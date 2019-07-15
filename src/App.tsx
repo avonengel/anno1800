@@ -1,26 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {AppBar, CssBaseline, Toolbar, Typography} from "@material-ui/core";
+import {ThemeProvider} from '@material-ui/styles';
+import theme from "./theme";
 
 const App: React.FC = () => {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    return (
+        <React.Fragment>
+            <CssBaseline/>
+            <ThemeProvider theme={theme}>
+                <AppBar position="static" color="default">
+                    <Toolbar>
+                        <Typography variant="h6" color="inherit">
+                            Anno 1800 Companion
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+            </ThemeProvider>
+        </React.Fragment>
+    );
+};
 
 export default App;
