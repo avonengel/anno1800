@@ -1,6 +1,6 @@
-import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
-import IdentityReducer from "./reducers";
+import {AnyAction, applyMiddleware, combineReducers, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
+import {islandReducer} from "./islands/reducers";
 
 // To be used to hydrate state
 const persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
@@ -21,7 +21,12 @@ const logger: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: 
     console.groupEnd();
     return result
 };
-const store = createStore(IdentityReducer, persistedState, composeEnhancers(applyMiddleware(logger)));
+
+const rootReducer = combineReducers({
+    island: islandReducer,
+});
+
+const store = createStore(rootReducer, persistedState, composeEnhancers(applyMiddleware(logger)));
 
 // Every time state changes, will be written to localStorage.
 // TODO: Find a more efficient way to do localStorage
@@ -30,3 +35,4 @@ store.subscribe(() => {
 });
 
 export default store;
+export type State = ReturnType<typeof rootReducer>
