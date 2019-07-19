@@ -2,34 +2,14 @@ import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById} from "../redux/selectors";
-import {Island, PopulationLevels} from "../redux/islands/types";
+import {PopulationLevels} from "../redux/islands/types";
 import {State} from "../redux/store";
 import PopulationCard from "./PopulationCard";
+import {Dispatch} from "redux";
+import {updateHouseCount} from "../redux/islands/actions";
 
 interface ReactProps {
     islandId: number;
-}
-
-interface StateProps {
-    island: Island;
-}
-
-class IslandComponent extends React.Component<StateProps & ReactProps> {
-
-    render() {
-        const {island} = this.props;
-        const populationCards = PopulationLevels.map((level) =>
-            <PopulationCard key={level} level={level} houses={island.population[level]}/>);
-        return <>
-            <Typography variant="h3">{island.name}</Typography>
-            <Grid container spacing={1}>
-                {populationCards.map((card) =>
-                    (<Grid item xs={6} sm={2} key={card.props.level}>
-                    {card}
-                </Grid>))}
-            </Grid>
-        </>;
-    }
 }
 
 const mapStateToProps = (state: State, reactProps: ReactProps) => {
@@ -38,4 +18,39 @@ const mapStateToProps = (state: State, reactProps: ReactProps) => {
     };
 };
 
-export default connect(mapStateToProps)(IslandComponent);
+const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
+    return {
+        onHouseChange: (level: string, houses: number) => {
+            dispatch(updateHouseCount(props.islandId, level, houses));
+        }
+    };
+};
+type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+
+class IslandComponent extends React.Component<Props> {
+
+    render() {
+        const {island} = this.props;
+        const populationCards = PopulationLevels.map((level) =>
+            <PopulationCard key={level} level={level} houses={island.population[level].houses}
+                            population={island.population[level].population}
+                            onHouseChange={this.createOnHouseChange(level)}/>);
+        return <>
+            <Typography variant="h3">{island.name}</Typography>
+            <Grid container spacing={1}>
+                {populationCards.map((card) =>
+                    (<Grid item xs={6} sm={2} key={card.props.level}>
+                        {card}
+                    </Grid>))}
+            </Grid>
+        </>;
+    }
+
+    createOnHouseChange(level: string): (houses: number) => void {
+        return (houses: number) => {
+            this.props.onHouseChange(level, houses);
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(IslandComponent);

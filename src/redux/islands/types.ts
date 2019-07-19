@@ -6,7 +6,13 @@ export const PopulationLevels = [
 export interface Island {
     name: string;
     id: number;
-    population: { [level: string]: number }
+    population: { [level: string]: PopulationState }
+}
+
+export class PopulationState {
+    // TODO: should this be in it's own reducer, or part of islandreducer?
+    constructor(readonly level: string, readonly houses: number, readonly population: number) {
+    }
 }
 
 export interface IslandState {
@@ -16,6 +22,7 @@ export interface IslandState {
 
 export const ADD_ISLAND = 'ADD_ISLAND';
 export const DELETE_ISLAND = 'DELETE_ISLAND';
+export const UPDATE_HOUSES = 'UPDATE_HOUSES';
 
 interface AddIslandAction {
     type: typeof ADD_ISLAND;
@@ -27,4 +34,11 @@ interface DeleteIslandAction {
     id: number;
 }
 
-export type IslandActionTypes = AddIslandAction | DeleteIslandAction;
+interface UpdateHousesAction {
+    type: typeof UPDATE_HOUSES;
+    islandId: number;
+    level: string;
+    houses: number;
+}
+
+export type IslandActionTypes = AddIslandAction | DeleteIslandAction | UpdateHousesAction;
