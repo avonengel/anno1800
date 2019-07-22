@@ -2,11 +2,11 @@ import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById} from "../redux/selectors";
-import {PopulationLevels} from "../redux/islands/types";
 import {State} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
+import {POPULATION_LEVELS} from "../data/populations";
 
 interface ReactProps {
     islandId: number;
@@ -31,7 +31,7 @@ class IslandComponent extends React.Component<Props> {
 
     render() {
         const {island} = this.props;
-        const populationCards = PopulationLevels.map((level) =>
+        const populationCards = POPULATION_LEVELS.map((level) =>
             <PopulationCard key={level} level={level} houses={island.population[level].houses}
                             population={island.population[level].population}
                             onHouseChange={this.createOnHouseChange(level)}/>);

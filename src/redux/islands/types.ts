@@ -1,5 +1,3 @@
-import {PopulationLevelName, POPULATION_LEVELS} from "../../data/populations";
-
 export interface Island {
     name: string;
     id: number;
