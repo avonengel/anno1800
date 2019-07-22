@@ -1,8 +1,5 @@
-export const PopulationLevels = [
-    "Farmers",
-    "Workers",
-    "Artisans",
-];
+import {PopulationLevelName, POPULATION_LEVELS} from "../../data/populations";
+
 export interface Island {
     name: string;
     id: number;
@@ -11,7 +8,7 @@ export interface Island {
 
 export class PopulationState {
     // TODO: should this be in it's own reducer, or part of islandreducer?
-    constructor(readonly level: string, readonly houses: number, readonly population: number) {
+    constructor(readonly level: string, readonly houses: number = 0, readonly population: number = 0) {
     }
 }
 

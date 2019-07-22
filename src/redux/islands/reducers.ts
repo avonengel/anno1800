@@ -1,12 +1,12 @@
-import {
-    ADD_ISLAND,
-    DELETE_ISLAND,
-    IslandActionTypes,
-    IslandState,
-    PopulationLevels,
-    PopulationState,
-    UPDATE_HOUSES
-} from "./types";
+import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, IslandState, PopulationState, UPDATE_HOUSES} from "./types";
+import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/populations";
+
+function newPopulationStateObject() {
+    return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
+        map[level] = new PopulationState(level);
+        return map;
+    }, {});
+}
 
 const initialState: IslandState = {
     islandIds: [1],
@@ -14,30 +14,28 @@ const initialState: IslandState = {
         1: {
             id: 1,
             name: "Ditchwater",
-            population: PopulationLevels.reduce((map: { [level: string]: number }, level: string) => {
-                map[level] = 5;
-                return map;
-            }, {}),
+            population: newPopulationStateObject(),
         }
     }
 };
 
 export function islandReducer(state = initialState, action: IslandActionTypes): IslandState {
+    if (!state) {
+        return initialState;
+    }
     switch (action.type) {
         case DELETE_ISLAND:
             // TODO implement deletion
             return state;
         case ADD_ISLAND:
             return {
+                // TODO generate unique ID
                 islandsById: {
                     ...state.islandsById,
                     42: {
                         name: action.name,
                         id: 42,
-                        population: PopulationLevels.reduce((map: { [level: string]: number }, level: string) => {
-                            map[level] = 0;
-                            return map;// FIXME this is wrong already? type safety my ass! :(
-                        }, {}),
+                        population: newPopulationStateObject(),
                     }
                 },
                 islandIds: [...state.islandIds, 42]
@@ -57,7 +55,12 @@ export function islandReducer(state = initialState, action: IslandActionTypes): 
                 ...result.islandsById[islandId].population,
             };
             const old = result.islandsById[islandId].population[level];
-            result.islandsById[islandId].population[level] = new PopulationState(level, houses, old.population);
+            const popLevel = getPopulationLevelByName(level);
+            let population = old.population;
+            if (popLevel) {
+                population = getPopulation(popLevel, houses, []);
+            }
+            result.islandsById[islandId].population[level] = new PopulationState(level, houses, population);
             return result;
         default:
             return state;
