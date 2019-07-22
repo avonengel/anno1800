@@ -1,6 +1,7 @@
 interface PopulationLevelRaw {
     Name: string;
     Inputs: PopulationInput[];
+    consumerId: number;
 }
 
 const BASE_SUPPLY_WEIGHT = 5;
@@ -41,7 +42,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010200, "Amount": 0.0004166667, "SupplyWeight": 3, "MoneyValue": 10},
             {"ProductID": 1010216, "Amount": 0.000555556, "SupplyWeight": 0, "MoneyValue": 30},
             {"ProductID": 1010237, "Amount": 0.000512821, "SupplyWeight": 2, "MoneyValue": 30}
-        ]
+        ],
+        "consumerId": 100,
     },
     {
         "Name": WORKERS,
@@ -55,7 +57,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010203, "Amount": 0.000138889, "SupplyWeight": 2, "MoneyValue": 20},
             {"ProductID": 1010214, "Amount": 0.00025641, "SupplyWeight": 0, "MoneyValue": 50},
             {"ProductID": 1010351, "Amount": 0.0, "SupplyWeight": 2, "MoneyValue": 0}
-        ]
+        ],
+        "consumerId": 200,
     },
     {
         "Name": ARTISANS,
@@ -70,7 +73,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010257, "Amount": 0.000952381, "SupplyWeight": 0, "MoneyValue": 50},
             {"ProductID": 1010247, "Amount": 0.000444444, "SupplyWeight": 2, "MoneyValue": 60},
             {"ProductID": 1010353, "Amount": 0.0, "SupplyWeight": 2, "MoneyValue": 0}
-        ]
+        ],
+        "consumerId": 300,
     },
     {
         "Name": ENGINEERS,
@@ -86,7 +90,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010246, "Amount": 0.000130719, "SupplyWeight": 0, "MoneyValue": 90},
             {"ProductID": 1010354, "Amount": 0.0, "SupplyWeight": 2, "MoneyValue": 0},
             {"ProductID": 1010208, "Amount": 0.000208333, "SupplyWeight": 2, "MoneyValue": 70}
-        ]
+        ],
+        "consumerId": 400,
     },
     {
         "Name": INVESTORS,
@@ -103,7 +108,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010250, "Amount": 0.000350877, "SupplyWeight": 0, "MoneyValue": 250},
             {"ProductID": 1010248, "Amount": 0.0, "SupplyWeight": 0, "MoneyValue": 150},
             {"ProductID": 1010225, "Amount": 0.000111111, "SupplyWeight": 4, "MoneyValue": 300}
-        ]
+        ],
+        "consumerId": 500,
     },
     {
         "Name": JORNALEROS,
@@ -112,7 +118,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 120033, "Amount": 0.00047619, "SupplyWeight": 3, "MoneyValue": 25},
             {"ProductID": 1010257, "Amount": 0.000238095, "SupplyWeight": 0, "MoneyValue": 25},
             {"ProductID": 120043, "Amount": 0.000416667, "SupplyWeight": 2, "MoneyValue": 25}
-        ]
+        ],
+        "consumerId": 600,
     },
     {
         "Name": OBREROS,
@@ -127,7 +134,8 @@ const RAW_DATA: PopulationLevelRaw[] = [
             {"ProductID": 1010214, "Amount": 0.000444444, "SupplyWeight": 0, "MoneyValue": 30},
             {"ProductID": 1010259, "Amount": 0.000185185, "SupplyWeight": 0, "MoneyValue": 35},
             {"ProductID": 1010206, "Amount": 0.000416667, "SupplyWeight": 2, "MoneyValue": 25}
-        ]
+        ],
+        "consumerId": 700,
     },
 
 ];

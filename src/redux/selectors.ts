@@ -1,6 +1,6 @@
-import {State} from "./store";
+import {AppState} from "./store";
 import {Island} from "./islands/types";
 
-export const getIslandById = (store: State, islandId: number): Island => {
+export const getIslandById = (store: AppState, islandId: number): Island => {
     return store.island.islandsById[islandId];
 };

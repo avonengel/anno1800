@@ -1,3 +1,5 @@
+import {Action} from "redux";
+
 export interface Island {
     name: string;
     id: number;
@@ -19,17 +21,17 @@ export const ADD_ISLAND = 'ADD_ISLAND';
 export const DELETE_ISLAND = 'DELETE_ISLAND';
 export const UPDATE_HOUSES = 'UPDATE_HOUSES';
 
-interface AddIslandAction {
+export interface AddIslandAction extends Action {
     type: typeof ADD_ISLAND;
     name: string;
 }
 
-interface DeleteIslandAction {
+export interface DeleteIslandAction extends Action {
     type: typeof DELETE_ISLAND;
     id: number;
 }
 
-interface UpdateHousesAction {
+export interface UpdateHousesAction extends Action {
     type: typeof UPDATE_HOUSES;
     islandId: number;
     level: string;

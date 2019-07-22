@@ -1,6 +1,9 @@
-import {AnyAction, applyMiddleware, combineReducers, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
+import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {islandReducer} from "./islands/reducers";
+import {consumptionReducer} from "./production/reducers";
+import {IslandState} from "./islands/types";
+import {ProductState} from "./production/types";
 
 // To be used to hydrate state
 const persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
@@ -22,9 +25,33 @@ const logger: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: 
     return result
 };
 
-const rootReducer = combineReducers({
-    island: islandReducer,
-});
+export type GuidMap<T> = { [key: number]: T };
+
+export interface AppState {
+    island: IslandState,
+    products: GuidMap<GuidMap<ProductState>>
+    // products?: { [productId: number]: ProductState },
+}
+
+function rootReducer(state: AppState | undefined, action: AnyAction): AppState {
+    if (state) {
+        var islandState = state.island;
+        islandState = islandReducer(islandState, action);
+        let products = {};
+        products = state.products;
+        const result = consumptionReducer({
+            ...state,
+            island: islandState,
+            products
+        }, action);
+        return result;
+    } else {
+        return {
+            island: islandReducer(undefined, action),
+            products: {},
+        };
+    }
+}
 
 const store = createStore(rootReducer, persistedState, composeEnhancers(applyMiddleware(logger)));
 
@@ -35,4 +62,3 @@ store.subscribe(() => {
 });
 
 export default store;
-export type State = ReturnType<typeof rootReducer>

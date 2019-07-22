@@ -5,7 +5,7 @@ import {ThemeProvider} from '@material-ui/styles';
 import theme from "./theme";
 import {connect} from "react-redux";
 import IslandComponent from "./components/IslandComponent";
-import {State} from "./redux/store";
+import {AppState} from "./redux/store";
 
 const styles = makeStyles((theme: Theme) =>
     createStyles({
@@ -40,7 +40,7 @@ const App: React.FC<StateProps> = (props: StateProps) => {
     </React.Fragment>;
 };
 
-const mapStateToProps = (state: State): StateProps => {
+const mapStateToProps = (state: AppState): StateProps => {
     return {
         islandIds: state.island.islandIds,
     };

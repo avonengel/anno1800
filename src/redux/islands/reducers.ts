@@ -1,5 +1,6 @@
-import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, IslandState, PopulationState, UPDATE_HOUSES} from "./types";
+import {ADD_ISLAND, DELETE_ISLAND, IslandState, PopulationState, UPDATE_HOUSES} from "./types";
 import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/populations";
+import {AnyAction} from "redux";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -19,7 +20,7 @@ const initialState: IslandState = {
     }
 };
 
-export function islandReducer(state = initialState, action: IslandActionTypes): IslandState {
+export function islandReducer(state = initialState, action: AnyAction): IslandState {
     if (!state) {
         return initialState;
     }

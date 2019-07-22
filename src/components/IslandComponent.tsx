@@ -2,7 +2,7 @@ import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById} from "../redux/selectors";
-import {State} from "../redux/store";
+import {AppState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
@@ -12,7 +12,7 @@ interface ReactProps {
     islandId: number;
 }
 
-const mapStateToProps = (state: State, reactProps: ReactProps) => {
+const mapStateToProps = (state: AppState, reactProps: ReactProps) => {
     return {
         island: {...getIslandById(state, reactProps.islandId)},
     };
