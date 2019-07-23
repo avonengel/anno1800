@@ -1,4 +1,5 @@
 import {FactoryIngredient, getFactoryById} from "../../data/factories";
+import {Map} from 'immutable';
 
 export interface Consumption {
     owner: number;
@@ -52,6 +53,8 @@ export interface Production {
 
 export interface ProductState {
     productId: number;
-    consumers: { [consumerId: number]: Consumption };
-    producers: { [producerId: number]: Production };
+    consumers: Map<number, Consumption>;
+    producers: Map<number, Production>;
+    // consumers: { [consumerId: number]: Consumption };
+    // producers: { [producerId: number]: Production };
 }

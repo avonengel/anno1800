@@ -4,6 +4,7 @@ import {islandReducer} from "./islands/reducers";
 import {consumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {ProductState} from "./production/types";
+import {Map} from 'immutable';
 
 // To be used to hydrate state
 const persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
@@ -29,26 +30,21 @@ export type GuidMap<T> = { [key: number]: T };
 
 export interface AppState {
     island: IslandState,
-    products: GuidMap<GuidMap<ProductState>>
-    // products?: { [productId: number]: ProductState },
+    products: Map<number, Map<number, ProductState>>
 }
 
 function rootReducer(state: AppState | undefined, action: AnyAction): AppState {
     if (state) {
-        var islandState = state.island;
-        islandState = islandReducer(islandState, action);
-        let products = {};
-        products = state.products;
+        const islandState = islandReducer(state.island, action);
         const result = consumptionReducer({
             ...state,
             island: islandState,
-            products
         }, action);
         return result;
     } else {
         return {
             island: islandReducer(undefined, action),
-            products: {},
+            products: Map<number, Map<number, ProductState>>(),
         };
     }
 }
