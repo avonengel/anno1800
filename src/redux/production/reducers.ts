@@ -14,7 +14,7 @@ export function consumptionReducer(state: AppState, action: AnyAction): AppState
         };
         if (state.island) {
             const level = getPopulationLevelByName(updateHousesAction.level);
-            const people = state.island.islandsById[updateHousesAction.islandId].population[updateHousesAction.level].population;
+            const people = state.island.islandsById[islandId].population[updateHousesAction.level].population;
             if (level) {
                 let oldIslandProductStates = state.products ? state.products.get(islandId, Map<number, ProductState>()) : Map<number, ProductState>();
                 const islandProductStates = level.Inputs.reduce((productStates, input) => {

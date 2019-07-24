@@ -26,8 +26,6 @@ const logger: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: 
     return result
 };
 
-export type GuidMap<T> = { [key: number]: T };
-
 export interface AppState {
     island: IslandState,
     products: Map<number, Map<number, ProductState>>

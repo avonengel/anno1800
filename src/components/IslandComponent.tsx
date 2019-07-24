@@ -7,6 +7,8 @@ import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
 import {POPULATION_LEVELS} from "../data/populations";
+import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
+import FactoryCard from "./FactoryCard";
 
 interface ReactProps {
     islandId: number;
@@ -43,7 +45,19 @@ class IslandComponent extends React.Component<Props> {
                         {card}
                     </Grid>))}
             </Grid>
+            <Grid container spacing={1}>
+                {ALL_FACTORIES.map((factory) =>
+                    this.shouldShow(factory) &&
+                    (<Grid item xs={6} sm={2} key={factory.ID}>
+                        <FactoryCard factory={factory}/>
+                    </Grid>))}
+            </Grid>
         </>;
+    }
+
+    private shouldShow(factory: FactoryRaw) {
+        // TODO: implement visibility logic
+        return true;
     }
 
     createOnHouseChange(level: string): (houses: number) => void {
