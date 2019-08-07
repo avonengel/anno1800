@@ -4,10 +4,15 @@ import {islandReducer} from "./islands/reducers";
 import {consumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {ProductState} from "./production/types";
-import {Map} from 'immutable';
+import {fromJS, Map} from 'immutable';
 
 // To be used to hydrate state
-const persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
+let persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
+// TODO: turn all state members into ImmutableJS Maps (or even whole state)
+// for (let key in persistedState) {
+//     persistedState.key = fromJS(persistedState.key);
+// }
+persistedState.products = fromJS(persistedState.products);
 
 const composeEnhancers = composeWithDevTools({
     // Specify name here, actionsBlacklist, actionsCreators and other options if needed
