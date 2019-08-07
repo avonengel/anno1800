@@ -19,14 +19,15 @@ export function consumptionReducer(state: AppState, action: AnyAction): AppState
                 let oldIslandProductStates = state.products ? state.products.get(islandId, Map<number, ProductState>()) : Map<number, ProductState>();
                 const islandProductStates = level.Inputs.reduce((productStates, input) => {
                     const productState = productStates.get(input.ProductID, {
-                        consumers: Map<number, Consumption>(),
+                        factoryConsumers: Map<number, Consumption>(),
+                        populationConsumers: Map<string, Consumption>(),
                         producers: Map<number, Production>(),
                         productId: input.ProductID,
                     });
                     return productStates.set(input.ProductID, {
                         ...productState,
-                        consumers: productState.consumers.set(level.consumerId, {
-                            owner: level.consumerId,
+                        populationConsumers: productState.populationConsumers.set(level.Name, {
+                            owner: level.Name,
                             productId: input.ProductID,
                             consumptionPerMinute: input.Amount * people,
                         }),

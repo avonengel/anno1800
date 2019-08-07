@@ -6,7 +6,7 @@ import {AppState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
-import {POPULATION_LEVELS} from "../data/populations";
+import {getPopulationLevelByName, POPULATION_LEVELS} from "../data/populations";
 import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
 import FactoryCard from "./FactoryCard";
 
@@ -55,9 +55,21 @@ class IslandComponent extends React.Component<Props> {
         </>;
     }
 
-    private shouldShow(factory: FactoryRaw) {
-        // TODO: implement visibility logic
-        return true;
+    private shouldShow(factory: FactoryRaw) : boolean {
+        const populationStates = this.props.island.population;
+        for (let level in populationStates) {
+            if (populationStates[level].population > 0) {
+                const populationLevel = getPopulationLevelByName(level);
+                if (!populationLevel) {
+                    continue;
+                }
+                const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
+                if(needed) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     createOnHouseChange(level: string): (houses: number) => void {

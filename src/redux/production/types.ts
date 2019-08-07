@@ -2,7 +2,7 @@ import {FactoryIngredient, getFactoryById} from "../../data/factories";
 import {Map} from 'immutable';
 
 export interface Consumption {
-    owner: number;
+    owner: number | String;
     productId: number;
     consumptionPerMinute: number;
 }
@@ -53,8 +53,7 @@ export interface Production {
 
 export interface ProductState {
     productId: number;
-    consumers: Map<number, Consumption>;
+    factoryConsumers: Map<number, Consumption>;
+    populationConsumers: Map<string, Consumption>;
     producers: Map<number, Production>;
-    // consumers: { [consumerId: number]: Consumption };
-    // producers: { [producerId: number]: Production };
 }
