@@ -1,9 +1,9 @@
 import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {islandReducer} from "./islands/reducers";
-import {consumptionReducer} from "./production/reducers";
+import {factoryReducer, populationConsumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
-import {ProductState} from "./production/types";
+import {FactoryState, ProductState} from "./production/types";
 import {fromJS, Map} from 'immutable';
 
 // To be used to hydrate state
@@ -33,21 +33,24 @@ const logger: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: 
 
 export interface AppState {
     island: IslandState,
-    products: Map<number, Map<number, ProductState>>
+    products: Map<number, Map<number, ProductState>>,
+    factories: Map<number, Map<number, FactoryState>>,
 }
 
 function rootReducer(state: AppState | undefined, action: AnyAction): AppState {
     if (state) {
         const islandState = islandReducer(state.island, action);
-        const result = consumptionReducer({
+        let result = populationConsumptionReducer({
             ...state,
             island: islandState,
         }, action);
+        result = factoryReducer(result, action);
         return result;
     } else {
         return {
             island: islandReducer(undefined, action),
             products: Map<number, Map<number, ProductState>>(),
+            factories: Map<number, Map<number, FactoryState>>(),
         };
     }
 }

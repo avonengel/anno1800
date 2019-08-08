@@ -2,10 +2,10 @@ import {AppState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UpdateHousesAction} from "../islands/types";
 import {getPopulationLevelByName} from "../../data/populations";
-import {Consumption, Production, ProductState} from "./types";
+import {Consumption, FactoryState, Production, ProductState, UPDATE_FACTORY_COUNT} from "./types";
 import {Map} from 'immutable';
 
-export function consumptionReducer(state: AppState, action: AnyAction): AppState {
+export function populationConsumptionReducer(state: AppState, action: AnyAction): AppState {
     if (action.type === UPDATE_HOUSES) {
         const updateHousesAction: UpdateHousesAction = action as UpdateHousesAction;
         const {islandId} = updateHousesAction;
@@ -36,7 +36,7 @@ export function consumptionReducer(state: AppState, action: AnyAction): AppState
                 if (result.products) {
                     result.products = result.products.set(islandId, islandProductStates);
                 } else {
-                    result.products = Map<number,Map<number,ProductState>>()
+                    result.products = Map<number, Map<number, ProductState>>()
                         .set(islandId, islandProductStates);
                 }
             }
@@ -45,3 +45,54 @@ export function consumptionReducer(state: AppState, action: AnyAction): AppState
     }
     return state;
 }
+
+function createFactoryState(factoryId: number): FactoryState {
+    return {
+        buildingCount: 0,
+        id: factoryId,
+        productivity: 1,
+    };
+}
+
+export function factoryReducer(state: Readonly<AppState>, action: AnyAction): AppState {
+    if (action.type === UPDATE_FACTORY_COUNT) {
+        const {islandId, factoryId, count} = action.payload;
+        let factories = state.factories;
+        if (!factories) {
+            factories = Map<number, Map<number, FactoryState>>();
+        }
+        const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
+        return {
+            ...state,
+            factories: factories.setIn([islandId, factoryId], {
+                ...factoryState,
+                buildingCount: count,
+            }),
+        };
+    }
+    return state;
+}
+
+// function getInputs(): { [productId: number]: Consumption } {
+//     const factoryRaw = getFactoryById(this.id);
+//     return factoryRaw.Inputs.reduce((map: { [productId: number]: Consumption }, input: FactoryIngredient) => {
+//         map[input.ProductID] = {
+//             owner: this.id,
+//             productId: input.ProductID,
+//             consumptionPerMinute: 60 / factoryRaw.CycleTime,
+//         };
+//         return map;
+//     }, {});
+// }
+//
+// function getOutputs(): { [productId: number]: Production } {
+//     const factoryRaw = getFactoryById(this.id);
+//     return factoryRaw.Outputs.reduce((map: { [productId: number]: Production }, output: FactoryIngredient) => {
+//         map[output.ProductID] = {
+//             owner: this.id,
+//             productId: output.ProductID,
+//             productionPerMinute: 60 / factoryRaw.CycleTime,
+//         };
+//         return map;
+//     }, {});
+// }

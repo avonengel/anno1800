@@ -49,7 +49,7 @@ class IslandComponent extends React.Component<Props> {
                 {ALL_FACTORIES.map((factory) =>
                     this.shouldShow(factory) &&
                     (<Grid item xs={6} sm={2} key={factory.ID}>
-                        <FactoryCard factory={factory}/>
+                        <FactoryCard factory={factory} islandId={island.id}/>
                     </Grid>))}
             </Grid>
         </>;
