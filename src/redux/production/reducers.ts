@@ -2,7 +2,14 @@ import {AppState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UpdateHousesAction} from "../islands/types";
 import {getPopulationLevelByName} from "../../data/populations";
-import {Consumption, FactoryState, Production, ProductState, UPDATE_FACTORY_COUNT} from "./types";
+import {
+    Consumption,
+    FactoryState,
+    Production,
+    ProductState,
+    UPDATE_FACTORY_COUNT,
+    UPDATE_FACTORY_PRODUCTIVITY
+} from "./types";
 import {Map} from 'immutable';
 
 export function populationConsumptionReducer(state: AppState, action: AnyAction): AppState {
@@ -67,6 +74,20 @@ export function factoryReducer(state: Readonly<AppState>, action: AnyAction): Ap
             factories: factories.setIn([islandId, factoryId], {
                 ...factoryState,
                 buildingCount: count,
+            }),
+        };
+    } else if (action.type === UPDATE_FACTORY_PRODUCTIVITY) {
+        const {islandId, factoryId, productivity} = action.payload;
+        let factories = state.factories;
+        if (!factories) {
+            factories = Map<number, Map<number, FactoryState>>();
+        }
+        const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
+        return {
+            ...state,
+            factories: factories.setIn([islandId, factoryId], {
+                ...factoryState,
+                productivity,
             }),
         };
     }

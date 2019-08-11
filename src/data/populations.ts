@@ -26,7 +26,6 @@ export const ENGINEERS = "Engineers";
 export const ARTISANS = "Artisans";
 export const WORKERS = "Workers";
 export const FARMERS = "Farmers";
-export type PopulationLevelName = typeof FARMERS | typeof WORKERS | typeof ARTISANS | typeof ENGINEERS | typeof INVESTORS | typeof JORNALEROS | typeof OBREROS;
 export const POPULATION_LEVELS = [FARMERS, WORKERS, ARTISANS, ENGINEERS, INVESTORS, JORNALEROS, OBREROS];
 
 export function getPopulationLevelByName(name: string) {

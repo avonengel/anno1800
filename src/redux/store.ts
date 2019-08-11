@@ -13,6 +13,7 @@ let persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
 //     persistedState.key = fromJS(persistedState.key);
 // }
 persistedState.products = fromJS(persistedState.products);
+persistedState.factories = fromJS(persistedState.factories);
 
 const composeEnhancers = composeWithDevTools({
     // Specify name here, actionsBlacklist, actionsCreators and other options if needed
