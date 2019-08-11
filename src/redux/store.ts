@@ -1,7 +1,7 @@
 import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {islandReducer} from "./islands/reducers";
-import {factoryReducer, populationConsumptionReducer} from "./production/reducers";
+import {factoryProductionConsumptionReducer, factoryReducer, populationConsumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
 import {fromJS, Map} from 'immutable';
@@ -46,6 +46,7 @@ function rootReducer(state: AppState | undefined, action: AnyAction): AppState {
             island: islandState,
         }, action);
         result = factoryReducer(result, action);
+        result = factoryProductionConsumptionReducer(result, action);
         return result;
     } else {
         return {

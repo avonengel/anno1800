@@ -130,7 +130,7 @@ class FactoryCard extends React.Component<Props> {
         if (cycleTime === 0) {
             cycleTime = 30;
         }
-        const productionPerMinutePerBuilding = outputs[0].Amount * (cycleTime / 60);
+        const productionPerMinutePerBuilding = outputs[0].Amount * (60 / cycleTime);
         var buildingCount = 1;
         if (!!factoryState) {
             buildingCount = factoryState.buildingCount || 1;
@@ -158,7 +158,7 @@ class FactoryCard extends React.Component<Props> {
         if(!!factoryState) {
             productivity = factoryState.productivity;
         }
-        const productionPerMinutePerBuilding = outputs[0].Amount * (cycleTime / 60) * productivity;
+        const productionPerMinutePerBuilding = outputs[0].Amount * (60 / cycleTime) * productivity;
         return Math.ceil(consumption / productionPerMinutePerBuilding);
     }
 }

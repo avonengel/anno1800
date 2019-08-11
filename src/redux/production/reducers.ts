@@ -97,51 +97,52 @@ export function factoryReducer(state: Readonly<AppState>, action: AnyAction): Ap
 }
 
 export function factoryProductionConsumptionReducer(state: Readonly<AppState>, action: AnyAction) {
-    if (action.type === UPDATE_FACTORY_PRODUCTIVITY || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
+    if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
         const {islandId, factoryId} = action.payload;
-        // TODO: recompute production for factoryId
+        // recompute production for factoryId
         const factoryState: FactoryState = state.factories.getIn([islandId, factoryId]);
 
         const factoryDefinition = getFactoryById(factoryId);
-        const productionsToUpdate = factoryDefinition.Outputs.map(output => {
+        const productsToUpdate: { [productId: number]: ProductState; } = {};
+        factoryDefinition.Outputs.forEach(output => {
             const productId = output.ProductID;
             const productState = getProductById(state, islandId, productId);
             let cycleTime = factoryDefinition.CycleTime;
             if (cycleTime === 0) {
                 cycleTime = 30;
             }
-            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (cycleTime / 60) * output.Amount;
-            const producer = productState.producers.get(factoryId, {
-                owner: factoryId,
-                productId,
-                productionPerMinute: 0
-            } as Production);
-            // TODO collect complete ProductState objects from this block
-            return Object.assign({}, producer, {productionPerMinute});
+            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
+            productsToUpdate[productId] = {
+                ...productState,
+                producers: productState.producers.set(factoryId, {
+                    owner: factoryId,
+                    productId,
+                    productionPerMinute
+                }),
+            }
         });
-        // TODO: recompute consumption for factoryId
-        const consumptionsToUpdate = factoryDefinition.Inputs.map(input => {
+        // recompute consumption for factoryId
+        factoryDefinition.Inputs.forEach(input => {
             const productId = input.ProductID;
             const productState = getProductById(state, islandId, productId);
             let cycleTime = factoryDefinition.CycleTime;
             if (cycleTime === 0) {
                 cycleTime = 30;
             }
-            const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (cycleTime / 60) * input.Amount;
-            const consumer = productState.factoryConsumers.get(factoryId, {
-                owner: factoryId,
-                productId,
-                consumptionPerMinute: 0
-            } as Consumption);
-            return Object.assign({}, consumer, {consumptionPerMinute});
-        });
-        state.products.udpateIn([islandId, factoryId], (productState: ProductState) => {
-            return {
+            const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
+            productsToUpdate[productId] = {
                 ...productState,
-                factoryConsumers: productState.factoryConsumers.merge(factoryConsumers),
-                producers: productState.producers.merge(producers),
-            };
+                factoryConsumers: productState.factoryConsumers.set(factoryId, {
+                    owner: factoryId,
+                    productId,
+                    consumptionPerMinute
+                }),
+            }
         });
+        return {
+            ...state,
+            products: state.products.mergeIn([islandId], productsToUpdate)
+        };
     }
     return state;
 }

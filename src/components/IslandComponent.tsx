@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
-import {getIslandById, getProductByIdFromProduct} from "../redux/selectors";
+import {getIslandById, getProductById} from "../redux/selectors";
 import {AppState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
@@ -17,9 +17,47 @@ interface ReactProps {
 const mapStateToProps = (state: AppState, reactProps: ReactProps) => {
     return {
         island: getIslandById(state, reactProps.islandId),
-        products: state.products,
+        factoriesToShow: factoriesToShow(state, reactProps),
     };
 };
+
+function factoriesToShow(state: Readonly<AppState>, props: ReactProps) {
+    const populationStates = state.island.islandsById[props.islandId].population;
+    const factoriesToShow: FactoryRaw[] = [];
+    for (const factory of ALL_FACTORIES) {
+
+        if (!!populationStates) {
+            for (let level in populationStates) {
+                if (populationStates[level].population > 0) {
+                    const populationLevel = getPopulationLevelByName(level);
+                    if (!populationLevel) {
+                        continue;
+                    }
+                    const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
+                    if (needed) {
+                        factoriesToShow.push(factory);
+                        continue;
+                    }
+                }
+            }
+        }
+        // also show factories for things that are consumed by factories
+        for (let output of factory.Outputs) {
+            // FIXME wtf?! why does this only work if productId is supplied as string?! And what's the difference to calling it from the reducer?
+            const productState = getProductById(state, props.islandId, output.ProductID);
+            if (!!productState) {
+                const consumptionPerMinute = productState.factoryConsumers.reduce((sum: number, cons) => sum + cons.consumptionPerMinute, 0);
+                if (output.ProductID === 1010197) {
+                    console.log(`Wool consumption total: ${consumptionPerMinute}, productState: ${JSON.stringify(productState)}`);
+                }
+                if (consumptionPerMinute) {
+                    factoriesToShow.push(factory);
+                }
+            }
+        }
+    }
+    return factoriesToShow;
+}
 
 const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
     return {
@@ -56,30 +94,8 @@ class IslandComponent extends React.Component<Props> {
         </>;
     }
 
-    private shouldShow(factory: FactoryRaw) : boolean {
-        const populationStates = this.props.island.population;
-        for (let level in populationStates) {
-            if (populationStates[level].population > 0) {
-                const populationLevel = getPopulationLevelByName(level);
-                if (!populationLevel) {
-                    continue;
-                }
-                const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
-                if(needed) {
-                    return true;
-                }
-            }
-        }
-        // TODO: also show factories for things that are consumed by factories
-        for (let output of factory.Outputs) {
-             const productState = getProductByIdFromProduct(this.props.products, this.props.islandId, output.ProductID);
-            if (!!productState) {
-                if (productState.factoryConsumers.some(cons => output.ProductID === cons.productId)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private shouldShow(factory: FactoryRaw): boolean {
+        return !!this.props.factoriesToShow.find(f => f === factory);
     }
 
     createOnHouseChange(level: string): (houses: number) => void {

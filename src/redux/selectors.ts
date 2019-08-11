@@ -18,26 +18,33 @@ export function getFactoryStateById(store: AppState, islandId: number, factoryId
     return store.factories.getIn([islandId, factoryId]);
 }
 
+function initialProductState(productId: number) {
+    return {
+        productId: productId,
+        producers: Map<number, Production>(),
+        factoryConsumers: Map<number, Consumption>(),
+        populationConsumers: Map<string, Consumption>(),
+    }
+};
+
 export function getProductById(store: AppState, islandId: number, productId: number): Readonly<ProductState> {
-    if (!store.products) {
-        return {
-            productId: productId,
-            producers: Map<number, Production>(),
-            factoryConsumers: Map<number, Consumption>(),
-            populationConsumers: Map<string, Consumption>(),
-        };
+    if (store.products === undefined || store.products === null) {
+        return initialProductState(productId);
     }
     return getProductByIdFromProduct(store.products, islandId, productId);
 }
+
 export function getProductByIdFromProduct(products: Map<number, Map<number, ProductState>>, islandId: number, productId: number): Readonly<ProductState> {
-    if (!products) {
-        return {
-            productId: productId,
-            producers: Map<number, Production>(),
-            factoryConsumers: Map<number, Consumption>(),
-            populationConsumers: Map<string, Consumption>(),
-        };
+    if (products === undefined || products === null) {
+        return initialProductState(productId);
     }
-    return products.getIn([islandId, productId]);
+    if (productId === 1010197) {
+        console.log(`${islandId} ${productId} productState`, products.toJS());
+    }
+    const result = products.getIn([islandId, productId], initialProductState(productId));
+    if (productId === 1010197) {
+        console.log('result', result);
+    }
+    return result;
 }
 
