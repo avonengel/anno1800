@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
-import {getIslandById} from "../redux/selectors";
+import {getIslandById, getProductByIdFromProduct} from "../redux/selectors";
 import {AppState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
@@ -16,7 +16,8 @@ interface ReactProps {
 
 const mapStateToProps = (state: AppState, reactProps: ReactProps) => {
     return {
-        island: {...getIslandById(state, reactProps.islandId)},
+        island: getIslandById(state, reactProps.islandId),
+        products: state.products,
     };
 };
 
@@ -65,6 +66,15 @@ class IslandComponent extends React.Component<Props> {
                 }
                 const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
                 if(needed) {
+                    return true;
+                }
+            }
+        }
+        // TODO: also show factories for things that are consumed by factories
+        for (let output of factory.Outputs) {
+             const productState = getProductByIdFromProduct(this.props.products, this.props.islandId, output.ProductID);
+            if (!!productState) {
+                if (productState.factoryConsumers.some(cons => output.ProductID === cons.productId)) {
                     return true;
                 }
             }

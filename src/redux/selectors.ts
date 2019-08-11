@@ -27,5 +27,17 @@ export function getProductById(store: AppState, islandId: number, productId: num
             populationConsumers: Map<string, Consumption>(),
         };
     }
-    return store.products.getIn([islandId, productId]);
+    return getProductByIdFromProduct(store.products, islandId, productId);
 }
+export function getProductByIdFromProduct(products: Map<number, Map<number, ProductState>>, islandId: number, productId: number): Readonly<ProductState> {
+    if (!products) {
+        return {
+            productId: productId,
+            producers: Map<number, Production>(),
+            factoryConsumers: Map<number, Consumption>(),
+            populationConsumers: Map<string, Consumption>(),
+        };
+    }
+    return products.getIn([islandId, productId]);
+}
+
