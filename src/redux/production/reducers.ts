@@ -103,45 +103,46 @@ export function factoryProductionConsumptionReducer(state: Readonly<AppState>, a
         const factoryState: FactoryState = state.factories.getIn([islandId, factoryId]);
 
         const factoryDefinition = getFactoryById(factoryId);
-        const productsToUpdate: { [productId: number]: ProductState; } = {};
-        factoryDefinition.Outputs.forEach(output => {
-            const productId = output.ProductID;
-            const productState = getProductById(state, islandId, productId);
-            let cycleTime = factoryDefinition.CycleTime;
-            if (cycleTime === 0) {
-                cycleTime = 30;
-            }
-            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
-            productsToUpdate[productId] = {
-                ...productState,
-                producers: productState.producers.set(factoryId, {
-                    owner: factoryId,
-                    productId,
-                    productionPerMinute
-                }),
-            }
-        });
-        // recompute consumption for factoryId
-        factoryDefinition.Inputs.forEach(input => {
-            const productId = input.ProductID;
-            const productState = getProductById(state, islandId, productId);
-            let cycleTime = factoryDefinition.CycleTime;
-            if (cycleTime === 0) {
-                cycleTime = 30;
-            }
-            const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
-            productsToUpdate[productId] = {
-                ...productState,
-                factoryConsumers: productState.factoryConsumers.set(factoryId, {
-                    owner: factoryId,
-                    productId,
-                    consumptionPerMinute
-                }),
-            }
+        const products = state.products.withMutations(products => {
+            factoryDefinition.Outputs.forEach(output => {
+                const productId = output.ProductID;
+                const productState = getProductById(state, islandId, productId);
+                let cycleTime = factoryDefinition.CycleTime;
+                if (cycleTime === 0) {
+                    cycleTime = 30;
+                }
+                const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
+                products.setIn([islandId, productId], {
+                    ...productState,
+                    producers: productState.producers.set(factoryId, {
+                        owner: factoryId,
+                        productId,
+                        productionPerMinute
+                    }),
+                });
+            });
+            // recompute consumption for factoryId
+            factoryDefinition.Inputs.forEach(input => {
+                const productId = input.ProductID;
+                const productState = getProductById(state, islandId, productId);
+                let cycleTime = factoryDefinition.CycleTime;
+                if (cycleTime === 0) {
+                    cycleTime = 30;
+                }
+                const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
+                products.setIn([islandId, productId],{
+                    ...productState,
+                    factoryConsumers: productState.factoryConsumers.set(factoryId, {
+                        owner: factoryId,
+                        productId,
+                        consumptionPerMinute
+                    }),
+                });
+            });
         });
         return {
             ...state,
-            products: state.products.mergeIn([islandId], productsToUpdate)
+            products
         };
     }
     return state;
