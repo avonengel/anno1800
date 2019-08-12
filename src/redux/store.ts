@@ -1,17 +1,13 @@
 import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
-import {islandReducer} from "./islands/reducers";
+import {initialState as initialIslandState, islandReducer} from "./islands/reducers";
 import {factoryProductionConsumptionReducer, factoryReducer, populationConsumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
-import {fromJS, Map} from 'immutable';
+import {fromJS, Map, Record} from 'immutable';
 
 // To be used to hydrate state
 let persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
-// TODO: turn all state members into ImmutableJS Maps (or even whole state)
-// for (let key in persistedState) {
-//     persistedState.key = fromJS(persistedState.key);
-// }
 persistedState.products = fromJS(persistedState.products);
 persistedState.factories = fromJS(persistedState.factories);
 
@@ -20,44 +16,40 @@ const composeEnhancers = composeWithDevTools({
     name: 'Anno1800 Companion'
 });
 
-/**
- * Logs all actions and states after they are dispatched.
- */
-const logger: Middleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: AnyAction) => {
-    console.group(action.type);
-    console.info('dispatching', action);
-    let result = next(action);
-    console.log('next state', api.getState());
-    console.groupEnd();
-    return result
-};
-
-export interface AppState {
+export interface IRootState {
     island: IslandState,
     products: Map<number, Map<number, ProductState>>,
     factories: Map<number, Map<number, FactoryState>>,
 }
 
-function rootReducer(state: AppState | undefined, action: AnyAction): AppState {
-    if (state) {
-        const islandState = islandReducer(state.island, action);
-        let result = populationConsumptionReducer({
-            ...state,
-            island: islandState,
-        }, action);
-        result = factoryReducer(result, action);
-        result = factoryProductionConsumptionReducer(result, action);
-        return result;
-    } else {
-        return {
-            island: islandReducer(undefined, action),
-            products: Map<number, Map<number, ProductState>>(),
-            factories: Map<number, Map<number, FactoryState>>(),
-        };
+export class RootState extends Record({
+    island: initialIslandState,
+    products: Map<number, Map<number, ProductState>>(),
+    factories: Map<number, Map<number, FactoryState>>()
+}) implements IRootState {
+    constructor(config?: Partial<IRootState>) {
+        if (!!config) {
+            super(config);
+        } else {
+            super();
+        }
     }
 }
 
-const store = createStore(rootReducer, persistedState, composeEnhancers(applyMiddleware(logger)));
+function rootReducer(state: RootState | undefined = new RootState(), action: AnyAction): RootState {
+    const islandState = islandReducer(state.island, action);
+    let result = populationConsumptionReducer({
+        // FIXME this should have displayed an error, as this state object is only IRootState, but not RootState (the Record)!
+        // FIXME maybe get rid of Immutable.JS and it's problems, after all!
+        ...state,
+        island: islandState,
+    }, action);
+    result = factoryReducer(result, action);
+    result = factoryProductionConsumptionReducer(result, action);
+    return result;
+}
+
+const store = createStore(rootReducer, persistedState);
 
 // Every time state changes, will be written to localStorage.
 // TODO: Find a more efficient way to do localStorage

@@ -1,4 +1,4 @@
-import {AppState} from "../store";
+import {IRootState, RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UpdateHousesAction} from "../islands/types";
 import {getPopulationLevelByName} from "../../data/populations";
@@ -14,7 +14,7 @@ import {Map} from 'immutable';
 import {getFactoryById} from "../../data/factories";
 import {getProductById} from "../selectors";
 
-export function populationConsumptionReducer(state: AppState, action: AnyAction): AppState {
+export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
     if (action.type === UPDATE_HOUSES) {
         const updateHousesAction: UpdateHousesAction = action as UpdateHousesAction;
         const {islandId} = updateHousesAction;
@@ -35,11 +35,10 @@ export function populationConsumptionReducer(state: AppState, action: AnyAction)
                     });
                     return productStates.set(input.ProductID, {
                         ...productState,
-                        populationConsumers: productState.populationConsumers.set(level.Name, {
-                            owner: level.Name,
+                        populationConsumers: productState.populationConsumers.set(level.Name, new Consumption({
                             productId: input.ProductID,
                             consumptionPerMinute: input.Amount * people,
-                        }),
+                        })),
                     });
                 }, oldIslandProductStates);
                 if (result.products) {
@@ -63,7 +62,7 @@ function createFactoryState(factoryId: number): FactoryState {
     };
 }
 
-export function factoryReducer(state: Readonly<AppState>, action: AnyAction): AppState {
+export function factoryReducer(state: RootState, action: AnyAction): RootState {
     if (action.type === UPDATE_FACTORY_COUNT) {
         const {islandId, factoryId, count} = action.payload;
         let factories = state.factories;
@@ -96,7 +95,7 @@ export function factoryReducer(state: Readonly<AppState>, action: AnyAction): Ap
     return state;
 }
 
-export function factoryProductionConsumptionReducer(state: Readonly<AppState>, action: AnyAction) {
+export function factoryProductionConsumptionReducer(state: RootState, action: AnyAction) {
     if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId
@@ -132,11 +131,10 @@ export function factoryProductionConsumptionReducer(state: Readonly<AppState>, a
                 const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
                 products.setIn([islandId, productId],{
                     ...productState,
-                    factoryConsumers: productState.factoryConsumers.set(factoryId, {
-                        owner: factoryId,
+                    factoryConsumers: productState.factoryConsumers.set(factoryId, new Consumption({
                         productId,
                         consumptionPerMinute
-                    }),
+                    })),
                 });
             });
         });

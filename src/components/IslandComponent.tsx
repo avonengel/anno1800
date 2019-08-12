@@ -2,7 +2,7 @@ import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById, getProductById} from "../redux/selectors";
-import {AppState} from "../redux/store";
+import {IRootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
@@ -14,14 +14,14 @@ interface ReactProps {
     islandId: number;
 }
 
-const mapStateToProps = (state: AppState, reactProps: ReactProps) => {
+const mapStateToProps = (state: IRootState, reactProps: ReactProps) => {
     return {
         island: getIslandById(state, reactProps.islandId),
         factoriesToShow: factoriesToShow(state, reactProps),
     };
 };
 
-function factoriesToShow(state: Readonly<AppState>, props: ReactProps) {
+function factoriesToShow(state: Readonly<IRootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
     const factoriesToShow: FactoryRaw[] = [];
     for (const factory of ALL_FACTORIES) {

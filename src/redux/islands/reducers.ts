@@ -9,7 +9,7 @@ function newPopulationStateObject() {
     }, {});
 }
 
-const initialState: IslandState = {
+export const initialState: IslandState = {
     islandIds: [1],
     islandsById: {
         1: {

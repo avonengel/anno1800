@@ -1,13 +1,13 @@
-import {AppState} from "./store";
+import {IRootState} from "./store";
 import {Island} from "./islands/types";
 import {Consumption, FactoryState, Production, ProductState} from "./production/types";
 import {Map} from 'immutable';
 
-export const getIslandById = (store: AppState, islandId: number): Readonly<Island> => {
+export const getIslandById = (store: IRootState, islandId: number): Readonly<Island> => {
     return store.island.islandsById[islandId];
 };
 
-export function getFactoryStateById(store: AppState, islandId: number, factoryId: number): Readonly<FactoryState> {
+export function getFactoryStateById(store: IRootState, islandId: number, factoryId: number): Readonly<FactoryState> {
     if (!store.factories) {
         return {
             buildingCount: 0,
@@ -27,7 +27,7 @@ function initialProductState(productId: number) {
     }
 };
 
-export function getProductById(store: AppState, islandId: number, productId: number): Readonly<ProductState> {
+export function getProductById(store: IRootState, islandId: number, productId: number): Readonly<ProductState> {
     if (store.products === undefined || store.products === null) {
         return initialProductState(productId);
     }

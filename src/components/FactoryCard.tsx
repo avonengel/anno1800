@@ -11,7 +11,7 @@ import {
     withStyles
 } from "@material-ui/core";
 import {FactoryRaw} from "../data/factories";
-import {AppState} from "../redux/store";
+import {IRootState} from "../redux/store";
 import {getFactoryStateById, getProductById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
@@ -30,7 +30,7 @@ interface ReactProps extends WithStyles<typeof styles> {
     islandId: number,
 }
 
-const mapStateToProps = (state: AppState, reactProps: ReactProps) => {
+const mapStateToProps = (state: IRootState, reactProps: ReactProps) => {
     const outputProductsById: { [id: number]: Readonly<ProductState> } = {};
     for (let output of reactProps.factory.Outputs) {
         outputProductsById[output.ProductID] = getProductById(state, reactProps.islandId, output.ProductID);
