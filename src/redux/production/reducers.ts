@@ -1,4 +1,4 @@
-import {IRootState, RootState} from "../store";
+import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UpdateHousesAction} from "../islands/types";
 import {getPopulationLevelByName} from "../../data/populations";
@@ -70,13 +70,10 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
             factories = Map<number, Map<number, FactoryState>>();
         }
         const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
-        return {
-            ...state,
-            factories: factories.setIn([islandId, factoryId], {
-                ...factoryState,
-                buildingCount: count,
-            }),
-        };
+        return state.setIn('factories', factories.setIn([islandId, factoryId], {
+            ...factoryState,
+            buildingCount: count,
+        }));
     } else if (action.type === UPDATE_FACTORY_PRODUCTIVITY) {
         const {islandId, factoryId, productivity} = action.payload;
         let factories = state.factories;
@@ -84,13 +81,10 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
             factories = Map<number, Map<number, FactoryState>>();
         }
         const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
-        return {
-            ...state,
-            factories: factories.setIn([islandId, factoryId], {
-                ...factoryState,
-                productivity,
-            }),
-        };
+        return state.set('factories', factories.setIn([islandId, factoryId], {
+            ...factoryState,
+            productivity,
+        }));
     }
     return state;
 }
@@ -129,7 +123,7 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
                     cycleTime = 30;
                 }
                 const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
-                products.setIn([islandId, productId],{
+                products.setIn([islandId, productId], {
                     ...productState,
                     factoryConsumers: productState.factoryConsumers.set(factoryId, new Consumption({
                         productId,

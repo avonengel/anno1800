@@ -1,15 +1,14 @@
-import {AnyAction, applyMiddleware, createStore, Dispatch, Middleware, MiddlewareAPI} from "redux";
+import {AnyAction, createStore} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {initialState as initialIslandState, islandReducer} from "./islands/reducers";
 import {factoryProductionConsumptionReducer, factoryReducer, populationConsumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
-import {fromJS, Map, Record} from 'immutable';
+import {isRecord, Map, Record} from 'immutable';
+import {persistStore } from 'redux-persist-immutable';
+import {persistReducer} from 'redux-persist'
+import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
 
-// To be used to hydrate state
-let persistedState = JSON.parse(localStorage.getItem('reduxState') || '{}');
-persistedState.products = fromJS(persistedState.products);
-persistedState.factories = fromJS(persistedState.factories);
 
 const composeEnhancers = composeWithDevTools({
     // Specify name here, actionsBlacklist, actionsCreators and other options if needed
@@ -37,24 +36,23 @@ export class RootState extends Record({
 }
 
 function rootReducer(state: RootState | undefined = new RootState(), action: AnyAction): RootState {
-    const islandState = islandReducer(state.island, action);
-    let result = populationConsumptionReducer({
-        // FIXME this should have displayed an error, as this state object is only IRootState, but not RootState (the Record)!
-        // FIXME maybe get rid of Immutable.JS and it's problems, after all!
-        ...state,
-        island: islandState,
-    }, action);
-    result = factoryReducer(result, action);
-    result = factoryProductionConsumptionReducer(result, action);
-    return result;
+    let currentState = state;
+    if (!isRecord(state)) {
+        currentState = new RootState();
+    }
+    const islandState = islandReducer(currentState.island, action);
+    currentState = populationConsumptionReducer(currentState.set('island', islandState), action);
+    currentState = factoryReducer(currentState, action);
+    currentState = factoryProductionConsumptionReducer(currentState, action);
+    return currentState;
 }
 
-const store = createStore(rootReducer, persistedState);
+const persistConfig = {
+    key: 'root',
+    storage,
+}
 
-// Every time state changes, will be written to localStorage.
-// TODO: Find a more efficient way to do localStorage
-store.subscribe(() => {
-    localStorage.setItem('reduxState', JSON.stringify(store.getState()))
-});
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
-export default store;
+export const store = createStore(persistedReducer, composeEnhancers())
+export const persistor = persistStore(store, {records: RootState})
