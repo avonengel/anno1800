@@ -4,10 +4,8 @@ import {initialState as initialIslandState, islandReducer} from "./islands/reduc
 import {factoryProductionConsumptionReducer, factoryReducer, populationConsumptionReducer} from "./production/reducers";
 import {IslandState} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
-import {isRecord, Map, Record} from 'immutable';
-import {persistStore } from 'redux-persist-immutable';
-import {persistReducer} from 'redux-persist'
-import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
+import {persistReducer, persistStore, createTransform} from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
 
 const composeEnhancers = composeWithDevTools({
@@ -15,44 +13,50 @@ const composeEnhancers = composeWithDevTools({
     name: 'Anno1800 Companion'
 });
 
-export interface IRootState {
-    island: IslandState,
-    products: Map<number, Map<number, ProductState>>,
-    factories: Map<number, Map<number, FactoryState>>,
+export interface RootState {
+    readonly island: IslandState,
+    readonly products: ReadonlyMap<number, ReadonlyMap<number, ProductState>> //{ [islandId: number]: { [productId: number]: ProductState } }
+    readonly factories: ReadonlyMap<number, ReadonlyMap<number, FactoryState>> //{ [islandId: number]: { [factoryId: number]: FactoryState } }
 }
 
-export class RootState extends Record({
+const initialState = {
     island: initialIslandState,
-    products: Map<number, Map<number, ProductState>>(),
-    factories: Map<number, Map<number, FactoryState>>()
-}) implements IRootState {
-    constructor(config?: Partial<IRootState>) {
-        if (!!config) {
-            super(config);
-        } else {
-            super();
-        }
-    }
+    products: new Map<number, ReadonlyMap<number, ProductState>>(),
+    factories: new Map<number, ReadonlyMap<number, FactoryState>>(),
+};
+
+function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
+    const islandState = islandReducer(state.island, action);
+    state = populationConsumptionReducer({...state, island: islandState}, action);
+    // FIXME for some reason, the state changes are not visible in redux dev tools now
+    // FIXME also, population consumption does not show up on factory cards
+    state = factoryReducer(state, action);
+    state = factoryProductionConsumptionReducer(state, action);
+    return state;
 }
 
-function rootReducer(state: RootState | undefined = new RootState(), action: AnyAction): RootState {
-    let currentState = state;
-    if (!isRecord(state)) {
-        currentState = new RootState();
-    }
-    const islandState = islandReducer(currentState.island, action);
-    currentState = populationConsumptionReducer(currentState.set('island', islandState), action);
-    currentState = factoryReducer(currentState, action);
-    currentState = factoryProductionConsumptionReducer(currentState, action);
-    return currentState;
-}
+// The transformer
+const mapTransformer = (config: any) => {
+    return createTransform(
+        (map: Map<any, any>) => JSON.stringify(Array.from(map)),
+        arrayString => new Map(JSON.parse(arrayString)),
+        config,
+    );
+};
+
+// Config
+const mapStatePersistConfig = {
+    key: 'mapState',
+    storage,
+    transforms: [mapTransformer({ whitelist: 'products' })],
+};
 
 const persistConfig = {
     key: 'root',
     storage,
-}
+};
+ // FIXME rehydrate doesn't work
+const persistedReducer = persistReducer(mapStatePersistConfig, rootReducer);
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
-
-export const store = createStore(persistedReducer, composeEnhancers())
-export const persistor = persistStore(store, {records: RootState})
+export const store = createStore(persistedReducer, composeEnhancers());
+export const persistor = persistStore(store);

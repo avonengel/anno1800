@@ -10,46 +10,49 @@ import {
     UPDATE_FACTORY_COUNT,
     UPDATE_FACTORY_PRODUCTIVITY
 } from "./types";
-import {Map} from 'immutable';
 import {getFactoryById} from "../../data/factories";
-import {getProductById} from "../selectors";
+import {getFactoryStateById, getProductStateById} from "../selectors";
+
+function initialProductState(productId: number) {
+    return {
+        factoryConsumers: new Map<number, Consumption>(),
+        populationConsumers: new Map<string, Consumption>(),
+        producers: new Map<number, Production>(),
+        productId: productId,
+    };
+}
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
     if (action.type === UPDATE_HOUSES) {
         const updateHousesAction: UpdateHousesAction = action as UpdateHousesAction;
         const {islandId} = updateHousesAction;
-        const result = {
-            ...state,
-        };
-        if (state.island) {
+        if (!!state.island) {
             const level = getPopulationLevelByName(updateHousesAction.level);
             const people = state.island.islandsById[islandId].population[updateHousesAction.level].population;
             if (level) {
-                let oldIslandProductStates = state.products ? state.products.get(islandId, Map<number, ProductState>()) : Map<number, ProductState>();
-                const islandProductStates = level.Inputs.reduce((productStates, input) => {
-                    const productState = productStates.get(input.ProductID, {
-                        factoryConsumers: Map<number, Consumption>(),
-                        populationConsumers: Map<string, Consumption>(),
-                        producers: Map<number, Production>(),
+                const oldProductStates = state.products.get(islandId);
+
+                const islandProductStates = oldProductStates ? new Map(oldProductStates) : new Map();
+                level.Inputs.forEach((input) => {
+                    let productState = islandProductStates.get(input.ProductID) || initialProductState(input.ProductID);
+
+                    const populationConsumers = new Map(productState.populationConsumers).set(level.Name, {
                         productId: input.ProductID,
+                        consumptionPerMinute: input.Amount * people,
                     });
-                    return productStates.set(input.ProductID, {
+                    islandProductStates.set(input.ProductID, {
                         ...productState,
-                        populationConsumers: productState.populationConsumers.set(level.Name, new Consumption({
-                            productId: input.ProductID,
-                            consumptionPerMinute: input.Amount * people,
-                        })),
+                        populationConsumers: populationConsumers,
                     });
-                }, oldIslandProductStates);
-                if (result.products) {
-                    result.products = result.products.set(islandId, islandProductStates);
-                } else {
-                    result.products = Map<number, Map<number, ProductState>>()
-                        .set(islandId, islandProductStates);
-                }
+                });
+                const products = state.products ? new Map(state.products) : new Map();
+                products.set(islandId, islandProductStates);
+                return {
+                    ...state,
+                    products
+                };
             }
         }
-        return result;
     }
     return state;
 }
@@ -63,28 +66,30 @@ function createFactoryState(factoryId: number): FactoryState {
 }
 
 export function factoryReducer(state: RootState, action: AnyAction): RootState {
-    if (action.type === UPDATE_FACTORY_COUNT) {
-        const {islandId, factoryId, count} = action.payload;
-        let factories = state.factories;
-        if (!factories) {
-            factories = Map<number, Map<number, FactoryState>>();
+    if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
+        const {islandId, factoryId} = action.payload;
+        const factories = state.factories ? new Map(state.factories) : new Map();
+        const islandFactories = new Map(factories.get(factoryId));
+        factories.set(islandId, islandFactories);
+        const oldFactoryState = islandFactories.get(factoryId);
+        const factoryState = oldFactoryState || createFactoryState(factoryId);
+
+        if (action.type === UPDATE_FACTORY_COUNT) {
+            islandFactories.set(factoryId, {
+                ...factoryState,
+                buildingCount: action.payload.count,
+            });
+        } else {
+            islandFactories.set(factoryId, {
+                ...factoryState,
+                productivity: action.payload.productivity,
+            });
         }
-        const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
-        return state.setIn('factories', factories.setIn([islandId, factoryId], {
-            ...factoryState,
-            buildingCount: count,
-        }));
-    } else if (action.type === UPDATE_FACTORY_PRODUCTIVITY) {
-        const {islandId, factoryId, productivity} = action.payload;
-        let factories = state.factories;
-        if (!factories) {
-            factories = Map<number, Map<number, FactoryState>>();
+
+        return {
+            ...state,
+            factories
         }
-        const factoryState = factories.getIn([islandId, factoryId], createFactoryState(factoryId));
-        return state.set('factories', factories.setIn([islandId, factoryId], {
-            ...factoryState,
-            productivity,
-        }));
     }
     return state;
 }
@@ -93,43 +98,51 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
     if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId
-        const factoryState: FactoryState = state.factories.getIn([islandId, factoryId]);
-
+        const factoryState = getFactoryStateById(state, islandId, factoryId);
         const factoryDefinition = getFactoryById(factoryId);
-        const products = state.products.withMutations(products => {
-            factoryDefinition.Outputs.forEach(output => {
-                const productId = output.ProductID;
-                const productState = getProductById(state, islandId, productId);
-                let cycleTime = factoryDefinition.CycleTime;
-                if (cycleTime === 0) {
-                    cycleTime = 30;
-                }
-                const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
-                products.setIn([islandId, productId], {
-                    ...productState,
-                    producers: productState.producers.set(factoryId, {
-                        owner: factoryId,
-                        productId,
-                        productionPerMinute
-                    }),
-                });
+        const products = state.products ? new Map(state.products) : new Map();
+        const islandProductMap = new Map<number, ProductState>(products.get(islandId));
+
+        factoryDefinition.Outputs.forEach(output => {
+            const productId = output.ProductID;
+            const productState = getProductStateById(state, islandId, productId);
+            let cycleTime = factoryDefinition.CycleTime;
+            if (cycleTime === 0) {
+                cycleTime = 30;
+            }
+            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
+            const producers = {
+                ...productState.producers,
+            };
+            producers[factoryId] = {
+                owner: factoryId,
+                productId,
+                productionPerMinute
+            };
+            islandProductMap.set(productId, {
+                ...productState,
+                producers
             });
-            // recompute consumption for factoryId
-            factoryDefinition.Inputs.forEach(input => {
-                const productId = input.ProductID;
-                const productState = getProductById(state, islandId, productId);
-                let cycleTime = factoryDefinition.CycleTime;
-                if (cycleTime === 0) {
-                    cycleTime = 30;
-                }
-                const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
-                products.setIn([islandId, productId], {
-                    ...productState,
-                    factoryConsumers: productState.factoryConsumers.set(factoryId, new Consumption({
-                        productId,
-                        consumptionPerMinute
-                    })),
-                });
+        });
+        // recompute consumption for factoryId
+        factoryDefinition.Inputs.forEach(input => {
+            const productId = input.ProductID;
+            const productState = getProductStateById(state, islandId, productId);
+            let cycleTime = factoryDefinition.CycleTime;
+            if (cycleTime === 0) {
+                cycleTime = 30;
+            }
+            const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
+            const consumers = {
+                ...productState.factoryConsumers,
+            };
+            consumers[factoryId] = {
+                productId,
+                consumptionPerMinute
+            };
+            islandProductMap.set(productId, {
+                ...productState,
+                factoryConsumers: consumers
             });
         });
         return {
@@ -139,27 +152,3 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
     }
     return state;
 }
-
-// function getInputs(): { [productId: number]: Consumption } {
-//     const factoryRaw = getFactoryById(this.id);
-//     return factoryRaw.Inputs.reduce((map: { [productId: number]: Consumption }, input: FactoryIngredient) => {
-//         map[input.ProductID] = {
-//             owner: this.id,
-//             productId: input.ProductID,
-//             consumptionPerMinute: 60 / factoryRaw.CycleTime,
-//         };
-//         return map;
-//     }, {});
-// }
-//
-// function getOutputs(): { [productId: number]: Production } {
-//     const factoryRaw = getFactoryById(this.id);
-//     return factoryRaw.Outputs.reduce((map: { [productId: number]: Production }, output: FactoryIngredient) => {
-//         map[output.ProductID] = {
-//             owner: this.id,
-//             productId: output.ProductID,
-//             productionPerMinute: 60 / factoryRaw.CycleTime,
-//         };
-//         return map;
-//     }, {});
-// }

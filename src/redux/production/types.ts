@@ -1,5 +1,3 @@
-import {Map, Record} from 'immutable';
-
 export const UPDATE_FACTORY_COUNT = 'UPDATE_FACTORY_COUNT';
 
 interface UpdateFactoryCountAction {
@@ -28,15 +26,9 @@ export interface UpdateFactoryProductivityPayload {
 
 export type ProductionActionTypes = UpdateFactoryCountAction | UpdateFactoryProductivityAction
 
-export interface IConsumption {
+export interface Consumption {
     productId: number;
     consumptionPerMinute: number;
-}
-
-export class Consumption extends Record<IConsumption>({productId: 0, consumptionPerMinute: 0}) implements IConsumption {
-    constructor(config: Partial<IConsumption>) {
-        super(config);
-    }
 }
 
 export interface FactoryState {
@@ -53,7 +45,7 @@ export interface Production {
 
 export interface ProductState {
     productId: number;
-    factoryConsumers: Map<number, Consumption>;
-    populationConsumers: Map<string, Consumption>;
-    producers: Map<number, Production>;
+    factoryConsumers: { [factoryId: number]: Consumption };
+    populationConsumers: { [level: number]: Consumption };
+    producers: { [factoryId: number]: Production };
 }

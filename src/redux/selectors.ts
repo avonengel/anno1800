@@ -1,50 +1,49 @@
-import {IRootState} from "./store";
+import {RootState} from "./store";
 import {Island} from "./islands/types";
-import {Consumption, FactoryState, Production, ProductState} from "./production/types";
-import {Map} from 'immutable';
+import {FactoryState, ProductState} from "./production/types";
 
-export const getIslandById = (store: IRootState, islandId: number): Readonly<Island> => {
+export const getIslandById = (store: RootState, islandId: number): Readonly<Island> => {
     return store.island.islandsById[islandId];
 };
 
-export function getFactoryStateById(store: IRootState, islandId: number, factoryId: number): Readonly<FactoryState> {
-    if (!store.factories) {
-        return {
-            buildingCount: 0,
-            productivity: 1,
-            id: factoryId,
-        };
+export function getFactoryStateById(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> {
+    const factoryMap = getByIslandId(store.factories, islandId);
+    const factoryState = factoryMap.get(factoryId);
+    if (factoryState !== undefined) {
+        return factoryState;
     }
-    return store.factories.getIn([islandId, factoryId]);
+    return {
+        id: factoryId,
+        buildingCount: 0,
+        productivity: 1,
+    };
+}
+
+function getByIslandId<K, V>(map: ReadonlyMap<number, ReadonlyMap<K, V>>, islandId: number) {
+    if (map !== undefined) {
+        const entry = map.get(islandId);
+        if (entry !== undefined) {
+            return entry;
+        }
+    }
+
+    return new Map<K, V>();
 }
 
 function initialProductState(productId: number) {
     return {
         productId: productId,
-        producers: Map<number, Production>(),
-        factoryConsumers: Map<number, Consumption>(),
-        populationConsumers: Map<string, Consumption>(),
+        producers: {},
+        factoryConsumers: {},
+        populationConsumers: {},
     }
-};
-
-export function getProductById(store: IRootState, islandId: number, productId: number): Readonly<ProductState> {
-    if (store.products === undefined || store.products === null) {
-        return initialProductState(productId);
-    }
-    return getProductByIdFromProduct(store.products, islandId, productId);
 }
 
-export function getProductByIdFromProduct(products: Map<number, Map<number, ProductState>>, islandId: number, productId: number): Readonly<ProductState> {
-    if (products === undefined || products === null) {
-        return initialProductState(productId);
+export function getProductStateById(store: RootState, islandId: number, productId: number): Readonly<ProductState> {
+    const productMap = getByIslandId(store.products, islandId);
+    const productState = productMap.get(productId);
+    if (productState !== undefined) {
+        return productState;
     }
-    if (productId === 1010197) {
-        console.log(`${islandId} ${productId} productState`, products.toJS());
-    }
-    const result = products.getIn([islandId, productId], initialProductState(productId));
-    if (productId === 1010197) {
-        console.log('result', result);
-    }
-    return result;
+    return initialProductState(productId);
 }
-

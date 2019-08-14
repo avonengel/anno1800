@@ -11,8 +11,8 @@ import {
     withStyles
 } from "@material-ui/core";
 import {FactoryRaw} from "../data/factories";
-import {IRootState} from "../redux/store";
-import {getFactoryStateById, getProductById} from "../redux/selectors";
+import {RootState} from "../redux/store";
+import {getFactoryStateById, getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
 import {connect} from "react-redux";
@@ -30,10 +30,10 @@ interface ReactProps extends WithStyles<typeof styles> {
     islandId: number,
 }
 
-const mapStateToProps = (state: IRootState, reactProps: ReactProps) => {
+const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     const outputProductsById: { [id: number]: Readonly<ProductState> } = {};
     for (let output of reactProps.factory.Outputs) {
-        outputProductsById[output.ProductID] = getProductById(state, reactProps.islandId, output.ProductID);
+        outputProductsById[output.ProductID] = getProductStateById(state, reactProps.islandId, output.ProductID);
     }
     return {
         factoryState: getFactoryStateById(state, reactProps.islandId, reactProps.factory.ID),
@@ -55,8 +55,12 @@ type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof
 
 function getConsumption(productState: ProductState): number {
     let consumption = 0;
-    productState.populationConsumers.forEach(c => consumption += c.consumptionPerMinute);
-    productState.factoryConsumers.forEach(c => consumption += c.consumptionPerMinute);
+    for (let level in productState.populationConsumers) {
+        consumption += productState.populationConsumers[level].consumptionPerMinute
+    }
+    for (let factoryId in productState.factoryConsumers) {
+        consumption += productState.populationConsumers[factoryId].consumptionPerMinute
+    }
     return consumption;
 }
 

@@ -1,8 +1,8 @@
 import * as React from "react";
 import {Grid, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
-import {getIslandById, getProductById} from "../redux/selectors";
-import {IRootState} from "../redux/store";
+import {getIslandById, getProductStateById} from "../redux/selectors";
+import {RootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {updateHouseCount} from "../redux/islands/actions";
@@ -14,14 +14,14 @@ interface ReactProps {
     islandId: number;
 }
 
-const mapStateToProps = (state: IRootState, reactProps: ReactProps) => {
+const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     return {
         island: getIslandById(state, reactProps.islandId),
         factoriesToShow: factoriesToShow(state, reactProps),
     };
 };
 
-function factoriesToShow(state: Readonly<IRootState>, props: ReactProps) {
+function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
     const factoriesToShow: FactoryRaw[] = [];
     for (const factory of ALL_FACTORIES) {
@@ -43,10 +43,12 @@ function factoriesToShow(state: Readonly<IRootState>, props: ReactProps) {
         }
         // also show factories for things that are consumed by factories
         for (let output of factory.Outputs) {
-            // FIXME wtf?! why does this only work if productId is supplied as string?! And what's the difference to calling it from the reducer?
-            const productState = getProductById(state, props.islandId, output.ProductID);
+            const productState = getProductStateById(state, props.islandId, output.ProductID);
             if (!!productState) {
-                const consumptionPerMinute = productState.factoryConsumers.reduce((sum: number, cons) => sum + cons.consumptionPerMinute, 0);
+                let consumptionPerMinute = 0;
+                for (let factoryId in productState.factoryConsumers) {
+                    consumptionPerMinute += productState.factoryConsumers[factoryId].consumptionPerMinute;
+                }
                 if (output.ProductID === 1010197) {
                     console.log(`Wool consumption total: ${consumptionPerMinute}, productState: ${JSON.stringify(productState)}`);
                 }
