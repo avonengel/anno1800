@@ -56,10 +56,10 @@ type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof
 function getConsumption(productState: ProductState): number {
     let consumption = 0;
     for (let level in productState.populationConsumers) {
-        consumption += productState.populationConsumers[level].consumptionPerMinute
+        consumption += productState.populationConsumers[level];
     }
     for (let factoryId in productState.factoryConsumers) {
-        consumption += productState.populationConsumers[factoryId].consumptionPerMinute
+        consumption += productState.factoryConsumers[factoryId];
     }
     return consumption;
 }

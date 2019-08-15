@@ -15,23 +15,23 @@ const composeEnhancers = composeWithDevTools({
 
 export interface RootState {
     readonly island: IslandState,
-    readonly products: ReadonlyMap<number, ReadonlyMap<number, ProductState>> //{ [islandId: number]: { [productId: number]: ProductState } }
-    readonly factories: ReadonlyMap<number, ReadonlyMap<number, FactoryState>> //{ [islandId: number]: { [factoryId: number]: FactoryState } }
+    readonly products: { [islandId: number]: { [productId: number]: ProductState } }
+    readonly factories: { [islandId: number]: { [factoryId: number]: FactoryState } }
 }
 
 const initialState = {
     island: initialIslandState,
-    products: new Map<number, ReadonlyMap<number, ProductState>>(),
-    factories: new Map<number, ReadonlyMap<number, FactoryState>>(),
+    products: {},
+    factories: {},
 };
 
 function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
     const islandState = islandReducer(state.island, action);
     state = populationConsumptionReducer({...state, island: islandState}, action);
-    // FIXME for some reason, the state changes are not visible in redux dev tools now
     // FIXME also, population consumption does not show up on factory cards
     state = factoryReducer(state, action);
     state = factoryProductionConsumptionReducer(state, action);
+    console.info("new state", state);
     return state;
 }
 
