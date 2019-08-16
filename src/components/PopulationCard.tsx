@@ -7,6 +7,7 @@ interface Props {
     houses: number;
     population: number;
     onHouseChange: (houses: number) => void
+    onPopulationChange: (population: number) => void
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -38,7 +39,8 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
                         <img src={selectIconByName('population')} alt={""} height={"36px"}/>
                     </Grid>
                     <Grid item>
-                        <TextField label={"Workforce"} type={"number"} value={population}/>
+                        <TextField label={"Workforce"} type={"number"} value={population}
+                                   onChange={this.onPopulationChange.bind(this)}/>
                     </Grid>
                 </Grid>
             </Card>);
@@ -46,6 +48,9 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
 
     private onHouseChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.props.onHouseChange(event.target.valueAsNumber);
+    }
+    private onPopulationChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.props.onPopulationChange(event.target.valueAsNumber);
     }
 }
 

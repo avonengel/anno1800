@@ -1,4 +1,4 @@
-import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES} from "./types";
+import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
 
 export function createIsland(name: string): IslandActionTypes {
     return {
@@ -20,5 +20,13 @@ export function updateHouseCount(id: number, level: string, houses: number): Isl
         islandId: id,
         level,
         houses,
+    }
+}
+export function updatePopulation(id: number, level: string, population: number): IslandActionTypes {
+    return {
+        type: UPDATE_POPULATION,
+        islandId: id,
+        level,
+        population,
     }
 }

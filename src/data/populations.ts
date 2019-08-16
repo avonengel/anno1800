@@ -34,6 +34,7 @@ export function getPopulationLevelByName(name: string) {
 
 const RAW_DATA: PopulationLevelRaw[] = [
     {
+        // ATTENTION: Amount needs to be multiplied by 6 in order to have consumption per head per minute
         "Name": FARMERS,
         "Inputs": [
             {"ProductID": 120020, "Amount": 0.0, "SupplyWeight": 5, "MoneyValue": 0},

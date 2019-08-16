@@ -1,4 +1,12 @@
-import {ADD_ISLAND, DELETE_ISLAND, IslandState, PopulationState, UPDATE_HOUSES} from "./types";
+import {
+    ADD_ISLAND,
+    DELETE_ISLAND,
+    IslandState,
+    PopulationState,
+    UPDATE_HOUSES,
+    UPDATE_POPULATION,
+    UpdatePopulationAction
+} from "./types";
 import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/populations";
 import {AnyAction} from "redux";
 
@@ -63,6 +71,19 @@ export function islandReducer(state = initialState, action: AnyAction): IslandSt
             }
             result.islandsById[islandId].population[level] = new PopulationState(level, houses, population);
             return result;
+        case UPDATE_POPULATION:
+            const popAction = action as UpdatePopulationAction;
+            const islandState = {...state};
+            const islandsById = {...islandState.islandsById};
+            islandState.islandsById = islandsById;
+            const island = {...islandsById[popAction.islandId]};
+            islandsById[popAction.islandId] = island;
+            const islandPopulation = {...island.population};
+            island.population = islandPopulation;
+            const populationState = {...islandPopulation[popAction.level]};
+            islandPopulation[popAction.level] = populationState;
+            populationState.population = popAction.population;
+            return islandState;
         default:
             return state;
     }

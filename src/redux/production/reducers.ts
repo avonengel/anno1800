@@ -1,6 +1,6 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
-import {UPDATE_HOUSES, UpdateHousesAction} from "../islands/types";
+import {UPDATE_HOUSES, UPDATE_POPULATION, UpdateHousesAction} from "../islands/types";
 import {getPopulationLevelByName} from "../../data/populations";
 import {Consumption, FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
 import {getFactoryById} from "../../data/factories";
@@ -13,12 +13,11 @@ const initialProductState = {
 };
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
-    if (action.type === UPDATE_HOUSES) {
-        const updateHousesAction: UpdateHousesAction = action as UpdateHousesAction;
-        const {islandId} = updateHousesAction;
+    if (action.type === UPDATE_HOUSES || action.type == UPDATE_POPULATION) {
+        const {islandId, level: levelName} = action;
         if (!!state.island) {
-            const level = getPopulationLevelByName(updateHousesAction.level);
-            const people = state.island.islandsById[islandId].population[updateHousesAction.level].population;
+            const level = getPopulationLevelByName(levelName);
+            const people = state.island.islandsById[islandId].population[levelName].population;
             if (level) {
                 const products = {...state.products};
                 const islandProductStates = {...products[islandId]} || {};
@@ -29,7 +28,7 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                     let productState = {...(islandProductStates[input.ProductID] || initialProductState)}; //islandProductStates.get(input.ProductID) || initialProductState(input.ProductID);
                     islandProductStates[input.ProductID] = productState;
                     productState.populationConsumers = {...productState.populationConsumers};
-                    productState.populationConsumers[level.Name] = input.Amount * people;
+                    productState.populationConsumers[level.Name] = input.Amount * people * 6;
                 });
                 return {
                     ...state,

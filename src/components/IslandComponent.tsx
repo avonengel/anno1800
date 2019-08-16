@@ -5,7 +5,7 @@ import {getIslandById, getProductStateById} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
-import {updateHouseCount} from "../redux/islands/actions";
+import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import {getPopulationLevelByName, POPULATION_LEVELS} from "../data/populations";
 import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
 import FactoryCard from "./FactoryCard";
@@ -65,6 +65,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
     return {
         onHouseChange: (level: string, houses: number) => {
             dispatch(updateHouseCount(props.islandId, level, houses));
+        },
+        onPopulationChange: (level: string, population: number) => {
+            dispatch(updatePopulation(props.islandId, level, population));
         }
     };
 };
@@ -77,7 +80,8 @@ class IslandComponent extends React.Component<Props> {
         const populationCards = POPULATION_LEVELS.map((level) =>
             <PopulationCard key={level} level={level} houses={island.population[level].houses}
                             population={island.population[level].population}
-                            onHouseChange={this.createOnHouseChange(level)}/>);
+                            onHouseChange={this.createOnHouseChange(level)}
+                            onPopulationChange={this.createOnPopulationChange(level)}/>);
         return <>
             <Typography variant="h3">{island.name}</Typography>
             <Grid container spacing={1}>
@@ -103,6 +107,11 @@ class IslandComponent extends React.Component<Props> {
     createOnHouseChange(level: string): (houses: number) => void {
         return (houses: number) => {
             this.props.onHouseChange(level, houses);
+        }
+    }
+    createOnPopulationChange(level: string): (population: number) => void {
+        return (population: number) => {
+            this.props.onPopulationChange(level, population);
         }
     }
 }
