@@ -98,7 +98,7 @@ class FactoryCard extends React.Component<Props> {
                             <td>
                                 <TextField label={"productivity"} type={"number"} inputProps={{min: 0}}
                                            style={{width: "5em"}}
-                                           value={factoryState && factoryState.productivity ? factoryState.productivity * 100 : 100}
+                                           value={factoryState && factoryState.productivity ? (factoryState.productivity * 100).toFixed(0) : 100}
                                            onChange={this.onProductivityChange.bind(this)}
                                            InputProps={{
                                                endAdornment: <InputAdornment position="end">%</InputAdornment>,
