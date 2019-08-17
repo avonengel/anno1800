@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
 import {
     Card,
@@ -68,7 +69,7 @@ function getConsumption(productState: ProductState): number {
 class FactoryCard extends React.Component<Props> {
 
     render() {
-        const {classes, factoryState} = this.props;
+        const {factoryState} = this.props;
         return (
             <Card>
                 <CardHeader title={this.props.factory.Name} titleTypographyProps={{component: 'h4'}}/>

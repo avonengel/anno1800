@@ -17,7 +17,7 @@ function getMaxPeoplePerHouse(level: PopulationLevelRaw) {
 }
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
-    if (action.type === UPDATE_HOUSES || action.type == UPDATE_POPULATION) {
+    if (action.type === UPDATE_HOUSES || action.type === UPDATE_POPULATION) {
         const {islandId, level: levelName} = action;
         if (!!state.island) {
             const level = getPopulationLevelByName(levelName);
