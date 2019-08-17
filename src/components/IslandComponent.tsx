@@ -56,9 +56,6 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                 for (let factoryId in productState.factoryConsumers) {
                     consumptionPerMinute += productState.factoryConsumers[factoryId];
                 }
-                if (output.ProductID === 1010197) {
-                    console.log(`Wool consumption total: ${consumptionPerMinute}, productState: ${JSON.stringify(productState)}`);
-                }
                 if (consumptionPerMinute) {
                     factoriesToShow.push(factory);
                 }

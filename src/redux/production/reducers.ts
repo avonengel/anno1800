@@ -1,8 +1,8 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
-import {UPDATE_HOUSES, UPDATE_POPULATION, UpdateHousesAction} from "../islands/types";
+import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
-import {Consumption, FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
+import {FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
 import {getFactoryById} from "../../data/factories";
 import {getFactoryStateById} from "../selectors";
 
@@ -13,9 +13,7 @@ const initialProductState = {
 };
 
 function getMaxPeoplePerHouse(level: PopulationLevelRaw) {
-    const number = level.Inputs.reduce((acc, input) => acc+input.SupplyWeight, 0);
-    console.info(`Max people per ${level.Name} house: `, number);
-    return number;
+    return level.Inputs.reduce((acc, input) => acc + input.SupplyWeight, 0);
 }
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
