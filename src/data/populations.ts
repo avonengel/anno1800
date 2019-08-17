@@ -1,4 +1,4 @@
-interface PopulationLevelRaw {
+export interface PopulationLevelRaw {
     Name: string;
     Inputs: PopulationInput[];
 }

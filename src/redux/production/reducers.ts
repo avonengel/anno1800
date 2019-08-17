@@ -1,7 +1,7 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION, UpdateHousesAction} from "../islands/types";
-import {getPopulationLevelByName} from "../../data/populations";
+import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
 import {Consumption, FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
 import {getFactoryById} from "../../data/factories";
 import {getFactoryStateById} from "../selectors";
@@ -11,6 +11,12 @@ const initialProductState = {
     populationConsumers: {},
     producers: {},
 };
+
+function getMaxPeoplePerHouse(level: PopulationLevelRaw) {
+    const number = level.Inputs.reduce((acc, input) => acc+input.SupplyWeight, 0);
+    console.info(`Max people per ${level.Name} house: `, number);
+    return number;
+}
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
     if (action.type === UPDATE_HOUSES || action.type == UPDATE_POPULATION) {
@@ -23,12 +29,11 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                 const islandProductStates = {...products[islandId]} || {};
                 products[islandId] = islandProductStates;
 
-                // const islandProductStates = oldProductStates ? new Map(oldProductStates) : new Map();
                 level.Inputs.forEach((input) => {
-                    let productState = {...(islandProductStates[input.ProductID] || initialProductState)}; //islandProductStates.get(input.ProductID) || initialProductState(input.ProductID);
+                    let productState = {...(islandProductStates[input.ProductID] || initialProductState)};
                     islandProductStates[input.ProductID] = productState;
                     productState.populationConsumers = {...productState.populationConsumers};
-                    productState.populationConsumers[level.Name] = input.Amount * people * 6;
+                    productState.populationConsumers[level.Name] = input.Amount * people * 60 / getMaxPeoplePerHouse(level);
                 });
                 return {
                     ...state,
