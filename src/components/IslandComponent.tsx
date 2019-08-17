@@ -25,6 +25,12 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
     const factoriesToShow: FactoryRaw[] = [];
     for (const factory of ALL_FACTORIES) {
+        if (state.factories && state.factories[props.islandId]
+            && state.factories[props.islandId][factory.ID]
+            && state.factories[props.islandId][factory.ID].buildingCount > 0) {
+            factoriesToShow.push(factory);
+            continue;
+        }
 
         if (!!populationStates) {
             for (let level in populationStates) {
@@ -44,6 +50,7 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
         // also show factories for things that are consumed by factories
         for (let output of factory.Outputs) {
             const productState = getProductStateById(state, props.islandId, output.ProductID);
+
             if (!!productState) {
                 let consumptionPerMinute = 0;
                 for (let factoryId in productState.factoryConsumers) {
@@ -83,7 +90,7 @@ class IslandComponent extends React.Component<Props> {
                             onHouseChange={this.createOnHouseChange(level)}
                             onPopulationChange={this.createOnPopulationChange(level)}/>);
         return <>
-            <Typography variant="h3">{island.name}</Typography>
+            <Typography variant="h3" align={"center"}>{island.name}</Typography>
             <Grid container spacing={1}>
                 {populationCards.map((card) =>
                     (<Grid item xs={6} sm={2} key={card.props.level}>
@@ -109,6 +116,7 @@ class IslandComponent extends React.Component<Props> {
             this.props.onHouseChange(level, houses);
         }
     }
+
     createOnPopulationChange(level: string): (population: number) => void {
         return (population: number) => {
             this.props.onPopulationChange(level, population);
