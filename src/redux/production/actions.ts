@@ -1,15 +1,18 @@
-import {ProductionActionTypes, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
-import {action} from "typesafe-actions";
+import {createCustomAction} from "typesafe-actions";
 
-export function updateFactoryCount(islandId: number, factoryId: number, count: number): ProductionActionTypes {
-    return {
-        type: UPDATE_FACTORY_COUNT,
-        payload: {
-            islandId,
-            factoryId,
-            count,
-        }
-    }
-}
+// export function updateFactoryCount(islandId: number, factoryId: number, count: number): ProductionActionTypes {
+export const updateFactoryCount = createCustomAction('factories/UPDATE_COUNT', type =>
+    (islandId: number, factoryId: number, count: number) => ({
+        type,
+        payload: {islandId, factoryId, count}
+    })
+);
 
-export const updateFactoryProductivity = (islandId: number, factoryId: number, productivity: number) => action(UPDATE_FACTORY_PRODUCTIVITY, {islandId, factoryId, productivity});
+export const updateFactoryProductivity = createCustomAction('factories/UPDATE_PRODUCTIVITY', type =>
+    (islandId: number, factoryId: number, productivity: number) => ({
+        type, payload: {islandId, factoryId, productivity}
+    })
+);
+
+export const FactoryActions = [updateFactoryCount, updateFactoryProductivity];
+//(islandId: number, factoryId: number, productivity: number) => action(UPDATE_FACTORY_PRODUCTIVITY, {islandId, factoryId, productivity});

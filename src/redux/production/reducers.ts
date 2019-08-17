@@ -5,6 +5,8 @@ import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populatio
 import {FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
 import {getFactoryById} from "../../data/factories";
 import {getFactoryStateById} from "../selectors";
+import {getType, isActionOf, isOfType} from "typesafe-actions";
+import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -49,7 +51,7 @@ const initialFactoryState: FactoryState = {
 };
 
 export function factoryReducer(state: RootState, action: AnyAction): RootState {
-    if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
+    if(isActionOf(FactoryActions, action)) {
         const {islandId, factoryId} = action.payload;
         const factories = {...state.factories};
         const islandFactories = {...factories[islandId]};
@@ -57,9 +59,9 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
         const factoryState = {...(islandFactories[factoryId] || initialFactoryState)};
         islandFactories[factoryId] = factoryState;
 
-        if (action.type === UPDATE_FACTORY_COUNT) {
+        if (isOfType(getType(updateFactoryCount), action)) {
             factoryState.buildingCount = action.payload.count;
-        } else {
+        } else if (isOfType(getType(updateFactoryProductivity), action)) {
             factoryState.productivity = action.payload.productivity;
         }
 
