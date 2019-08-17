@@ -31,6 +31,7 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
                     </Grid>
                     <Grid item>
                         <TextField label={"Houses"} type={"number"} value={houses}
+                                   inputProps={{min: 0}}
                                    onChange={this.onHouseChange.bind(this)}/>
                     </Grid>
                 </Grid>
@@ -40,6 +41,7 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
                     </Grid>
                     <Grid item>
                         <TextField label={"Workforce"} type={"number"} value={population}
+                                   inputProps={{min: 0}}
                                    onChange={this.onPopulationChange.bind(this)}/>
                     </Grid>
                 </Grid>
@@ -49,6 +51,7 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
     private onHouseChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.props.onHouseChange(event.target.valueAsNumber);
     }
+
     private onPopulationChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.props.onPopulationChange(event.target.valueAsNumber);
     }
