@@ -1,4 +1,5 @@
 import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
+import {createCustomAction, createStandardAction} from "typesafe-actions";
 
 export function createIsland(name: string): IslandActionTypes {
     return {
@@ -13,6 +14,8 @@ export function deleteIsland(id: number): IslandActionTypes {
         id: id
     }
 }
+
+export const selectIsland = createStandardAction('islands/SELECT')<number>();
 
 export function updateHouseCount(id: number, level: string, houses: number): IslandActionTypes {
     return {
