@@ -90,14 +90,14 @@ class IslandComponent extends React.Component<Props> {
             <Typography variant="h3" align={"center"}>{island.name}</Typography>
             <Grid container spacing={1}>
                 {populationCards.map((card) =>
-                    (<Grid item xs={6} sm={2} key={card.props.level}>
+                    (<Grid item xs={6} md={3} lg={2} key={card.props.level}>
                         {card}
                     </Grid>))}
             </Grid>
             <Grid container spacing={1}>
                 {ALL_FACTORIES.map((factory) =>
                     this.shouldShow(factory) &&
-                    (<Grid item xs={6} sm={2} key={factory.ID}>
+                    (<Grid item xs={6} md={3} lg={2} key={factory.ID}>
                         <FactoryCard factory={factory} islandId={island.id}/>
                     </Grid>))}
             </Grid>
