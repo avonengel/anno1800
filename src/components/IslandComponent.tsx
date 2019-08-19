@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Grid, IconButton, Typography} from "@material-ui/core";
+import {Grid, IconButton, Typography, Zoom} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById, getProductStateById} from "../redux/selectors";
 import {RootState} from "../redux/store";
@@ -116,10 +116,11 @@ class IslandComponent extends React.Component<Props, OwnState> {
             </div>
             <Grid container spacing={1}>
                 {ALL_FACTORIES.map((factory) =>
-                    this.shouldShow(factory) &&
-                    (<Grid item xs={6} md={3} lg={2} key={factory.ID}>
-                        <FactoryCard factory={factory} islandId={island.id}/>
-                    </Grid>))}
+                    <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true}>
+                        <Grid item xs={6} md={3} lg={2}>
+                            <FactoryCard factory={factory} islandId={island.id}/>
+                        </Grid>
+                    </Zoom>)}
             </Grid>
         </>;
     }
