@@ -91,7 +91,9 @@ class App extends React.Component<Props, OwnState> {
     }
 
 
-    handleSubmit() {
+    handleSubmit(event: React.FormEvent) {
+        event.preventDefault();
+        this.setState({name: ""});
         this.props.onCreateIsland(this.state.name);
     }
 
