@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
 import {
+    Avatar,
     Card,
     CardContent,
     CardHeader,
@@ -18,6 +19,7 @@ import {Dispatch} from "redux";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
 import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
+import {params} from '../data/params_2019-04-17_full'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -66,13 +68,31 @@ function getConsumption(productState: ProductState): number {
 }
 
 
+function getIconData(name: string) {
+    for (let factory of params.factories) {
+        if (factory.name === name) {
+            if (!!factory.icon) {
+                return factory.icon;
+            }
+            return null;
+        }
+    }
+    return null;
+}
+
 class FactoryCard extends React.Component<Props> {
 
     render() {
         const {factoryState} = this.props;
+        const iconData = getIconData(this.props.factory.Name);
         return (
             <Card>
-                <CardHeader title={this.props.factory.Name}  titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
+                <CardHeader
+                    avatar={
+                        iconData && <Avatar alt={this.props.factory.Name} src={iconData} />
+                    }
+                    title={this.props.factory.Name}
+                            titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
                 <CardContent>
                     <table>
                         <tbody>
