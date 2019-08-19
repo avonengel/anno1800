@@ -72,7 +72,7 @@ class FactoryCard extends React.Component<Props> {
         const {factoryState} = this.props;
         return (
             <Card>
-                <CardHeader title={this.props.factory.Name} titleTypographyProps={{component: 'h4'}}/>
+                <CardHeader title={this.props.factory.Name}  titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
                 <CardContent>
                     <table>
                         <tbody>
@@ -106,7 +106,7 @@ class FactoryCard extends React.Component<Props> {
                                            }}/>
                             </td>
                             <td>
-                                {this.computeMinimumRequiredCount()}
+                                {"" + this.computeMinimumRequiredCount()}
                             </td>
                         </tr>
                         </tbody>
@@ -126,7 +126,11 @@ class FactoryCard extends React.Component<Props> {
     private computePerfectProductivity() {
         const factoryState = this.props.factoryState;
         const outputs = this.props.factory.Outputs;
-        const productState = this.props.outputProductsById[outputs[0].ProductID];
+        const output = outputs[0];
+        if (!output) {
+            return 0;
+        }
+        const productState = this.props.outputProductsById[output.ProductID];
         if (!productState) {
             return 0;
         }
@@ -135,7 +139,7 @@ class FactoryCard extends React.Component<Props> {
         if (cycleTime === 0) {
             cycleTime = 30;
         }
-        const productionPerMinutePerBuilding = outputs[0].Amount * (60 / cycleTime);
+        const productionPerMinutePerBuilding = output.Amount * (60 / cycleTime);
         var buildingCount = 1;
         if (!!factoryState) {
             buildingCount = factoryState.buildingCount || 1;
@@ -143,14 +147,17 @@ class FactoryCard extends React.Component<Props> {
                 buildingCount = 1;
             }
         }
-        // FIXME also, values are wrong in general when state was loaded from localstorage
         return consumption / productionPerMinutePerBuilding / buildingCount;
     }
 
     private computeMinimumRequiredCount() {
         const outputs = this.props.factory.Outputs;
         const factoryState = this.props.factoryState;
-        const productState = this.props.outputProductsById[outputs[0].ProductID];
+        const output = outputs[0];
+        if (!output) {
+            return 0;
+        }
+        const productState = this.props.outputProductsById[output.ProductID];
         if (!productState) {
             return 0;
         }
@@ -160,10 +167,10 @@ class FactoryCard extends React.Component<Props> {
             cycleTime = 30;
         }
         let productivity = 1;
-        if(!!factoryState) {
+        if (!!factoryState) {
             productivity = factoryState.productivity;
         }
-        const productionPerMinutePerBuilding = outputs[0].Amount * (60 / cycleTime) * productivity;
+        const productionPerMinutePerBuilding = output.Amount * (60 / cycleTime) * productivity;
         return Math.ceil(consumption / productionPerMinutePerBuilding);
     }
 }

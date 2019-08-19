@@ -2,7 +2,7 @@ import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
-import {FactoryState, UPDATE_FACTORY_COUNT, UPDATE_FACTORY_PRODUCTIVITY} from "./types";
+import {FactoryState} from "./types";
 import {getFactoryById} from "../../data/factories";
 import {getFactoryStateById} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
@@ -74,7 +74,7 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
 }
 
 export function factoryProductionConsumptionReducer(state: RootState, action: AnyAction) {
-    if (action.type === UPDATE_FACTORY_COUNT || action.type === UPDATE_FACTORY_PRODUCTIVITY) {
+    if (isActionOf([updateFactoryCount, updateFactoryProductivity], action)) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId
         const factoryState = getFactoryStateById(state, islandId, factoryId);

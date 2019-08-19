@@ -1,10 +1,11 @@
 import * as React from "react";
-import {Grid, Typography} from "@material-ui/core";
+import {Grid, IconButton, Typography} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById, getProductStateById} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
+import {Visibility, VisibilityOff} from "@material-ui/icons";
 import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import {getPopulationLevelByName, POPULATION_LEVELS} from "../data/populations";
 import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
@@ -24,7 +25,7 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
 function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
     const factoriesToShow: FactoryRaw[] = [];
-    for (const factory of ALL_FACTORIES) {
+    factoryLoop: for (const factory of ALL_FACTORIES) {
         if (state.factories && state.factories[props.islandId]
             && state.factories[props.islandId][factory.ID]
             && state.factories[props.islandId][factory.ID].buildingCount > 0) {
@@ -42,7 +43,7 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                     const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
                     if (needed) {
                         factoriesToShow.push(factory);
-                        continue;
+                        continue factoryLoop;
                     }
                 }
             }
@@ -58,6 +59,7 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                 }
                 if (consumptionPerMinute) {
                     factoriesToShow.push(factory);
+                    continue factoryLoop;
                 }
             }
         }
@@ -77,7 +79,19 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
 };
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-class IslandComponent extends React.Component<Props> {
+interface OwnState {
+    showAll: boolean;
+}
+
+class IslandComponent extends React.Component<Props, OwnState> {
+
+
+    constructor(props: Readonly<Props>) {
+        super(props);
+        this.state = {
+            showAll: false,
+        };
+    }
 
     render() {
         const {island} = this.props;
@@ -87,13 +101,19 @@ class IslandComponent extends React.Component<Props> {
                             onHouseChange={this.createOnHouseChange(level)}
                             onPopulationChange={this.createOnPopulationChange(level)}/>);
         return <>
-            <Typography variant="h3" align={"center"}>{island.name}</Typography>
+            <Typography variant="h3" align={"center"} gutterBottom>{island.name}</Typography>
             <Grid container spacing={1}>
                 {populationCards.map((card) =>
                     (<Grid item xs={6} md={3} lg={2} key={card.props.level}>
                         {card}
                     </Grid>))}
             </Grid>
+            <div style={{textAlign: "center"}}>
+                <Typography component="div" variant="h5">Factories</Typography>
+                <IconButton aria-label="toggle visibility" onClick={this.toggleVisibility.bind(this)} color={"primary"}>
+                    {this.state.showAll ? <VisibilityOff/> : <Visibility/>}
+                </IconButton>
+            </div>
             <Grid container spacing={1}>
                 {ALL_FACTORIES.map((factory) =>
                     this.shouldShow(factory) &&
@@ -104,8 +124,12 @@ class IslandComponent extends React.Component<Props> {
         </>;
     }
 
+    private toggleVisibility() {
+        this.setState({showAll: !this.state.showAll});
+    }
+
     private shouldShow(factory: FactoryRaw): boolean {
-        return !!this.props.factoriesToShow.find(f => f === factory);
+        return this.state.showAll || !!this.props.factoriesToShow.find(f => f === factory);
     }
 
     createOnHouseChange(level: string): (houses: number) => void {

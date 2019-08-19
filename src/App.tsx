@@ -125,7 +125,7 @@ class App extends React.Component<Props, OwnState> {
                             paper: classes.drawerPaper,
                         }}>
                         <div className={classes.toolbar}/>
-                        <List>
+                        <List component={"nav"}>
                             {islandIds.map((islandId) => (
                                 <ListItem button key={islandId}>
                                     <ListItemText primary={islandsById[islandId].name}
