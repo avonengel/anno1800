@@ -6,13 +6,14 @@ import {
     createStyles,
     CssBaseline,
     Divider,
-    Drawer,
+    Drawer, InputAdornment,
     List,
     ListItem,
     ListItemText,
     TextField,
     Toolbar,
-    Typography, withStyles,
+    Typography,
+    withStyles,
     WithStyles
 } from "@material-ui/core";
 import {ThemeProvider} from '@material-ui/styles';
@@ -22,6 +23,9 @@ import IslandComponent from "./components/IslandComponent";
 import {RootState} from "./redux/store";
 import {Dispatch} from "redux";
 import {createIsland, selectIsland} from "./redux/islands/actions";
+import clsx from "clsx";
+import IconButton from "@material-ui/core/IconButton";
+import {Add, ChevronLeft, ChevronRight, Menu} from "@material-ui/icons"
 
 const drawerWidth = 240;
 
@@ -30,7 +34,24 @@ const styles = createStyles({
         display: 'flex',
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    appBarShift: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth,
+        transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    menuButton: {
+        marginRight: theme.spacing(2),
+    },
+    hide: {
+        display: 'none',
     },
     drawer: {
         width: drawerWidth,
@@ -39,20 +60,38 @@ const styles = createStyles({
     drawerPaper: {
         width: drawerWidth,
     },
+    drawerHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 8px',
+        ...theme.mixins.toolbar,
+        justifyContent: 'flex-end',
+    },
     content: {
         flexGrow: 1,
-        padding: theme.spacing(3),
+        padding: theme.spacing(1),
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        marginLeft: -drawerWidth,
     },
-    toolbar: theme.mixins.toolbar,
+    contentShift: {
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: 0,
+    },
     container: {
         paddingTop: theme.spacing(5)
     },
     textField: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1),
-        width: "100%",
+        marginLeft: 0,
+        marginRight: 0,
     },
 });
+
 interface OwnProps extends WithStyles<typeof styles> {
 }
 
@@ -75,18 +114,30 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
 type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 interface OwnState {
-    name: string;
+    name: string,
+    drawerOpen: boolean,
 }
 
 class App extends React.Component<Props, OwnState> {
 
     constructor(props: Props) {
         super(props);
-        this.state = {name:""}
+        this.state = {
+            name: "",
+            drawerOpen: false,
+        };
     }
 
-    selectIsland(islandId: number) {
+    handleDrawerOpen() {
+        this.setState({drawerOpen: true});
+    }
 
+    handleDrawerClose() {
+        this.setState({drawerOpen: false});
+    }
+
+
+    selectIsland(islandId: number) {
         this.props.onIslandSelected(islandId);
     }
 
@@ -98,64 +149,95 @@ class App extends React.Component<Props, OwnState> {
     }
 
     handleOnChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState(
-            {
-                name: event.target.value
-            }
-        )
+        this.setState({
+            name: event.target.value
+        });
     }
 
     render() {
         const {classes, islandIds, islandsById} = this.props;
-        return (<React.Fragment>
-            <CssBaseline/>
-            <ThemeProvider theme={theme}>
-                <div className={classes.root}>
-                    <AppBar position="fixed" className={classes.appBar}>
-                        <Toolbar>
-                            <Typography variant="h6" noWrap>
-                                Anno 1800 Companion
-                            </Typography>
-                        </Toolbar>
-                    </AppBar>
-                    <Drawer
-                        className={classes.drawer}
-                        variant="permanent"
-                        classes={{
-                            paper: classes.drawerPaper,
-                        }}>
-                        <div className={classes.toolbar}/>
-                        <List component={"nav"}>
-                            {islandIds.map((islandId) => (
-                                <ListItem button key={islandId}>
-                                    <ListItemText primary={islandsById[islandId].name}
-                                                  onClick={() => this.selectIsland(islandId)}/>
+        return (
+            <React.Fragment>
+                <CssBaseline/>
+                <ThemeProvider theme={theme}>
+                    <div className={classes.root}>
+                        <CssBaseline/>
+                        <AppBar
+                            position="fixed"
+                            className={clsx(classes.appBar, {
+                                [classes.appBarShift]: this.state.drawerOpen,
+                            })}
+                        >
+                            <Toolbar>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="Open drawer"
+                                    onClick={this.handleDrawerOpen.bind(this)}
+                                    edge="start"
+                                    className={clsx(classes.menuButton, this.state.drawerOpen && classes.hide)}
+                                >
+                                    <Menu/>
+                                </IconButton>
+                                <Typography variant="h6" noWrap>
+                                    Anno 1800 Companion
+                                </Typography>
+                            </Toolbar>
+                        </AppBar>
+                        <Drawer
+                            className={classes.drawer}
+                            variant="persistent"
+                            anchor="left"
+                            open={this.state.drawerOpen}
+                            classes={{
+                                paper: classes.drawerPaper,
+                            }}
+                        >
+                            <div className={classes.drawerHeader}>
+                                <IconButton onClick={this.handleDrawerClose.bind(this)}>
+                                    {theme.direction === 'ltr' ? <ChevronLeft/> : <ChevronRight/>}
+                                </IconButton>
+                            </div>
+                            <List component={"nav"}>
+                                {islandIds.map((islandId) => (
+                                    <ListItem button key={islandId}>
+                                        <ListItemText primary={islandsById[islandId].name}
+                                                      onClick={() => this.selectIsland(islandId)}/>
+                                    </ListItem>
+                                ))}
+                                <ListItem>
+                                    <form onSubmit={this.handleSubmit.bind(this)}>
+                                        <TextField
+                                            id="create-island"
+                                            // label="Create new Island"
+                                            placeholder={"New Island"}
+                                            className={classes.textField}
+                                            // helperText="Some important text"
+                                            // margin="normal"
+                                            value={this.state.name}
+                                            onChange={this.handleOnChange.bind(this)}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <Add/>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </form>
                                 </ListItem>
-                            ))}
-                            <form onSubmit={this.handleSubmit.bind(this)}>
-                                <TextField
-                                    id="create-island"
-                                    // label="Create new Island"
-                                    placeholder={"New Island"}
-                                    className={classes.textField}
-                                    // helperText="Some important text"
-                                    margin="normal"
-                                    value={this.state.name}
-                                    onChange={this.handleOnChange.bind(this)}
-                                />
-                            </form>
+                            </List>
                             <Divider/>
-                        </List>
-                    </Drawer>
-                    <main className={classes.content}>
-                        <div className={classes.toolbar}/>
-                        <Container className={classes.container}>
-                            <IslandComponent islandId={this.props.selectedIsland}/>
-                        </Container>
-                    </main>
-                </div>
-            </ThemeProvider>
-        </React.Fragment>);
+                        </Drawer>
+                        <main className={clsx(classes.content, {[classes.contentShift]: this.state.drawerOpen})}>
+                            <div className={classes.drawerHeader}/>
+                            <Container className={classes.container}>
+                                <IslandComponent islandId={this.props.selectedIsland}/>
+                            </Container>
+                        </main>
+                    </div>
+                </ThemeProvider>
+            </React.Fragment>
+        );
     }
 }
 

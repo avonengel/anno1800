@@ -1,5 +1,5 @@
 import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
-import {createCustomAction, createStandardAction} from "typesafe-actions";
+import {createStandardAction} from "typesafe-actions";
 
 export function createIsland(name: string): IslandActionTypes {
     return {
