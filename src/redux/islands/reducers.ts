@@ -37,17 +37,17 @@ export function islandReducer(state = initialState, action: AnyAction): IslandSt
             // TODO implement deletion
             return state;
         case ADD_ISLAND:
+            const newId = Math.max(...state.islandIds) + 1;
             return {
-                // TODO generate unique ID
                 islandsById: {
                     ...state.islandsById,
-                    42: {
+                    [newId]: {
                         name: action.name,
-                        id: 42,
+                        id: newId,
                         population: newPopulationStateObject(),
                     }
                 },
-                islandIds: [...state.islandIds, 42]
+                islandIds: [...state.islandIds, newId]
             };
         case UPDATE_HOUSES:
             const {islandId, level, houses} = action;
