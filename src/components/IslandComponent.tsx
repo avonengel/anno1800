@@ -116,7 +116,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
             </div>
             <Grid container spacing={1}>
                 {ALL_FACTORIES.map((factory) =>
-                    <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true}>
+                    <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
                         <Grid item xs={6} md={3} lg={2}>
                             <FactoryCard factory={factory} islandId={island.id}/>
                         </Grid>
