@@ -6,16 +6,13 @@ export const getIslandById = (store: RootState, islandId: number): Readonly<Isla
     return store.island.islandsById[islandId];
 };
 
-export function getFactoryStateById(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> {
+export function getFactoryStateByIdOrDefault(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> {
+    return getFactoryStateById(store, islandId, factoryId) || {buildingCount: 0, productivity: 1};
+}
+
+export function getFactoryStateById(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> | undefined {
     const factoryMap = getByIslandId(store.factories, islandId);
-    const factoryState = factoryMap[factoryId];
-    if (factoryState !== undefined) {
-        return factoryState;
-    }
-    return {
-        buildingCount: 0,
-        productivity: 1,
-    };
+    return factoryMap[factoryId];
 }
 
 function getByIslandId<V>(map: { [islandId: number]: { [id: number]: V } }, islandId: number) {
@@ -34,11 +31,11 @@ const initialProductState = {
     populationConsumers: {},
 };
 
-export function getProductStateById(store: RootState, islandId: number, productId: number): Readonly<ProductState> {
+export function getProductStateByIdOrDefault(store: RootState, islandId: number, productId: number): Readonly<ProductState> {
+    return getProductStateById(store, islandId, productId) || initialProductState;
+}
+
+export function getProductStateById(store: RootState, islandId: number, productId: number): Readonly<ProductState> | undefined {
     const productMap = getByIslandId(store.products, islandId);
-    const productState = productMap[productId];
-    if (productState !== undefined) {
-        return productState;
-    }
-    return initialProductState;
+    return productMap[productId];
 }

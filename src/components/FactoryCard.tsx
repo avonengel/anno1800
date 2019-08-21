@@ -34,13 +34,13 @@ interface ReactProps extends WithStyles<typeof styles> {
 }
 
 const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
-    const outputProductsById: { [id: number]: Readonly<ProductState> } = {};
-    for (let output of reactProps.factory.Outputs) {
-        outputProductsById[output.ProductID] = getProductStateById(state, reactProps.islandId, output.ProductID);
+    let outputProductState: ProductState | undefined;
+    if (reactProps.factory.Outputs.length > 0) {
+        outputProductState = getProductStateById(state, reactProps.islandId, reactProps.factory.Outputs[0].ProductID);
     }
     return {
         factoryState: getFactoryStateById(state, reactProps.islandId, reactProps.factory.ID),
-        outputProductsById
+        outputProductState
     };
 };
 
@@ -144,17 +144,16 @@ class FactoryCard extends React.Component<Props> {
     }
 
     private computePerfectProductivity() {
-        const factoryState = this.props.factoryState;
+        const {factoryState, outputProductState} = this.props;
         const outputs = this.props.factory.Outputs;
         const output = outputs[0];
         if (!output) {
             return 0;
         }
-        const productState = this.props.outputProductsById[output.ProductID];
-        if (!productState) {
+        if (!outputProductState) {
             return 0;
         }
-        const consumption = getConsumption(productState);
+        const consumption = getConsumption(outputProductState);
         let cycleTime = this.props.factory.CycleTime;
         if (cycleTime === 0) {
             cycleTime = 30;
@@ -172,16 +171,15 @@ class FactoryCard extends React.Component<Props> {
 
     private computeMinimumRequiredCount() {
         const outputs = this.props.factory.Outputs;
-        const factoryState = this.props.factoryState;
+        const {factoryState, outputProductState} = this.props;
         const output = outputs[0];
         if (!output) {
             return 0;
         }
-        const productState = this.props.outputProductsById[output.ProductID];
-        if (!productState) {
+        if (!outputProductState) {
             return 0;
         }
-        const consumption = getConsumption(productState);
+        const consumption = getConsumption(outputProductState);
         let cycleTime = this.props.factory.CycleTime;
         if (cycleTime === 0) {
             cycleTime = 30;

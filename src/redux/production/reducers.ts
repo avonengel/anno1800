@@ -4,7 +4,7 @@ import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
 import {FactoryState} from "./types";
 import {getFactoryById} from "../../data/factories";
-import {getFactoryStateById} from "../selectors";
+import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 
@@ -77,7 +77,7 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
     if (isActionOf([updateFactoryCount, updateFactoryProductivity], action)) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId
-        const factoryState = getFactoryStateById(state, islandId, factoryId);
+        const factoryState = getFactoryStateByIdOrDefault(state, islandId, factoryId);
         const factoryDefinition = getFactoryById(factoryId);
         const products = {...state.products};
         const islandProductMap = {...products[islandId as number]};

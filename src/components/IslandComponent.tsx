@@ -130,7 +130,8 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     private shouldShow(factory: FactoryRaw): boolean {
-        return this.state.showAll || !!this.props.factoriesToShow.find(f => f === factory);
+
+        return this.state.showAll || this.props.factoriesToShow.includes(factory);
     }
 
     createOnHouseChange(level: string): (houses: number) => void {
