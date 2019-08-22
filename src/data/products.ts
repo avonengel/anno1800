@@ -5,3 +5,11 @@ export interface Product {
     ID: number;
     Name: string;
 }
+export function getProductById(id: number): Product {
+    for(let p of Products) {
+        if (p.ID === id) {
+            return p;
+        }
+    }
+    return {ID: id, Name: "Unknown"};
+}

@@ -10,6 +10,7 @@ import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import {getPopulationLevelByName, POPULATION_LEVELS} from "../data/populations";
 import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
 import FactoryCard from "./FactoryCard";
+import TradeCard from "./TradeCard";
 
 interface ReactProps {
     islandId: number;
@@ -100,7 +101,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                             population={island.population[level].population}
                             onHouseChange={this.createOnHouseChange(level)}
                             onPopulationChange={this.createOnPopulationChange(level)}/>);
-        return <>
+        return <React.Fragment>
             <Typography variant="h3" align={"center"} gutterBottom>{island.name}</Typography>
             <Grid container spacing={1}>
                 {populationCards.map((card) =>
@@ -122,7 +123,9 @@ class IslandComponent extends React.Component<Props, OwnState> {
                         </Grid>
                     </Zoom>)}
             </Grid>
-        </>;
+            <Typography component="div" align={"center"} variant="h5">Trade</Typography>
+            <TradeCard tradeId={1}/>
+        </React.Fragment>;
     }
 
     private toggleVisibility() {

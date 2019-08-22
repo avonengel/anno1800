@@ -18,11 +18,16 @@ function newPopulationStateObject() {
 }
 
 export const initialState: IslandState = {
-    islandIds: [1],
+    islandIds: [1, 2],
     islandsById: {
         1: {
             id: 1,
             name: "Ditchwater",
+            population: newPopulationStateObject(),
+        },
+        2: {
+            id: 2,
+            name: "Bright Sands",
             population: newPopulationStateObject(),
         }
     }

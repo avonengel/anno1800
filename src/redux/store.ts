@@ -8,6 +8,7 @@ import {persistReducer, persistStore} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import {getType, isOfType} from "typesafe-actions";
 import {selectIsland} from "./islands/actions";
+import {initialTradeState, tradeReducer, TradeState} from "./trade/reducers";
 
 
 const composeEnhancers = composeWithDevTools({
@@ -20,6 +21,7 @@ export interface RootState {
     readonly products: { [islandId: number]: { [productId: number]: ProductState } }
     readonly factories: { [islandId: number]: { [factoryId: number]: FactoryState } },
     readonly selectedIsland: number,
+    readonly trades: TradeState,
 }
 
 const initialState = {
@@ -27,6 +29,7 @@ const initialState = {
     products: {},
     factories: {},
     selectedIsland: 1,
+    trades: initialTradeState
 };
 
 function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
@@ -41,6 +44,7 @@ function rootReducer(state: RootState | undefined = initialState, action: AnyAct
             };
         }
     }
+    state = tradeReducer(state, action);
     return state;
 }
 
