@@ -20,6 +20,7 @@ import {updateFactoryCount, updateFactoryProductivity} from "../redux/production
 import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
+import {Warning, Error} from "@material-ui/icons";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -56,11 +57,20 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
 };
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-function getConsumption(productState: ProductState): number {
+function getPopulationConsumption(productState: ProductState | undefined) {
+    if(productState === undefined) {
+        return 0;
+    }
     let consumption = 0;
     for (let level in productState.populationConsumers) {
         consumption += productState.populationConsumers[level];
     }
+    return consumption;
+}
+
+function getConsumption(productState: ProductState): number {
+    let consumption = 0;
+    consumption += getPopulationConsumption(productState);
     for (let factoryId in productState.factoryConsumers) {
         consumption += productState.factoryConsumers[factoryId];
     }
@@ -93,6 +103,14 @@ class FactoryCard extends React.Component<Props> {
     render() {
         const {factoryState, outputProductState} = this.props;
         const iconData = getIconData(this.props.factory.Name);
+        const production = outputProductState && getProduction(outputProductState) || 0;
+        const consumption = outputProductState && getConsumption(outputProductState) || 0;
+        let warnIcon = null;
+        if (production < consumption) {
+            warnIcon = <Error fontSize={"large"} color={"error"}/>
+        } else if (production * 0.9 < consumption && getPopulationConsumption(outputProductState) > 0) {
+            warnIcon = <Warning fontSize={"large"}/>;
+        }
         return (
             <Card>
                 <CardHeader
@@ -100,7 +118,8 @@ class FactoryCard extends React.Component<Props> {
                         iconData && <Avatar alt={this.props.factory.Name} src={iconData} />
                     }
                     title={this.props.factory.Name}
-                            titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
+                    action={warnIcon}
+                    titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
                 <CardContent>
                     <table>
                         <tbody>
@@ -139,10 +158,10 @@ class FactoryCard extends React.Component<Props> {
                         </tr>
                         <tr>
                             <td>
-                                {outputProductState && getProduction(outputProductState).toFixed(2) || 0} t/min
+                                {production.toFixed(2) || 0} t/min
                             </td>
                             <td>
-                                {outputProductState && getConsumption(outputProductState).toFixed(2) || 0} t/min
+                                {consumption.toFixed(2) || 0} t/min
                             </td>
                         </tr>
                         </tbody>
