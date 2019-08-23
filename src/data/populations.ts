@@ -26,7 +26,9 @@ export const ENGINEERS = "Engineers";
 export const ARTISANS = "Artisans";
 export const WORKERS = "Workers";
 export const FARMERS = "Farmers";
-export const POPULATION_LEVELS = [FARMERS, WORKERS, ARTISANS, ENGINEERS, INVESTORS, JORNALEROS, OBREROS];
+export const NEW_WORLD_POPULATION_LEVELS = [JORNALEROS, OBREROS];
+export const OLD_WORLD_POPULATION_LEVELS = [FARMERS, WORKERS, ARTISANS, ENGINEERS, INVESTORS];
+export const POPULATION_LEVELS = [...OLD_WORLD_POPULATION_LEVELS, ...NEW_WORLD_POPULATION_LEVELS];
 
 export function getPopulationLevelByName(name: string) {
     return RAW_DATA.find(raw => raw.Name === name);

@@ -7,10 +7,16 @@ import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {Visibility, VisibilityOff} from "@material-ui/icons";
 import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
-import {getPopulationLevelByName, POPULATION_LEVELS} from "../data/populations";
-import {ALL_FACTORIES, FactoryRaw} from "../data/factories";
+import {
+    getPopulationLevelByName,
+    NEW_WORLD_POPULATION_LEVELS,
+    OLD_WORLD_POPULATION_LEVELS,
+    POPULATION_LEVELS
+} from "../data/populations";
+import {ALL_FACTORIES, FactoryRaw, getFactoryById} from "../data/factories";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
+import {params} from "../data/params_2019-04-17_full";
 
 interface ReactProps {
     islandId: number;
@@ -96,14 +102,21 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
     render() {
         const {island} = this.props;
-        const populationCards = POPULATION_LEVELS.map((level) =>
-            <PopulationCard key={level} level={level} houses={island.population[level].houses}
-                            population={island.population[level].population}
-                            onHouseChange={this.createOnHouseChange(level)}
-                            onPopulationChange={this.createOnPopulationChange(level)}/>);
+        const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
+        const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
+        const populationDecided = isOldWorld !== isNewWorld;
+        let populationCards;
+        if (populationDecided && isOldWorld) {
+            populationCards = OLD_WORLD_POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
+        } else if (populationDecided && isNewWorld) {
+            populationCards = NEW_WORLD_POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
+        } else {
+            populationCards = POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
+        }
+
         return <React.Fragment>
             <Typography variant="h3" align={"center"} gutterBottom>{island.name}</Typography>
-            <Grid container spacing={1}>
+            <Grid container spacing={1} justify={"center"}>
                 {populationCards.map((card) =>
                     (<Grid item xs={6} md={3} lg={2} key={card.props.level}>
                         {card}
@@ -116,7 +129,23 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </IconButton>
             </div>
             <Grid container spacing={1}>
-                {ALL_FACTORIES.map((factory) =>
+                {/*TODO: clean this up, get better source data*/}
+                {params.factories
+                    .map((factory) => getFactoryById(factory.guid))
+                    .filter((factory) => !!factory)
+                    .filter((factory) => {
+                        if (factory.IsOldWorld !== factory.IsNewWorld) {
+                            if (isOldWorld) {
+                                return factory.IsOldWorld;
+                            }
+                            if (isNewWorld) {
+                                return factory.IsNewWorld;
+                            }
+                        }
+                        return true;
+                    })
+                    .filter((factory) => factory.Outputs.length > 0)
+                    .map((factory) =>
                     <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
                         <Grid item xs={6} md={3} lg={2}>
                             <FactoryCard factory={factory} islandId={island.id}/>
@@ -126,6 +155,20 @@ class IslandComponent extends React.Component<Props, OwnState> {
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
             <TradeCard tradeId={1}/>
         </React.Fragment>;
+    }
+
+    private hasPopulation(levelNames: string[]) {
+        return levelNames.find(levelName => {
+            const populationState = this.props.island.population[levelName];
+            return populationState && populationState.population > 0;
+        });
+    }
+
+    private renderPopulationCard(level: string) {
+        return <PopulationCard key={level} level={level} houses={this.props.island.population[level].houses}
+                               population={this.props.island.population[level].population}
+                               onHouseChange={this.createOnHouseChange(level)}
+                               onPopulationChange={this.createOnPopulationChange(level)}/>;
     }
 
     private toggleVisibility() {
