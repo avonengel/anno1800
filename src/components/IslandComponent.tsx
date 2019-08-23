@@ -128,7 +128,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     {this.state.showAll ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>
             </div>
-            <Grid container spacing={1}>
+            <Grid container spacing={1} justify={"center"}>
                 {/*TODO: clean this up, get better source data*/}
                 {params.factories
                     .map((factory) => getFactoryById(factory.guid))
