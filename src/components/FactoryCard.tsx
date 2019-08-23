@@ -67,6 +67,14 @@ function getConsumption(productState: ProductState): number {
     return consumption;
 }
 
+function getProduction(productState: ProductState): number {
+    let production = 0;
+    for (let factoryId in productState.producers) {
+        production += productState.producers[factoryId];
+    }
+    return production;
+}
+
 
 function getIconData(name: string) {
     for (let factory of params.factories) {
@@ -83,7 +91,7 @@ function getIconData(name: string) {
 class FactoryCard extends React.Component<Props> {
 
     render() {
-        const {factoryState} = this.props;
+        const {factoryState, outputProductState} = this.props;
         const iconData = getIconData(this.props.factory.Name);
         return (
             <Card>
@@ -127,6 +135,14 @@ class FactoryCard extends React.Component<Props> {
                             </td>
                             <td>
                                 {"" + this.computeMinimumRequiredCount()}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {outputProductState && getProduction(outputProductState).toFixed(2) || 0} t/min
+                            </td>
+                            <td>
+                                {outputProductState && getConsumption(outputProductState).toFixed(2) || 0} t/min
                             </td>
                         </tr>
                         </tbody>
