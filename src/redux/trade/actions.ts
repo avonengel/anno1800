@@ -7,7 +7,7 @@ import {
     UPDATE_TRADE_TONS_PER_MINUTE
 } from "./constants";
 
-export const addTrade = createCustomAction(ADD_TRADE, type => () => ({type}));
+export const addTrade = createStandardAction(ADD_TRADE)<number>();
 
 export const updateTradeIslands = createCustomAction(UPDATE_TRADE_ISLANDS,
     type => (tradeId: number, fromIslandId: number, toIslandId: number) => ({

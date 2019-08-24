@@ -1,5 +1,5 @@
 import {isActionOf} from "typesafe-actions";
-import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "./actions";
+import {addTrade, deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "./actions";
 import {AnyAction} from "redux";
 import {RootState} from "../store";
 
@@ -64,6 +64,23 @@ export function tradeReducer(state: RootState, action: AnyAction) {
         return {
             ...state,
             trades: trades
+        }
+    } else if (isActionOf(addTrade, action)) {
+        const trades = {...state.trades};
+        let maxId = 0;
+        for (let tradeId in trades) {
+            // TODO: introduce allTradeIds: number[] instead of this BS
+            maxId = Math.max(maxId, Number(tradeId));
+        }
+        trades[maxId + 1] = {
+            productId: 0,
+            toIslandId: 0,
+            fromIslandId: action.payload,
+            tonsPerMinute: 0,
+        };
+        return {
+            ...state,
+            trades
         }
     }
     return state;

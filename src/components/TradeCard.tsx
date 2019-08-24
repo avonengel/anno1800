@@ -11,7 +11,6 @@ import {
     CardHeader,
     createStyles,
     FormControl,
-    Grid,
     IconButton,
     InputLabel,
     MenuItem,
@@ -21,7 +20,7 @@ import {
     WithStyles,
     withStyles
 } from "@material-ui/core";
-import {CompareArrows, Delete, Edit} from "@material-ui/icons";
+import {CompareArrows, Delete} from "@material-ui/icons";
 import {params} from '../data/params_2019-04-17_full';
 import {getProductById} from "../data/products";
 import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
@@ -97,6 +96,7 @@ class TradeCard extends React.Component<Props> {
     private onTonsPerMinuteChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.props.updateTonsPerMinute(event.target.valueAsNumber);
     }
+
     private onDelete(event: React.MouseEvent) {
         this.props.delete();
     }
@@ -106,7 +106,7 @@ class TradeCard extends React.Component<Props> {
         const productName = getProductById(productId).Name;
         const fromIsland = this.props.islandState.islandsById[fromIslandId];
         const toIsland = this.props.islandState.islandsById[toIslandId];
-        return `${productName} ${fromIsland? fromIsland.name.substr(0,3) : '?'} - ${toIsland? toIsland.name.substr(0,3) : '?'}`
+        return `${productName} ${fromIsland ? fromIsland.name.substr(0, 3) : '?'} - ${toIsland ? toIsland.name.substr(0, 3) : '?'}`
     }
 
     render() {
@@ -114,72 +114,68 @@ class TradeCard extends React.Component<Props> {
         const product = getProductById(trade.productId);
         const otherIslandId = thisIslandId === trade.fromIslandId ? trade.toIslandId : trade.fromIslandId;
         return (
-            <Grid container spacing={1}>
-                <Grid item xs={3}>
-                    <Card className={classes.card}>
-                        <CardHeader
-                            avatar={
-                                <Avatar aria-label={product.Name} className={classes.avatar}
-                                        src={getIconData(trade.productId)}/>
+            <Card className={classes.card}>
+                <CardHeader
+                    avatar={
+                        <Avatar aria-label={product.Name} className={classes.avatar}
+                                src={getIconData(trade.productId)}/>
+                    }
+                    title={this.generateTitle()}
+                />
+                <CardContent>
+                    <Button variant={"outlined"} size={"medium"}
+                            color={"inherit"}
+                            onClick={this.handleImExportToggle.bind(this)}>
+                        <CompareArrows className={classes.buttonIcon}/>
+                        {trade.fromIslandId === thisIslandId ? "Export" : "Import"}
+                    </Button>
+                    <FormControl className={classes.formControl} fullWidth>
+                        <InputLabel htmlFor={"productSelect"}>Product</InputLabel>
+                        <Select
+                            fullWidth
+                            value={trade.productId}
+                            onChange={this.handleChangeProduct.bind(this)}
+                            inputProps={{
+                                name: 'product',
+                                id: 'productSelect',
+                            }}>
+                            {
+                                params.products.map(p => (
+                                    <MenuItem value={p.guid} key={p.guid}>{p.name}</MenuItem>
+                                ))
                             }
-                            title={this.generateTitle()}
-                        />
-                        <CardContent>
-                            <Button variant={"outlined"} size={"medium"}
-                                    color={"inherit"}
-                                    onClick={this.handleImExportToggle.bind(this)}>
-                                <CompareArrows className={classes.buttonIcon}/>
-                                {trade.fromIslandId === thisIslandId ? "Export" : "Import"}
-                            </Button>
-                            <FormControl className={classes.formControl} fullWidth>
-                                <InputLabel htmlFor={"productSelect"}>Product</InputLabel>
-                                <Select
-                                    fullWidth
-                                    value={trade.productId}
-                                    onChange={this.handleChangeProduct.bind(this)}
-                                    inputProps={{
-                                        name: 'product',
-                                        id: 'productSelect',
-                                    }}>
-                                    {
-                                        params.products.map(p => (
-                                            <MenuItem value={p.guid} key={p.guid}>{p.name}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                            <FormControl className={classes.formControl} fullWidth>
-                                <InputLabel htmlFor={"islandSelect"}>Island</InputLabel>
-                                <Select
-                                    fullWidth
-                                    value={otherIslandId}
-                                    onChange={this.handleChangeIsland.bind(this)}
-                                    inputProps={{
-                                        name: 'island',
-                                        id: 'islandSelect',
-                                    }}>
-                                    {
-                                        islandState.islandIds.filter(islandId => islandId !== thisIslandId).map(islandId => (
-                                            <MenuItem value={islandId}
-                                                      key={islandId}>{islandState.islandsById[islandId].name}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                            <FormControl className={classes.formControl} fullWidth>
-                                <TextField fullWidth label={"tons / minute"} type={"number"} inputProps={{min: 0}}
-                                           value={trade.tonsPerMinute}
-                                           onChange={this.onTonsPerMinuteChange.bind(this)}/>
-                            </FormControl>
-                        </CardContent>
-                        <CardActions disableSpacing>
-                            <IconButton style={{marginLeft: 'auto'}} aria-label="Delete" onClick={this.onDelete.bind(this)}>
-                                <Delete/>
-                            </IconButton>
-                        </CardActions>
-                    </Card>
-                </Grid>
-            </Grid>
+                        </Select>
+                    </FormControl>
+                    <FormControl className={classes.formControl} fullWidth>
+                        <InputLabel htmlFor={"islandSelect"}>Island</InputLabel>
+                        <Select
+                            fullWidth
+                            value={otherIslandId}
+                            onChange={this.handleChangeIsland.bind(this)}
+                            inputProps={{
+                                name: 'island',
+                                id: 'islandSelect',
+                            }}>
+                            {
+                                islandState.islandIds.filter(islandId => islandId !== thisIslandId).map(islandId => (
+                                    <MenuItem value={islandId}
+                                              key={islandId}>{islandState.islandsById[islandId].name}</MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </FormControl>
+                    <FormControl className={classes.formControl} fullWidth>
+                        <TextField fullWidth label={"tons / minute"} type={"number"} inputProps={{min: 0}}
+                                   value={trade.tonsPerMinute}
+                                   onChange={this.onTonsPerMinuteChange.bind(this)}/>
+                    </FormControl>
+                </CardContent>
+                <CardActions disableSpacing>
+                    <IconButton style={{marginLeft: 'auto'}} aria-label="Delete" onClick={this.onDelete.bind(this)}>
+                        <Delete/>
+                    </IconButton>
+                </CardActions>
+            </Card>
         );
     }
 }

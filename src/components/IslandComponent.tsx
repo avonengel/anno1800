@@ -1,11 +1,11 @@
 import * as React from "react";
-import {Grid, IconButton, Typography, Zoom} from "@material-ui/core";
+import {createStyles, Fab, Grid, IconButton, Theme, Typography, WithStyles, withStyles, Zoom} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
-import {Visibility, VisibilityOff} from "@material-ui/icons";
+import {Add, Visibility, VisibilityOff} from "@material-ui/icons";
 import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import {
     getPopulationLevelByName,
@@ -17,8 +17,17 @@ import {ALL_FACTORIES, FactoryRaw, getFactoryById} from "../data/factories";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
 import {params} from "../data/params_2019-04-17_full";
+import {addTrade} from "../redux/trade/actions";
 
-interface ReactProps {
+
+const styles = (theme: Theme) => createStyles({
+    addTradeItem: {
+        alignSelf: "center",
+        textAlign: "center"
+    },
+});
+
+interface ReactProps extends WithStyles<typeof styles> {
     islandId: number;
 }
 
@@ -82,6 +91,9 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
         },
         onPopulationChange: (level: string, population: number) => {
             dispatch(updatePopulation(props.islandId, level, population));
+        },
+        addTrade: () => {
+            dispatch(addTrade(props.islandId));
         }
     };
 };
@@ -101,8 +113,12 @@ class IslandComponent extends React.Component<Props, OwnState> {
         };
     }
 
+    private handleAddTrade() {
+        this.props.addTrade();
+    }
+
     render() {
-        const {island, tradeIds} = this.props;
+        const {island, tradeIds, classes} = this.props;
         const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
         const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
         const populationDecided = isOldWorld !== isNewWorld;
@@ -155,7 +171,16 @@ class IslandComponent extends React.Component<Props, OwnState> {
             </Grid>
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
             <Grid container spacing={1} justify={"center"}>
-                {tradeIds.map( tradeId => <TradeCard tradeId={tradeId}/>)}
+                {tradeIds.map(tradeId =>
+                    <Grid item xs={3} key={tradeId}>
+                        <TradeCard tradeId={tradeId}/>
+                    </Grid>
+                )}
+                <Grid item xs={3} classes={{item: classes.addTradeItem}}>
+                    <Fab color={"primary"} aria-label={"Add trade"} onClick={this.handleAddTrade.bind(this)}>
+                        <Add/>
+                    </Fab>
+                </Grid>
             </Grid>
         </React.Fragment>;
     }
@@ -196,4 +221,4 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(IslandComponent);
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(IslandComponent));
