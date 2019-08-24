@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Grid, IconButton, Typography, Zoom} from "@material-ui/core";
 import {connect} from "react-redux";
-import {getIslandById, getProductStateById} from "../redux/selectors";
+import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
@@ -26,6 +26,7 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     return {
         island: getIslandById(state, reactProps.islandId),
         factoriesToShow: factoriesToShow(state, reactProps),
+        tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
     };
 };
 
@@ -101,7 +102,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     render() {
-        const {island} = this.props;
+        const {island, tradeIds} = this.props;
         const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
         const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
         const populationDecided = isOldWorld !== isNewWorld;
@@ -146,14 +147,16 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     })
                     .filter((factory) => factory.Outputs.length > 0)
                     .map((factory) =>
-                    <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
-                        <Grid item xs={6} md={3} lg={2}>
-                            <FactoryCard factory={factory} islandId={island.id}/>
-                        </Grid>
-                    </Zoom>)}
+                        <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
+                            <Grid item xs={6} md={3} lg={2}>
+                                <FactoryCard factory={factory} islandId={island.id}/>
+                            </Grid>
+                        </Zoom>)}
             </Grid>
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
-            <TradeCard tradeId={1}/>
+            <Grid container spacing={1} justify={"center"}>
+                {tradeIds.map( tradeId => <TradeCard tradeId={tradeId}/>)}
+            </Grid>
         </React.Fragment>;
     }
 

@@ -2,11 +2,29 @@ import * as React from "react";
 import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
-import {Avatar, Card, CardActions, CardContent, CardHeader, createStyles, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, Theme, Typography, WithStyles, withStyles} from "@material-ui/core";
-import {Delete, Edit} from "@material-ui/icons";
+import {
+    Avatar,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    createStyles,
+    FormControl,
+    Grid,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Theme,
+    WithStyles,
+    withStyles
+} from "@material-ui/core";
+import {CompareArrows, Delete, Edit} from "@material-ui/icons";
 import {params} from '../data/params_2019-04-17_full';
 import {getProductById} from "../data/products";
-import {updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
+import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
 
 const styles = (theme: Theme) => createStyles({
     card: {
@@ -16,8 +34,11 @@ const styles = (theme: Theme) => createStyles({
         // backgroundColor: red[500],
     },
     formControl: {
-        margin: theme.spacing(1),
+        marginTop: theme.spacing(1),
     },
+    buttonIcon: {
+        marginRight: theme.spacing(1)
+    }
 });
 
 interface OwnProps extends WithStyles<typeof styles> {
@@ -35,7 +56,9 @@ const mapStateToProps = (state: RootState, ownProps: OwnProps) => {
 const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
     return {
         updateTradeProduct: (productId: number) => dispatch(updateTradeProduct(props.tradeId, productId)),
-        updateTradeIslands: (islandId1: number, islandId2: number) => dispatch(updateTradeIslands(props.tradeId, islandId1, islandId2))
+        updateTradeIslands: (fromIslandId: number, toIslandId: number) => dispatch(updateTradeIslands(props.tradeId, fromIslandId, toIslandId)),
+        updateTonsPerMinute: (tonsPerMinute: number) => dispatch(updateTonsPerMinute(props.tradeId, tonsPerMinute)),
+        delete: () => dispatch(deleteTrade(props.tradeId)),
     };
 };
 type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -54,37 +77,60 @@ function getIconData(productId: number) {
 
 class TradeCard extends React.Component<Props> {
 
-    constructor(props: Props) {
-        super(props);
-    }
-
     handleChangeProduct(event: React.ChangeEvent<{ name?: string; value: unknown }>) {
         this.props.updateTradeProduct(event.target.value as number);
     }
 
     handleChangeIsland(event: React.ChangeEvent<{ name?: string; value: unknown }>) {
-            if (this.props.trade.islandId1 === this.props.thisIslandId) {
-                this.props.updateTradeIslands(this.props.thisIslandId, event.target.value as number);
-            } else {
-                this.props.updateTradeIslands(event.target.value as number, this.props.thisIslandId);
-            }
+        if (this.props.trade.fromIslandId === this.props.thisIslandId) {
+            this.props.updateTradeIslands(this.props.thisIslandId, event.target.value as number);
+        } else {
+            this.props.updateTradeIslands(event.target.value as number, this.props.thisIslandId);
+        }
+    }
+
+    handleImExportToggle(event: React.MouseEvent) {
+        const {fromIslandId, toIslandId} = this.props.trade;
+        this.props.updateTradeIslands(toIslandId, fromIslandId);
+    }
+
+    private onTonsPerMinuteChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.props.updateTonsPerMinute(event.target.valueAsNumber);
+    }
+    private onDelete(event: React.MouseEvent) {
+        this.props.delete();
+    }
+
+    private generateTitle(): string {
+        const {productId, fromIslandId, toIslandId} = this.props.trade;
+        const productName = getProductById(productId).Name;
+        const fromIsland = this.props.islandState.islandsById[fromIslandId];
+        const toIsland = this.props.islandState.islandsById[toIslandId];
+        return `${productName} ${fromIsland? fromIsland.name.substr(0,3) : '?'} - ${toIsland? toIsland.name.substr(0,3) : '?'}`
     }
 
     render() {
         const {classes, islandState, trade, thisIslandId} = this.props;
         const product = getProductById(trade.productId);
-        const otherIslandId = thisIslandId === trade.islandId1 ? trade.islandId2 : trade.islandId1;
+        const otherIslandId = thisIslandId === trade.fromIslandId ? trade.toIslandId : trade.fromIslandId;
         return (
             <Grid container spacing={1}>
                 <Grid item xs={3}>
                     <Card className={classes.card}>
                         <CardHeader
                             avatar={
-                                <Avatar aria-label={product.Name} className={classes.avatar} src={getIconData(trade.productId)}/>
+                                <Avatar aria-label={product.Name} className={classes.avatar}
+                                        src={getIconData(trade.productId)}/>
                             }
-                            title="Shrimp and Chorizo Paella"
+                            title={this.generateTitle()}
                         />
                         <CardContent>
+                            <Button variant={"outlined"} size={"medium"}
+                                    color={"inherit"}
+                                    onClick={this.handleImExportToggle.bind(this)}>
+                                <CompareArrows className={classes.buttonIcon}/>
+                                {trade.fromIslandId === thisIslandId ? "Export" : "Import"}
+                            </Button>
                             <FormControl className={classes.formControl} fullWidth>
                                 <InputLabel htmlFor={"productSelect"}>Product</InputLabel>
                                 <Select
@@ -114,18 +160,21 @@ class TradeCard extends React.Component<Props> {
                                     }}>
                                     {
                                         islandState.islandIds.filter(islandId => islandId !== thisIslandId).map(islandId => (
-                                            <MenuItem value={islandId} key={islandId}>{islandState.islandsById[islandId].name}</MenuItem>
+                                            <MenuItem value={islandId}
+                                                      key={islandId}>{islandState.islandsById[islandId].name}</MenuItem>
                                         ))
                                     }
                                 </Select>
                             </FormControl>
+                            <FormControl className={classes.formControl} fullWidth>
+                                <TextField fullWidth label={"tons / minute"} type={"number"} inputProps={{min: 0}}
+                                           value={trade.tonsPerMinute}
+                                           onChange={this.onTonsPerMinuteChange.bind(this)}/>
+                            </FormControl>
                         </CardContent>
                         <CardActions disableSpacing>
-                            <IconButton style={{marginLeft: 'auto'}} aria-label="Delete">
+                            <IconButton style={{marginLeft: 'auto'}} aria-label="Delete" onClick={this.onDelete.bind(this)}>
                                 <Delete/>
-                            </IconButton>
-                            <IconButton aria-label="Edit">
-                                <Edit/>
                             </IconButton>
                         </CardActions>
                     </Card>
