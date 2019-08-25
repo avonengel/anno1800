@@ -74,6 +74,9 @@ function getConsumption(productState: ProductState): number {
     for (let factoryId in productState.factoryConsumers) {
         consumption += productState.factoryConsumers[factoryId];
     }
+    for (let tradeId in productState.exports) {
+        consumption += productState.exports[tradeId];
+    }
     return consumption;
 }
 
@@ -81,6 +84,9 @@ function getProduction(productState: ProductState): number {
     let production = 0;
     for (let factoryId in productState.producers) {
         production += productState.producers[factoryId];
+    }
+    for (let tradeId in productState.imports) {
+        production += productState.imports[tradeId];
     }
     return production;
 }

@@ -74,6 +74,9 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                 for (let factoryId in productState.factoryConsumers) {
                     consumptionPerMinute += productState.factoryConsumers[factoryId];
                 }
+                for (let tradeId in productState.exports) {
+                    consumptionPerMinute += productState.exports[tradeId];
+                }
                 if (consumptionPerMinute) {
                     factoriesToShow.push(factory);
                     continue factoryLoop;

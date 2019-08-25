@@ -30,6 +30,8 @@ const initialProductState = {
     producers: {},
     factoryConsumers: {},
     populationConsumers: {},
+    exports: {},
+    imports: {},
 };
 
 export function getProductStateByIdOrDefault(store: RootState, islandId: number, productId: number): Readonly<ProductState> {

@@ -51,4 +51,6 @@ export interface ProductState {
     factoryConsumers: { [factoryId: number]: Consumption };
     populationConsumers: { [level: string] : Consumption};
     producers: { [factoryId: number]: Production };
+    exports: { [tradeId: number]: Consumption};
+    imports: { [tradeId: number]: Production};
 }
