@@ -12,12 +12,6 @@ export interface Trade {
 
 export type TradeState = { [tradeId: number]: Trade };
 export const initialTradeState: TradeState = {
-    1: {
-        fromIslandId: 1,
-        toIslandId: 2,
-        productId: 120042,
-        tonsPerMinute: 0,
-    }
 };
 
 export function tradeReducer(state: RootState, action: AnyAction) {

@@ -25,11 +25,6 @@ export const initialState: IslandState = {
             name: "Ditchwater",
             population: newPopulationStateObject(),
         },
-        2: {
-            id: 2,
-            name: "Bright Sands",
-            population: newPopulationStateObject(),
-        }
     }
 };
 
