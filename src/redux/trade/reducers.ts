@@ -45,10 +45,12 @@ export function tradeReducer(state: RootState, action: AnyAction) {
         }
         if (previousTrade && trade.productId && previousTrade.toIslandId !== action.payload.toIslandId) {
             // delete the old import
-            products[previousTrade.toIslandId] = {...products[previousTrade.toIslandId]};
-            products[previousTrade.toIslandId][previousTrade.productId] = {...products[previousTrade.toIslandId][previousTrade.productId]};
-            const {[action.payload.tradeId]: _, ...newImports} = products[previousTrade.toIslandId][previousTrade.productId].imports;
-            products[previousTrade.toIslandId][previousTrade.productId].imports = newImports;
+            if (!!previousTrade.toIslandId) {
+                products[previousTrade.toIslandId] = {...products[previousTrade.toIslandId]};
+                products[previousTrade.toIslandId][previousTrade.productId] = {...products[previousTrade.toIslandId][previousTrade.productId]};
+                const {[action.payload.tradeId]: _, ...newImports} = products[previousTrade.toIslandId][previousTrade.productId].imports;
+                products[previousTrade.toIslandId][previousTrade.productId].imports = newImports;
+            }
             // create the new import
             products[action.payload.toIslandId] = {...products[action.payload.toIslandId]};
             const newProductState = {...products[action.payload.toIslandId][trade.productId]};
