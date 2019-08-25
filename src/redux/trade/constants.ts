@@ -1,5 +1,0 @@
-export const ADD_TRADE = 'trades/ADD_TRADE';
-export const DELETE_TRADE = 'trades/DELETE_TRADE';
-export const UPDATE_TRADE_ISLANDS = 'trades/UPDATE_TRADE_ISLANDS';
-export const UPDATE_TRADE_PRODUCT = 'trades/UPDATE_TRADE_PRODUCT';
-export const UPDATE_TRADE_TONS_PER_MINUTE = 'trades/UPDATE_TRADE_TONS_PER_MINUTE';
