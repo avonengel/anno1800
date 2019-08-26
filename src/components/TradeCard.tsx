@@ -47,7 +47,7 @@ interface OwnProps extends WithStyles<typeof styles> {
 const mapStateToProps = (state: RootState, ownProps: OwnProps) => {
     return {
         islandState: state.island,
-        trade: state.trades[ownProps.tradeId],
+        trade: state.trades.tradesById[ownProps.tradeId],
         thisIslandId: state.selectedIsland,
     };
 };

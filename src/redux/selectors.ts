@@ -1,7 +1,6 @@
 import {RootState} from "./store";
 import {Island} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
-import {Trade} from "./trade/reducers";
 
 export const getIslandById = (store: RootState, islandId: number): Readonly<Island> => {
     return store.island.islandsById[islandId];
@@ -44,13 +43,7 @@ export function getProductStateById(store: RootState, islandId: number, productI
 }
 
 export function getTradeIdsForIslandId(store: RootState, islandId: number): number[] {
-    const result: number[] = [];
-    for (let tradeId in store.trades as {[tradeId: number] : Trade}) {
-        const trade = store.trades[tradeId];
-        if (trade.fromIslandId === islandId || trade.toIslandId === islandId) {
-            // FIXME wtf, TypeScript?!
-            result.push(tradeId as unknown as number);
-        }
-    }
-    return result;
+    return store.trades.allTradeIds.filter(
+        (tradeId) => store.trades.tradesById[tradeId].toIslandId === islandId || store.trades.tradesById[tradeId].fromIslandId === islandId
+    );
 }

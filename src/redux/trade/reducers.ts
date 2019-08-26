@@ -10,13 +10,19 @@ export interface Trade {
     tonsPerMinute: number,
 }
 
-export type TradeState = { [tradeId: number]: Trade };
+export type TradeState = {
+    tradesById: { [tradeId: number]: Trade };
+    allTradeIds: number[];
+};
+
 export const initialTradeState: TradeState = {
+    tradesById: {},
+    allTradeIds: [],
 };
 
 export function tradeReducer(state: RootState, action: AnyAction) {
     if (isActionOf(updateTradeIslands, action)) {
-        const previousTrade = state.trades[action.payload.tradeId];
+        const previousTrade = state.trades.tradesById[action.payload.tradeId];
         const trade = {
             ...previousTrade,
             fromIslandId: action.payload.fromIslandId,
@@ -24,23 +30,19 @@ export function tradeReducer(state: RootState, action: AnyAction) {
         };
         const products = {...state.products};
         if (previousTrade && trade.productId && previousTrade.fromIslandId !== action.payload.fromIslandId) {
-            // delete the old export
-            const productState = {...products[previousTrade.fromIslandId][previousTrade.productId]};
-            const {[action.payload.tradeId]: _, ...newExports} = productState.exports;
-            productState.exports = newExports;
-            products[previousTrade.fromIslandId] = {
-                ...products[previousTrade.fromIslandId],
-                [previousTrade.productId]: productState,
-            };
-            // create the new export
-            const newProductState = {...products[action.payload.fromIslandId][trade.productId]};
-            newProductState.exports = {
-                ...newProductState.exports,
-                [action.payload.tradeId]: trade.tonsPerMinute,
-            };
-            products[trade.fromIslandId] = {
-                ...products[trade.fromIslandId],
-                [trade.productId]: newProductState,
+            if (previousTrade.fromIslandId) {
+                // delete the old export
+                products[previousTrade.fromIslandId] = {...products[previousTrade.fromIslandId]};
+                products[previousTrade.fromIslandId][trade.productId] = {...products[previousTrade.fromIslandId][trade.productId]};
+                const {[action.payload.tradeId]: _, ...newExports} = products[previousTrade.fromIslandId][trade.productId].exports;
+                products[previousTrade.fromIslandId][trade.productId].exports = newExports;
+            }
+            if (action.payload.fromIslandId) {
+                // create the new export
+                products[action.payload.fromIslandId] = {...products[action.payload.fromIslandId]};
+                products[action.payload.fromIslandId][trade.productId] = {...products[action.payload.fromIslandId][trade.productId]};
+                products[action.payload.fromIslandId][trade.productId].exports = {...products[action.payload.fromIslandId][trade.productId].exports};
+                products[action.payload.fromIslandId][trade.productId].exports[action.payload.tradeId] = trade.tonsPerMinute;
             }
         }
         if (previousTrade && trade.productId && previousTrade.toIslandId !== action.payload.toIslandId) {
@@ -51,16 +53,18 @@ export function tradeReducer(state: RootState, action: AnyAction) {
                 const {[action.payload.tradeId]: _, ...newImports} = products[previousTrade.toIslandId][previousTrade.productId].imports;
                 products[previousTrade.toIslandId][previousTrade.productId].imports = newImports;
             }
-            // create the new import
-            products[action.payload.toIslandId] = {...products[action.payload.toIslandId]};
-            const newProductState = {...products[action.payload.toIslandId][trade.productId]};
-            newProductState.imports = {
-                ...newProductState.imports,
-                [action.payload.tradeId]: trade.tonsPerMinute,
-            };
-            products[trade.toIslandId] = {
-                ...products[trade.toIslandId],
-                [trade.productId]: newProductState,
+            if(action.payload.toIslandId) {
+                // create the new import
+                products[action.payload.toIslandId] = {...products[action.payload.toIslandId]};
+                const newProductState = {...products[action.payload.toIslandId][trade.productId]};
+                newProductState.imports = {
+                    ...newProductState.imports,
+                    [action.payload.tradeId]: trade.tonsPerMinute,
+                };
+                products[trade.toIslandId] = {
+                    ...products[trade.toIslandId],
+                    [trade.productId]: newProductState,
+                }
             }
         }
         return {
@@ -68,27 +72,33 @@ export function tradeReducer(state: RootState, action: AnyAction) {
             products,
             trades: {
                 ...state.trades,
-                [action.payload.tradeId]: trade
+                tradesById: {
+                    ...state.trades.tradesById,
+                    [action.payload.tradeId]: trade
+                }
             }
 
         };
     } else if (isActionOf(updateTradeProduct, action)) {
-        const previousTrade = state.trades[action.payload.tradeId];
+        const previousTrade = state.trades.tradesById[action.payload.tradeId];
         const trade = {
-            ...state.trades[action.payload.tradeId],
+            ...state.trades.tradesById[action.payload.tradeId],
             productId: action.payload.productId,
         };
         let products = state.products;
-        if (previousTrade && previousTrade.productId) {
+        if (previousTrade && trade.productId !== previousTrade.productId) {
             products = {...products};
             if (previousTrade.fromIslandId) {
                 const exportIslandProducts = {...products[previousTrade.fromIslandId]};
                 products[previousTrade.fromIslandId] = exportIslandProducts;
-                // delete the old export
-                const previousExportProductState = {...exportIslandProducts[previousTrade.productId]};
-                exportIslandProducts[previousTrade.productId] = previousExportProductState;
-                const {[action.payload.tradeId]: _, ...remainingPreviousExports} = previousExportProductState.exports;
-                previousExportProductState.exports = remainingPreviousExports;
+                if (previousTrade.productId) {
+                    // delete the old export
+                    const previousExportProductState = {...exportIslandProducts[previousTrade.productId]};
+                    exportIslandProducts[previousTrade.productId] = previousExportProductState;
+                    const {[action.payload.tradeId]: _, ...remainingPreviousExports} = previousExportProductState.exports;
+                    previousExportProductState.exports = remainingPreviousExports;
+                }
+
                 // create the new export
                 const newExportProductState = {...exportIslandProducts[trade.productId]};
                 exportIslandProducts[trade.productId] = newExportProductState;
@@ -100,11 +110,13 @@ export function tradeReducer(state: RootState, action: AnyAction) {
             if (previousTrade.toIslandId) {
                 const importIslandProducts = {...products[previousTrade.toIslandId]};
                 products[previousTrade.toIslandId] = importIslandProducts;
-                // delete the old import
-                const previousImportProductState = {...importIslandProducts[previousTrade.productId]};
-                importIslandProducts[previousTrade.productId] = previousImportProductState;
-                const {[action.payload.tradeId]: _remove, ...remainingPreviousImports} = previousImportProductState.imports;
-                previousImportProductState.imports = remainingPreviousImports;
+                if (previousTrade.productId) {
+                    // delete the old import
+                    const previousImportProductState = {...importIslandProducts[previousTrade.productId]};
+                    importIslandProducts[previousTrade.productId] = previousImportProductState;
+                    const {[action.payload.tradeId]: _remove, ...remainingPreviousImports} = previousImportProductState.imports;
+                    previousImportProductState.imports = remainingPreviousImports;
+                }
                 // create the new import
                 const newImportProductState = {...importIslandProducts[trade.productId]};
                 importIslandProducts[trade.productId] = newImportProductState;
@@ -119,13 +131,16 @@ export function tradeReducer(state: RootState, action: AnyAction) {
             products,
             trades: {
                 ...state.trades,
-                [action.payload.tradeId]: trade
+                tradesById: {
+                    ...state.trades.tradesById,
+                    [action.payload.tradeId]: trade
+                }
             }
         };
     } else if (isActionOf(updateTonsPerMinute, action)) {
-        const previousTrade = state.trades[action.payload.tradeId];
+        const previousTrade = state.trades.tradesById[action.payload.tradeId];
         const trade = {
-            ...state.trades[action.payload.tradeId],
+            ...state.trades.tradesById[action.payload.tradeId],
             tonsPerMinute: action.payload.tonsPerMinute
         };
         let products = state.products;
@@ -152,12 +167,16 @@ export function tradeReducer(state: RootState, action: AnyAction) {
             products,
             trades: {
                 ...state.trades,
-                [action.payload.tradeId]: trade
+                tradesById: {
+                    ...state.trades.tradesById,
+                    [action.payload.tradeId]: trade
+                }
             }
         };
     } else if (isActionOf(deleteTrade, action)) {
-        const previousTrade = state.trades[action.payload];
-        const {[action.payload]: tradeToDelete, ...trades} = state.trades;
+        const previousTrade = state.trades.tradesById[action.payload];
+        const {[action.payload]: tradeToDelete, ...tradesById} = state.trades.tradesById;
+        const allTradeIds = state.trades.allTradeIds.filter((tradeId) => tradeId !== action.payload);
         let products = state.products;
         if (previousTrade && previousTrade.productId) {
             products = {...products};
@@ -179,16 +198,19 @@ export function tradeReducer(state: RootState, action: AnyAction) {
         return {
             ...state,
             products,
-            trades: trades
+            trades: {
+                tradesById,
+                allTradeIds
+            }
         }
     } else if (isActionOf(addTrade, action)) {
-        const trades = {...state.trades};
+        const tradesById = {...state.trades.tradesById};
         let maxId = 0;
-        for (let tradeId in trades) {
-            // TODO: introduce allTradeIds: number[] instead of this BS
-            maxId = Math.max(maxId, Number(tradeId));
+        for (let tradeId of state.trades.allTradeIds) {
+            maxId = Math.max(maxId, tradeId);
         }
-        trades[maxId + 1] = {
+        const newTradeId = maxId + 1;
+        tradesById[newTradeId] = {
             productId: 0,
             toIslandId: 0,
             fromIslandId: action.payload,
@@ -196,7 +218,10 @@ export function tradeReducer(state: RootState, action: AnyAction) {
         };
         return {
             ...state,
-            trades
+            trades: {
+                tradesById,
+                allTradeIds: [...state.trades.allTradeIds, newTradeId]
+            }
         }
     }
     return state;
