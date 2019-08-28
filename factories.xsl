@@ -21,6 +21,7 @@
                                     or Template = 'FreeAreaBuilding')
                                     and Values/Building/AssociatedRegions!='']">
             <!-- Values/Building/AssociatedRegions is empty for buildings like "Edvard's Timber Yard" -->
+            <!-- FIXME buildings that exist in both worlds are really strangely modeled in the XML, see <BaseAssetGUID>1010266</BaseAssetGUID> <GUID>101260</GUID> <Name>agriculture_colony01_06 (Timber Yard)</Name>-->
             <xsl:apply-templates select="."/>
             <xsl:if test="not(position() = last())">
                 <xsl:text>,</xsl:text>
