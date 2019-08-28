@@ -15,7 +15,7 @@
         <xsl:for-each select="descendant::Asset[Template='FactoryBuilding7'
                                     or Template='FarmBuilding'
                                     or Template='HeavyFactoryBuilding'
-                                    or Template = 'PublicServiceBuilding'
+                                    or Template='HeavyFreeAreaBuilding'
                                     or Template = 'SlotFactoryBuilding7'
                                     or Template = 'FreeAreaBuilding']">
             <xsl:apply-templates select="."/>
