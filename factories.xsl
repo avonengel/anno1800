@@ -12,12 +12,14 @@
         <xsl:text>}&#xa;&#xa;</xsl:text>
         <xsl:text>const factoriesById: {[factoryId: number]: FactoryAsset } = </xsl:text>
         <xsl:text>{&#xa;</xsl:text>
-        <xsl:for-each select="descendant::Asset[Template='FactoryBuilding7'
+        <xsl:for-each select="descendant::Asset[(Template='FactoryBuilding7'
                                     or Template='FarmBuilding'
                                     or Template='HeavyFactoryBuilding'
                                     or Template='HeavyFreeAreaBuilding'
                                     or Template = 'SlotFactoryBuilding7'
-                                    or Template = 'FreeAreaBuilding']">
+                                    or Template = 'FreeAreaBuilding')
+                                    and Values/Building/AssociatedRegions!='']">
+            <!-- Values/Building/AssociatedRegions is empty for buildings like "Edvard's Timber Yard" -->
             <xsl:apply-templates select="."/>
             <xsl:if test="not(position() = last())">
                 <xsl:text>,</xsl:text>
