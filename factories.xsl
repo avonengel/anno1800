@@ -31,11 +31,10 @@
     <xsl:template match="//Asset">
         <xsl:text>  </xsl:text><xsl:value-of select="Values/Standard/GUID"/><xsl:text>: {</xsl:text>
         <xsl:text>name: "</xsl:text><xsl:value-of select="Values/Text/LocaText/English/Text"/><xsl:text>"</xsl:text>
-        <!--        <xsl:text>, "guid": "</xsl:text><xsl:value-of select="Values/Standard/GUID"/><xsl:text>"</xsl:text>-->
         <xsl:text>, associatedRegions: "</xsl:text><xsl:value-of select="Values/Building/AssociatedRegions"/><xsl:text>"</xsl:text>
         <xsl:apply-templates select="Values/FactoryBase" mode="population"/>
         <xsl:if test="Values/FactoryBase/CycleTime">
-            <xsl:text>, cycleTime: </xsl:text><xsl:value-of select="Values/FactoryBase/CycleTime"/><xsl:text></xsl:text>
+            <xsl:text>, cycleTime: </xsl:text><xsl:value-of select="Values/FactoryBase/CycleTime"/>
         </xsl:if>
         <xsl:text>}</xsl:text>
     </xsl:template>
