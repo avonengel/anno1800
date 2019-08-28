@@ -1,171 +1,93 @@
-const RAW_FACTORIES = [{"ID":101122,"Name":"Dynamite Shop","CycleTime":0,"Inputs":[],"Outputs":[],"IsOldWorld":false,"IsNewWorld":false},{"ID":100806,"Name":"Edvard's Timber Yard","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":120008,"Amount":1}],"IsOldWorld":false,"IsNewWorld":false},{"ID":100767,"Name":"Edvard's Church","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010350,"Amount":0}],"IsOldWorld":false,"IsNewWorld":false},{"ID":1010342,"Name":"Cigar Factory","CycleTime":0,"Inputs":[{"ProductID":1010252,"Amount":1},{"ProductID":1010242,"Amount":1}],"Outputs":[{"ProductID":1010259,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101266,"Name":"Poncho Darner","CycleTime":0,"Inputs":[{"ProductID":120036,"Amount":1}],"Outputs":[{"ProductID":120043,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010317,"Name":"Sugar Refinery","CycleTime":0,"Inputs":[{"ProductID":1010251,"Amount":1}],"Outputs":[{"ProductID":1010239,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101271,"Name":"Tortilla Maker","CycleTime":0,"Inputs":[{"ProductID":1010193,"Amount":1},{"ProductID":120034,"Amount":1}],"Outputs":[{"ProductID":120035,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101264,"Name":"Fried Plantain Kitchen","CycleTime":0,"Inputs":[{"ProductID":120042,"Amount":1},{"ProductID":120041,"Amount":1}],"Outputs":[{"ProductID":120033,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101252,"Name":"Coffee Roaster","CycleTime":0,"Inputs":[{"ProductID":120031,"Amount":1}],"Outputs":[{"ProductID":120032,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010341,"Name":"Chocolate Factory","CycleTime":0,"Inputs":[{"ProductID":1010254,"Amount":1},{"ProductID":1010239,"Amount":1}],"Outputs":[{"ProductID":1010258,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010340,"Name":"Rum Distillery","CycleTime":0,"Inputs":[{"ProductID":120008,"Amount":1},{"ProductID":1010251,"Amount":1}],"Outputs":[{"ProductID":1010257,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101273,"Name":"Bombín Weaver","CycleTime":0,"Inputs":[{"ProductID":1010240,"Amount":1},{"ProductID":120044,"Amount":1}],"Outputs":[{"ProductID":120037,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101415,"Name":"Felt Producer","CycleTime":0,"Inputs":[{"ProductID":120036,"Amount":1}],"Outputs":[{"ProductID":120044,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010318,"Name":"Cotton Mill","CycleTime":0,"Inputs":[{"ProductID":1010253,"Amount":1}],"Outputs":[{"ProductID":1010240,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101262,"Name":"Fish Oil Factory","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":120042,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010339,"Name":"Pearl Farm","CycleTime":90,"Inputs":[],"Outputs":[{"ProductID":1010256,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101272,"Name":"Alpaca Farm","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":120036,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101270,"Name":"Corn Farm","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":120034,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101263,"Name":"Plantain Plantation","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":120041,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101251,"Name":"Coffee Plantation","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":120031,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010333,"Name":"Caoutchouc Plantation","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010255,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010332,"Name":"Cocoa Plantation","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010254,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010331,"Name":"Cotton Plantation","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010253,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010330,"Name":"Tobacco Plantation","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":1010252,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010329,"Name":"Sugar Cane Plantation","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010251,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010364,"Name":"Members Club","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010355,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010362,"Name":"University","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010353,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010361,"Name":"Variety Theatre","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010352,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010359,"Name":"Church","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010350,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010365,"Name":"Bank","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010356,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010360,"Name":"School","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010351,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010358,"Name":"Pub","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010349,"Amount":0}],"IsOldWorld":true,"IsNewWorld":false},{"ID":101250,"Name":"Spectacle Factory","CycleTime":90,"Inputs":[{"ProductID":1010241,"Amount":1},{"ProductID":1010204,"Amount":1}],"Outputs":[{"ProductID":120030,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010328,"Name":"Jewellers","CycleTime":0,"Inputs":[{"ProductID":1010256,"Amount":1},{"ProductID":1010249,"Amount":1}],"Outputs":[{"ProductID":1010250,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010327,"Name":"Goldsmiths","CycleTime":60,"Inputs":[{"ProductID":1010226,"Amount":1},{"ProductID":1010233,"Amount":1}],"Outputs":[{"ProductID":1010249,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010326,"Name":"Gramophone Factory","CycleTime":120,"Inputs":[{"ProductID":1010242,"Amount":1},{"ProductID":1010204,"Amount":1}],"Outputs":[{"ProductID":1010248,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010284,"Name":"Sewing Machine Factory","CycleTime":0,"Inputs":[{"ProductID":120008,"Amount":1},{"ProductID":1010219,"Amount":1}],"Outputs":[{"ProductID":1010206,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010324,"Name":"Clockmakers","CycleTime":90,"Inputs":[{"ProductID":1010241,"Amount":1},{"ProductID":1010249,"Amount":1}],"Outputs":[{"ProductID":1010246,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010323,"Name":"Bicycle Factory","CycleTime":0,"Inputs":[{"ProductID":1010255,"Amount":1},{"ProductID":1010219,"Amount":1}],"Outputs":[{"ProductID":1010245,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010321,"Name":"Filament Factory","CycleTime":60,"Inputs":[{"ProductID":1010226,"Amount":1}],"Outputs":[{"ProductID":1010243,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010320,"Name":"Marquetry Workshop","CycleTime":60,"Inputs":[{"ProductID":120008,"Amount":1}],"Outputs":[{"ProductID":1010242,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010319,"Name":"Glassmakers","CycleTime":0,"Inputs":[{"ProductID":1010228,"Amount":1}],"Outputs":[{"ProductID":1010241,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010300,"Name":"Dynamite Factory","CycleTime":60,"Inputs":[{"ProductID":1010234,"Amount":1},{"ProductID":1010232,"Amount":1}],"Outputs":[{"ProductID":1010222,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010315,"Name":"Framework Knitters","CycleTime":0,"Inputs":[{"ProductID":1010197,"Amount":1}],"Outputs":[{"ProductID":1010237,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010314,"Name":"Malthouse","CycleTime":0,"Inputs":[{"ProductID":1010192,"Amount":1}],"Outputs":[{"ProductID":1010236,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010313,"Name":"Flour Mill","CycleTime":0,"Inputs":[{"ProductID":1010192,"Amount":1}],"Outputs":[{"ProductID":1010235,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010312,"Name":"Rendering Works","CycleTime":60,"Inputs":[{"ProductID":1010199,"Amount":1}],"Outputs":[{"ProductID":1010234,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010311,"Name":"Gold Mine","CycleTime":150,"Inputs":[],"Outputs":[{"ProductID":1010233,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010309,"Name":"Limestone Quarry","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010231,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010308,"Name":"Copper Mine","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010230,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010307,"Name":"Zinc Mine","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010229,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010305,"Name":"Iron Mine","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":1010227,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010304,"Name":"Coal Mine","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":1010226,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":101331,"Name":"Oil Refinery","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":1010566,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010282,"Name":"Brass Smeltery","CycleTime":60,"Inputs":[{"ProductID":1010229,"Amount":1},{"ProductID":1010230,"Amount":1}],"Outputs":[{"ProductID":1010204,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010303,"Name":"Cab Assembly Line","CycleTime":60,"Inputs":[{"ProductID":1010211,"Amount":1},{"ProductID":1010224,"Amount":1}],"Outputs":[{"ProductID":1010225,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010302,"Name":"Motor Assembly Line","CycleTime":90,"Inputs":[{"ProductID":1010219,"Amount":1},{"ProductID":1010204,"Amount":1}],"Outputs":[{"ProductID":1010224,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010301,"Name":"Heavy Weapons Factory","CycleTime":120,"Inputs":[{"ProductID":1010219,"Amount":1},{"ProductID":1010222,"Amount":1}],"Outputs":[{"ProductID":1010223,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010299,"Name":"Weapon Factory","CycleTime":90,"Inputs":[{"ProductID":1010219,"Amount":1}],"Outputs":[{"ProductID":1010221,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010297,"Name":"Furnace","CycleTime":0,"Inputs":[{"ProductID":1010227,"Amount":1},{"ProductID":1010226,"Amount":1}],"Outputs":[{"ProductID":1010219,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010296,"Name":"Steelworks","CycleTime":45,"Inputs":[{"ProductID":1010219,"Amount":1}],"Outputs":[{"ProductID":1010218,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":100659,"Name":"Champagne Cellar","CycleTime":0,"Inputs":[{"ProductID":120014,"Amount":1},{"ProductID":1010241,"Amount":1}],"Outputs":[{"ProductID":120016,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010316,"Name":"Butcher's","CycleTime":60,"Inputs":[{"ProductID":1010199,"Amount":1}],"Outputs":[{"ProductID":1010238,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010294,"Name":"Schnapps Distillery","CycleTime":0,"Inputs":[{"ProductID":1010195,"Amount":1}],"Outputs":[{"ProductID":1010216,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010295,"Name":"Cannery","CycleTime":90,"Inputs":[{"ProductID":1010227,"Amount":1},{"ProductID":1010215,"Amount":1}],"Outputs":[{"ProductID":1010217,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010293,"Name":"Artisanal Kitchen","CycleTime":120,"Inputs":[{"ProductID":1010193,"Amount":1},{"ProductID":1010198,"Amount":1}],"Outputs":[{"ProductID":1010215,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010292,"Name":"Brewery","CycleTime":60,"Inputs":[{"ProductID":1010194,"Amount":1},{"ProductID":1010236,"Amount":1}],"Outputs":[{"ProductID":1010214,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010291,"Name":"Bakery","CycleTime":60,"Inputs":[{"ProductID":1010235,"Amount":1}],"Outputs":[{"ProductID":1010213,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010289,"Name":"Coachmakers","CycleTime":120,"Inputs":[{"ProductID":120008,"Amount":1},{"ProductID":1010255,"Amount":1}],"Outputs":[{"ProductID":1010211,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":100416,"Name":"Clay Pit","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010201,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010288,"Name":"Sailmakers","CycleTime":0,"Inputs":[{"ProductID":1010197,"Amount":1}],"Outputs":[{"ProductID":1010210,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010285,"Name":"Window-Makers","CycleTime":60,"Inputs":[{"ProductID":120008,"Amount":1},{"ProductID":1010241,"Amount":1}],"Outputs":[{"ProductID":1010207,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010286,"Name":"Light Bulb Factory","CycleTime":60,"Inputs":[{"ProductID":1010241,"Amount":1},{"ProductID":1010243,"Amount":1}],"Outputs":[{"ProductID":1010208,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010325,"Name":"Fur Dealer","CycleTime":0,"Inputs":[{"ProductID":1010209,"Amount":1},{"ProductID":1010240,"Amount":1}],"Outputs":[{"ProductID":1010247,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":100451,"Name":"Sawmill","CycleTime":15,"Inputs":[{"ProductID":120008,"Amount":1}],"Outputs":[{"ProductID":1010196,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010283,"Name":"Brick Factory","CycleTime":60,"Inputs":[{"ProductID":1010201,"Amount":1}],"Outputs":[{"ProductID":1010205,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010281,"Name":"Soap Factory","CycleTime":0,"Inputs":[{"ProductID":1010234,"Amount":1}],"Outputs":[{"ProductID":1010203,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010280,"Name":"Concrete Factory","CycleTime":60,"Inputs":[{"ProductID":1010231,"Amount":1},{"ProductID":1010219,"Amount":1}],"Outputs":[{"ProductID":1010202,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010560,"Name":"Sand Mine","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010228,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010310,"Name":"Saltpeter Works","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":1010232,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010278,"Name":"Fishery","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010200,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":100655,"Name":"Vineyard","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":120014,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":100654,"Name":"Red Pepper Farm","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":1010198,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010558,"Name":"Hunting Cabin","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010209,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010269,"Name":"Pig Farm","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010199,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010267,"Name":"Sheep Farm","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010197,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010266,"Name":"Lumberjack's Hut","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":120008,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010265,"Name":"Potato Farm","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010195,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010264,"Name":"Hop Farm","CycleTime":90,"Inputs":[],"Outputs":[{"ProductID":1010194,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010263,"Name":"Cattle Farm","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":1010193,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":1010262,"Name":"Grain Farm","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010192,"Amount":1}],"IsOldWorld":true,"IsNewWorld":false},{"ID":101259,"Name":"Pub","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010349,"Amount":0}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101258,"Name":"Church","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010350,"Amount":0}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101296,"Name":"Marquetry Workshop","CycleTime":60,"Inputs":[{"ProductID":120008,"Amount":1}],"Outputs":[{"ProductID":1010242,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101311,"Name":"Gold Mine","CycleTime":150,"Inputs":[],"Outputs":[{"ProductID":1010233,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":1010561,"Name":"Oil Refinery","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":1010566,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101268,"Name":"Brick Factory","CycleTime":60,"Inputs":[{"ProductID":1010201,"Amount":1}],"Outputs":[{"ProductID":1010205,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101267,"Name":"Clay Pit","CycleTime":0,"Inputs":[],"Outputs":[{"ProductID":1010201,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101265,"Name":"Sailmakers","CycleTime":0,"Inputs":[{"ProductID":1010197,"Amount":1}],"Outputs":[{"ProductID":1010210,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101261,"Name":"Sawmill","CycleTime":15,"Inputs":[{"ProductID":120008,"Amount":1}],"Outputs":[{"ProductID":1010196,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101303,"Name":"Saltpeter Works","CycleTime":120,"Inputs":[],"Outputs":[{"ProductID":1010232,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101269,"Name":"Cattle Farm","CycleTime":60,"Inputs":[],"Outputs":[{"ProductID":1010193,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true},{"ID":101260,"Name":"Lumberjack's Hut","CycleTime":15,"Inputs":[],"Outputs":[{"ProductID":120008,"Amount":1}],"IsOldWorld":false,"IsNewWorld":true}];
-
-export const ALL_FACTORIES = [
-    ...RAW_FACTORIES,
-    // Hacking in a factory for electricity since it doesn't seem to count as a public service building in the game files
-    { "ID":1, "Name":"Electricity", "CycleTime":0, "Inputs":[], "Outputs":[{ "ProductID":1010354, "Amount":0 }], "IsOldWorld":true, "IsNewWorld":false  },
-    { "ID":2, "Name":"Chapel", "CycleTime":0, "Inputs":[], "Outputs":[{ "ProductID":120050, "Amount":0 }], "IsOldWorld":true, "IsNewWorld":false  },
-    { "ID":3, "Name":"Boxing Arena", "CycleTime":0, "Inputs":[], "Outputs":[{ "ProductID":1010348, "Amount":0 }], "IsOldWorld":false, "IsNewWorld":true },
-];
-
-const FACTORIES_BY_ID: { [factoryID: number]: FactoryRaw } = ALL_FACTORIES.reduce((map: { [factoryID: number]: FactoryRaw }, f: FactoryRaw) => {
-    map[f.ID] = f;
-    return map;
-}, {});
-
-export function getFactoryById(id: number): FactoryRaw {
-    return FACTORIES_BY_ID[id];
-}
-export interface FactoryRaw {
-    ID: number;
-    Name: string;
-    CycleTime: number;
-    Inputs: FactoryIngredient[];
-    Outputs: FactoryIngredient[];
-    IsOldWorld: boolean;
-    IsNewWorld: boolean;
+export interface FactoryAsset {
+  guid: number;
+  name: string;
+  associatedRegions: string;
+  cycleTime?: number;
+  inputs?: number[];
+  output?: number;
 }
 
-// export class Factory extends FactoryRaw {
-//     constructor(raw: FactoryRaw) {
-//         super();
-//         this.ID = raw.ID;
-//         this.Name = raw.Name;
-//         this.CycleTime = raw.CycleTime;
-//         this.Inputs = raw.Inputs;
-//         this.Outputs = raw.Outputs;
-//         this.IsOldWorld = raw.IsOldWorld;
-//         this.IsNewWorld = raw.IsNewWorld;
-//     }
-//
-//     ChildFactories: Factory[] = []
-//     ParentFactory?: Factory = null
-//
-//     get ParentFactoryOrThisRecursive(): Factory {
-//         if (!this.ParentFactory) {
-//             return this;
-//         }
-//
-//         return this.ParentFactory.ParentFactoryOrThisRecursive;
-//     }
-//
-//     _enabled: boolean = false
-//     get Enabled(): boolean {
-//         return this._enabled;
-//     }
-//
-//     set Enabled(newVal: boolean) {
-//         this._enabled = newVal;
-//         for(var i = 0; i < this.ChildFactories.length; i++) {
-//             this.ChildFactories[i].Enabled = this.Enabled;
-//         }
-//     }
-//
-//     BuiltCount: number = 0
-//     Productivity: number = 100
-//     ChildLevel: number = 0
-//     TradeBalance: number = 0
-//
-//     GetRequiredCount(allPopulationLevels: PopulationLevelD[]): number {
-//         if (this.Outputs[0].Amount === 0) {
-//             // Public service building
-//             return 0;
-//         }
-//
-//         let amountRequiredPerMinute = 0;
-//         let outputProductID = this.Outputs[0].ProductID;
-//         let cycleTime = this.CycleTime > 0 ? this.CycleTime : 30;
-//
-//         for (var i = 0; i < allPopulationLevels.length; i++) {
-//             amountRequiredPerMinute += allPopulationLevels[i].GetProductRequirement(outputProductID);
-//         }
-//
-//         // Requirements appear to be in tons per second, so multiply by 60
-//         amountRequiredPerMinute *= 60;
-//
-//         let requiredFactoriesFromParent = 0;
-//         if (this.ParentFactory) {
-//             let parentInput = this.ParentFactory.Inputs.filter(i => i.ProductID === outputProductID)[0];
-//             if (parentInput) {
-//                 let parentRequiredFactories = this.ParentFactory.GetRequiredCount(allPopulationLevels);
-//                 let parentCycleTime = this.ParentFactory.CycleTime > 0 ? this.ParentFactory.CycleTime : 30;
-//                 let childParentFactoryRatio = parentInput.Amount / this.Outputs[0].Amount * cycleTime / parentCycleTime;
-//                 requiredFactoriesFromParent = parentRequiredFactories * childParentFactoryRatio;
-//             }
-//         }
-//
-//         let producedPerMinute = this.Outputs[0].Amount * 60 / cycleTime;
-//
-//         return Math.round((amountRequiredPerMinute / producedPerMinute + requiredFactoriesFromParent) * 100 * 100 / this.Productivity) / 100;
-//     }
-//
-//     GetSatisfactionClass(allPopulationLevels: PopulationLevelD[]): string {
-//         let result = 'factory';
-//
-//         if (this.Outputs[0].Amount === 0) {
-//             result = result + ' publicService';
-//
-//             if (this.Enabled) {
-//                 result = result + ' satisfied';
-//             }
-//
-//             return result;
-//         }
-//
-//         if (!this.Enabled) {
-//             return result;
-//         }
-//
-//         let required = this.GetRequiredCount(allPopulationLevels);
-//         let satisfaction = this.BuiltCount + this.TradeBalance;
-//
-//         if(satisfaction > required) {
-//             result = result + ' satisfied';
-//         }
-//         else if (required - satisfaction < 0.5) {
-//             result = result + ' slightlyUnsatisfied';
-//         }
-//         else {
-//             result = result + ' unsatisfied';
-//         }
-//
-//         return result;
-//     }
-//
-//     IsInUse(allPopulationLevels: PopulationLevelD[]) {
-//         let relevantFactory = this as Factory;
-//         while (relevantFactory.ParentFactory) {
-//             relevantFactory = relevantFactory.ParentFactory;
-//         }
-//
-//         return allPopulationLevels.filter(p =>
-//             p.Inputs.filter(input => input.ProductID === relevantFactory.Outputs[0].ProductID).length > 0
-//             && (p.HouseCount > 0 || p.ShowUnused)
-//         ).length > 0;
-//     }
-//
-//     Save(): FactorySaveInfo {
-//         return {
-//             FactoryID: this.ID,
-//             ParentFactoryID: this.ParentFactory ? this.ParentFactory.ID : null,
-//             Enabled: this.Enabled,
-//             BuiltCount: this.BuiltCount,
-//             Productivity: this.Productivity,
-//             TradeBalance: this.TradeBalance
-//         };
-//     }
-// }
-//
-export interface FactoryIngredient {
-    ProductID: number;
-    Amount: number;
-}
-
-// export class FactorySaveInfo {
-//     FactoryID: number
-//     ParentFactoryID?: number
-//     Enabled: boolean
-//     BuiltCount: number
-//     Productivity: number
-//     TradeBalance: number
-// }
+export const FACTORIES_BY_ID: ReadonlyMap<number, FactoryAsset> = new Map([
+  [1010262, {name: "Grain Farm", "guid": 1010262, associatedRegions: "Moderate", output: 1010192, cycleTime: 60}],
+  [1010263, {name: "Cattle Farm", "guid": 1010263, associatedRegions: "Moderate", output: 1010193, cycleTime: 120}],
+  [1010264, {name: "Hop Farm", "guid": 1010264, associatedRegions: "Moderate", output: 1010194, cycleTime: 90}],
+  [1010265, {name: "Potato Farm", "guid": 1010265, associatedRegions: "Moderate", output: 1010195}],
+  [1010266, {name: "Lumberjack's Hut", "guid": 1010266, associatedRegions: "Moderate", output: 120008, cycleTime: 15}],
+  [1010267, {name: "Sheep Farm", "guid": 1010267, associatedRegions: "Moderate", output: 1010197}],
+  [1010269, {name: "Pig Farm", "guid": 1010269, associatedRegions: "Moderate", output: 1010199, cycleTime: 60}],
+  [1010558, {name: "Hunting Cabin", "guid": 1010558, associatedRegions: "Moderate", output: 1010209, cycleTime: 60}],
+  [100654, {name: "Red Pepper Farm", "guid": 100654, associatedRegions: "Moderate", output: 1010198, cycleTime: 120}],
+  [100655, {name: "Vineyard", "guid": 100655, associatedRegions: "Moderate", output: 120014, cycleTime: 120}],
+  [1010278, {name: "Fishery", "guid": 1010278, associatedRegions: "Moderate", output: 1010200}],
+  [1010310, {name: "Saltpeter Works", "guid": 1010310, associatedRegions: "Moderate", output: 1010232, cycleTime: 120}],
+  [1010560, {name: "Sand Mine", "guid": 1010560, associatedRegions: "Moderate", output: 1010228}],
+  [1010280, {name: "Concrete Factory", "guid": 1010280, associatedRegions: "Moderate", inputs: [1010231, 1010219], output: 1010202, cycleTime: 60}],
+  [1010281, {name: "Soap Factory", "guid": 1010281, associatedRegions: "Moderate", inputs: [1010234], output: 1010203}],
+  [1010283, {name: "Brick Factory", "guid": 1010283, associatedRegions: "Moderate", inputs: [1010201], output: 1010205, cycleTime: 60}],
+  [100451, {name: "Sawmill", "guid": 100451, associatedRegions: "Moderate", inputs: [120008], output: 1010196, cycleTime: 15}],
+  [1010325, {name: "Fur Dealer", "guid": 1010325, associatedRegions: "Moderate", inputs: [1010209, 1010240], output: 1010247}],
+  [1010286, {name: "Light Bulb Factory", "guid": 1010286, associatedRegions: "Moderate", inputs: [1010241, 1010243], output: 1010208, cycleTime: 60}],
+  [1010285, {name: "Window-Makers", "guid": 1010285, associatedRegions: "Moderate", inputs: [120008, 1010241], output: 1010207, cycleTime: 60}],
+  [1010288, {name: "Sailmakers", "guid": 1010288, associatedRegions: "Moderate", inputs: [1010197], output: 1010210}],
+  [100416, {name: "Clay Pit", "guid": 100416, associatedRegions: "Moderate", output: 1010201}],
+  [1010289, {name: "Coachmakers", "guid": 1010289, associatedRegions: "Moderate", inputs: [120008, 1010255], output: 1010211, cycleTime: 120}],
+  [1010291, {name: "Bakery", "guid": 1010291, associatedRegions: "Moderate", inputs: [1010235], output: 1010213, cycleTime: 60}],
+  [1010292, {name: "Brewery", "guid": 1010292, associatedRegions: "Moderate", inputs: [1010194, 1010236], output: 1010214, cycleTime: 60}],
+  [1010293, {name: "Artisanal Kitchen", "guid": 1010293, associatedRegions: "Moderate", inputs: [1010193, 1010198], output: 1010215, cycleTime: 120}],
+  [1010295, {name: "Cannery", "guid": 1010295, associatedRegions: "Moderate", inputs: [1010227, 1010215], output: 1010217, cycleTime: 90}],
+  [1010294, {name: "Schnapps Distillery", "guid": 1010294, associatedRegions: "Moderate", inputs: [1010195], output: 1010216}],
+  [1010316, {name: "Butcher's", "guid": 1010316, associatedRegions: "Moderate", inputs: [1010199], output: 1010238, cycleTime: 60}],
+  [100659, {name: "Champagne Cellar", "guid": 100659, associatedRegions: "Moderate", inputs: [120014, 1010241], output: 120016}],
+  [1010296, {name: "Steelworks", "guid": 1010296, associatedRegions: "Moderate", inputs: [1010219], output: 1010218, cycleTime: 45}],
+  [1010297, {name: "Furnace", "guid": 1010297, associatedRegions: "Moderate", inputs: [1010227, 1010226], output: 1010219}],
+  [1010298, {name: "Charcoal Kiln", "guid": 1010298, associatedRegions: "Moderate", output: 1010226}],
+  [1010299, {name: "Weapon Factory", "guid": 1010299, associatedRegions: "Moderate", inputs: [1010219], output: 1010221, cycleTime: 90}],
+  [1010301, {name: "Heavy Weapons Factory", "guid": 1010301, associatedRegions: "Moderate", inputs: [1010219, 1010222], output: 1010223, cycleTime: 120}],
+  [1010302, {name: "Motor Assembly Line", "guid": 1010302, associatedRegions: "Moderate", inputs: [1010219, 1010204], output: 1010224, cycleTime: 90}],
+  [1010303, {name: "Cab Assembly Line", "guid": 1010303, associatedRegions: "Moderate", inputs: [1010211, 1010224], output: 1010225, cycleTime: 60}],
+  [1010282, {name: "Brass Smeltery", "guid": 1010282, associatedRegions: "Moderate", inputs: [1010229, 1010230], output: 1010204, cycleTime: 60}],
+  [101331, {name: "Oil Refinery", "guid": 101331, associatedRegions: "Moderate", output: 1010566, cycleTime: 15}],
+  [1010304, {name: "Coal Mine", "guid": 1010304, associatedRegions: "Moderate", output: 1010226, cycleTime: 15}],
+  [1010305, {name: "Iron Mine", "guid": 1010305, associatedRegions: "Moderate", output: 1010227, cycleTime: 15}],
+  [1010307, {name: "Zinc Mine", "guid": 1010307, associatedRegions: "Moderate", output: 1010229}],
+  [1010308, {name: "Copper Mine", "guid": 1010308, associatedRegions: "Moderate", output: 1010230}],
+  [1010309, {name: "Limestone Quarry", "guid": 1010309, associatedRegions: "Moderate", output: 1010231}],
+  [1010311, {name: "Gold Mine", "guid": 1010311, associatedRegions: "Moderate", output: 1010233, cycleTime: 150}],
+  [1010312, {name: "Rendering Works", "guid": 1010312, associatedRegions: "Moderate", inputs: [1010199], output: 1010234, cycleTime: 60}],
+  [1010313, {name: "Flour Mill", "guid": 1010313, associatedRegions: "Moderate", inputs: [1010192], output: 1010235}],
+  [1010314, {name: "Malthouse", "guid": 1010314, associatedRegions: "Moderate", inputs: [1010192], output: 1010236}],
+  [1010315, {name: "Framework Knitters", "guid": 1010315, associatedRegions: "Moderate", inputs: [1010197], output: 1010237}],
+  [1010300, {name: "Dynamite Factory", "guid": 1010300, associatedRegions: "Moderate", inputs: [1010234, 1010232], output: 1010222, cycleTime: 60}],
+  [1010319, {name: "Glassmakers", "guid": 1010319, associatedRegions: "Moderate", inputs: [1010228], output: 1010241}],
+  [1010320, {name: "Marquetry Workshop", "guid": 1010320, associatedRegions: "Moderate", inputs: [120008], output: 1010242, cycleTime: 60}],
+  [1010321, {name: "Filament Factory", "guid": 1010321, associatedRegions: "Moderate", inputs: [1010226], output: 1010243, cycleTime: 60}],
+  [1010323, {name: "Bicycle Factory", "guid": 1010323, associatedRegions: "Moderate", inputs: [1010255, 1010219], output: 1010245}],
+  [1010324, {name: "Clockmakers", "guid": 1010324, associatedRegions: "Moderate", inputs: [1010241, 1010249], output: 1010246, cycleTime: 90}],
+  [1010284, {name: "Sewing Machine Factory", "guid": 1010284, associatedRegions: "Moderate", inputs: [120008, 1010219], output: 1010206}],
+  [1010326, {name: "Gramophone Factory", "guid": 1010326, associatedRegions: "Moderate", inputs: [1010242, 1010204], output: 1010248, cycleTime: 120}],
+  [1010327, {name: "Goldsmiths", "guid": 1010327, associatedRegions: "Moderate", inputs: [1010226, 1010233], output: 1010249, cycleTime: 60}],
+  [1010328, {name: "Jewellers", "guid": 1010328, associatedRegions: "Moderate", inputs: [1010256, 1010249], output: 1010250}],
+  [101250, {name: "Spectacle Factory", "guid": 101250, associatedRegions: "Moderate", inputs: [1010241, 1010204], output: 120030, cycleTime: 90}],
+  [1010329, {name: "Sugar Cane Plantation", "guid": 1010329, associatedRegions: "Colony01", output: 1010251}],
+  [1010330, {name: "Tobacco Plantation", "guid": 1010330, associatedRegions: "Colony01", output: 1010252, cycleTime: 120}],
+  [1010331, {name: "Cotton Plantation", "guid": 1010331, associatedRegions: "Colony01", output: 1010253, cycleTime: 60}],
+  [1010332, {name: "Cocoa Plantation", "guid": 1010332, associatedRegions: "Colony01", output: 1010254, cycleTime: 60}],
+  [1010333, {name: "Caoutchouc Plantation", "guid": 1010333, associatedRegions: "Colony01", output: 1010255, cycleTime: 60}],
+  [101251, {name: "Coffee Plantation", "guid": 101251, associatedRegions: "Colony01", output: 120031, cycleTime: 60}],
+  [101263, {name: "Plantain Plantation", "guid": 101263, associatedRegions: "Colony01", output: 120041}],
+  [101270, {name: "Corn Farm", "guid": 101270, associatedRegions: "Colony01", output: 120034, cycleTime: 60}],
+  [101272, {name: "Alpaca Farm", "guid": 101272, associatedRegions: "Colony01", output: 120036}],
+  [1010339, {name: "Pearl Farm", "guid": 1010339, associatedRegions: "Colony01", output: 1010256, cycleTime: 90}],
+  [101262, {name: "Fish Oil Factory", "guid": 101262, associatedRegions: "Colony01", output: 120042}],
+  [1010318, {name: "Cotton Mill", "guid": 1010318, associatedRegions: "Colony01", inputs: [1010253], output: 1010240}],
+  [101415, {name: "Felt Producer", "guid": 101415, associatedRegions: "Colony01", inputs: [120036], output: 120044}],
+  [101273, {name: "Bombín Weaver", "guid": 101273, associatedRegions: "Colony01", inputs: [1010240, 120044], output: 120037}],
+  [1010340, {name: "Rum Distillery", "guid": 1010340, associatedRegions: "Colony01", inputs: [120008, 1010251], output: 1010257}],
+  [1010341, {name: "Chocolate Factory", "guid": 1010341, associatedRegions: "Colony01", inputs: [1010254, 1010239], output: 1010258}],
+  [101252, {name: "Coffee Roaster", "guid": 101252, associatedRegions: "Colony01", inputs: [120031], output: 120032}],
+  [101264, {name: "Fried Plantain Kitchen", "guid": 101264, associatedRegions: "Colony01", inputs: [120042, 120041], output: 120033}],
+  [101271, {name: "Tortilla Maker", "guid": 101271, associatedRegions: "Colony01", inputs: [1010193, 120034], output: 120035}],
+  [1010317, {name: "Sugar Refinery", "guid": 1010317, associatedRegions: "Colony01", inputs: [1010251], output: 1010239}],
+  [101266, {name: "Poncho Darner", "guid": 101266, associatedRegions: "Colony01", inputs: [120036], output: 120043}],
+  [1010342, {name: "Cigar Factory", "guid": 1010342, associatedRegions: "Colony01", inputs: [1010252, 1010242], output: 1010259}]
+]);

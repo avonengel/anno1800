@@ -3,10 +3,10 @@ import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
 import {FactoryState} from "./types";
-import {getFactoryById} from "../../data/factories";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
+import {FACTORIES_BY_ID} from "../../data/factories";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -78,38 +78,44 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId
         const factoryState = getFactoryStateByIdOrDefault(state, islandId, factoryId);
-        const factoryDefinition = getFactoryById(factoryId);
+        const factoryDefinition = FACTORIES_BY_ID.get(factoryId);
+        if (!factoryDefinition) {
+            console.error("factoryProductionConsumptionReducer called with nonexistend factory ID", factoryId);
+            return state;
+        }
         const products = {...state.products};
         const islandProductMap = {...products[islandId as number]};
         products[islandId] = islandProductMap;
 
-        factoryDefinition.Outputs.forEach(output => {
-            const productId = output.ProductID;
+        if (factoryDefinition.output) {
+            const productId = factoryDefinition.output;
             const productState = {...islandProductMap[productId]};
             islandProductMap[productId] = productState;
-            let cycleTime = factoryDefinition.CycleTime;
-            if (cycleTime === 0) {
+            let cycleTime = factoryDefinition.cycleTime;
+            if (!cycleTime) {
                 cycleTime = 30;
             }
-            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * output.Amount;
+            const productionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime);
             const producers = {...productState.producers};
             productState.producers = producers;
             producers[factoryId] = productionPerMinute;
-        });
+        }
         // recompute consumption for factoryId
-        factoryDefinition.Inputs.forEach(input => {
-            const productId = input.ProductID;
-            const productState = {...islandProductMap[productId]};
-            islandProductMap[productId] = productState;
-            let cycleTime = factoryDefinition.CycleTime;
-            if (cycleTime === 0) {
-                cycleTime = 30;
-            }
-            const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime) * input.Amount;
-            const consumers = {...productState.factoryConsumers};
-            productState.factoryConsumers = consumers;
-            consumers[factoryId] = consumptionPerMinute;
-        });
+        if (factoryDefinition.inputs) {
+            factoryDefinition.inputs.forEach(input => {
+                const productId = input;
+                const productState = {...islandProductMap[productId]};
+                islandProductMap[productId] = productState;
+                let cycleTime = factoryDefinition.cycleTime;
+                if (!cycleTime) {
+                    cycleTime = 30;
+                }
+                const consumptionPerMinute = factoryState.productivity * factoryState.buildingCount * (60 / cycleTime);
+                const consumers = {...productState.factoryConsumers};
+                productState.factoryConsumers = consumers;
+                consumers[factoryId] = consumptionPerMinute;
+            });
+        }
         return {
             ...state,
             products

@@ -12,7 +12,6 @@ import {
     WithStyles,
     withStyles
 } from "@material-ui/core";
-import {FactoryRaw} from "../data/factories";
 import {RootState} from "../redux/store";
 import {getFactoryStateById, getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
@@ -21,6 +20,7 @@ import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Warning, Error} from "@material-ui/icons";
+import {FactoryAsset} from "../data/factories";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -30,17 +30,17 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface ReactProps extends WithStyles<typeof styles> {
-    factory: FactoryRaw,
+    factory: FactoryAsset,
     islandId: number,
 }
 
 const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     let outputProductState: ProductState | undefined;
-    if (reactProps.factory.Outputs.length > 0) {
-        outputProductState = getProductStateById(state, reactProps.islandId, reactProps.factory.Outputs[0].ProductID);
+    if (reactProps.factory.output) {
+        outputProductState = getProductStateById(state, reactProps.islandId, reactProps.factory.output);
     }
     return {
-        factoryState: getFactoryStateById(state, reactProps.islandId, reactProps.factory.ID),
+        factoryState: getFactoryStateById(state, reactProps.islandId, reactProps.factory.guid),
         outputProductState
     };
 };
@@ -48,10 +48,10 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
 const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
     return {
         onBuildingCountChange: (count: number) => {
-            dispatch(updateFactoryCount(props.islandId, props.factory.ID, count));
+            dispatch(updateFactoryCount(props.islandId, props.factory.guid, count));
         },
         onProductivityChange: (productivity: number) => {
-            dispatch(updateFactoryProductivity(props.islandId, props.factory.ID, productivity));
+            dispatch(updateFactoryProductivity(props.islandId, props.factory.guid, productivity));
         }
     };
 };
@@ -108,7 +108,7 @@ class FactoryCard extends React.Component<Props> {
 
     render() {
         const {factoryState, outputProductState} = this.props;
-        const iconData = getIconData(this.props.factory.Name);
+        const iconData = getIconData(this.props.factory.name);
         const production = outputProductState && getProduction(outputProductState) || 0;
         const consumption = outputProductState && getConsumption(outputProductState) || 0;
         let warnIcon = null;
@@ -121,9 +121,9 @@ class FactoryCard extends React.Component<Props> {
             <Card>
                 <CardHeader
                     avatar={
-                        iconData && <Avatar alt={this.props.factory.Name} src={iconData} />
+                        iconData && <Avatar alt={this.props.factory.name} src={iconData} />
                     }
-                    title={this.props.factory.Name}
+                    title={this.props.factory.name}
                     action={warnIcon}
                     titleTypographyProps={{component: 'h6', variant: 'h6'}}/>
                 <CardContent>
@@ -186,8 +186,7 @@ class FactoryCard extends React.Component<Props> {
 
     private computePerfectProductivity() {
         const {factoryState, outputProductState} = this.props;
-        const outputs = this.props.factory.Outputs;
-        const output = outputs[0];
+        const output = this.props.factory.output;
         if (!output) {
             return 0;
         }
@@ -195,11 +194,11 @@ class FactoryCard extends React.Component<Props> {
             return 0;
         }
         const consumption = getConsumption(outputProductState);
-        let cycleTime = this.props.factory.CycleTime;
-        if (cycleTime === 0) {
+        let cycleTime = this.props.factory.cycleTime;
+        if (!cycleTime) {
             cycleTime = 30;
         }
-        const productionPerMinutePerBuilding = output.Amount * (60 / cycleTime);
+        const productionPerMinutePerBuilding = (60 / cycleTime);
         var buildingCount = 1;
         if (!!factoryState) {
             buildingCount = factoryState.buildingCount || 1;
@@ -211,9 +210,8 @@ class FactoryCard extends React.Component<Props> {
     }
 
     private computeMinimumRequiredCount() {
-        const outputs = this.props.factory.Outputs;
         const {factoryState, outputProductState} = this.props;
-        const output = outputs[0];
+        const output =  this.props.factory.output;
         if (!output) {
             return 0;
         }
@@ -221,15 +219,15 @@ class FactoryCard extends React.Component<Props> {
             return 0;
         }
         const consumption = getConsumption(outputProductState);
-        let cycleTime = this.props.factory.CycleTime;
-        if (cycleTime === 0) {
+        let cycleTime = this.props.factory.cycleTime;
+        if (!cycleTime) {
             cycleTime = 30;
         }
         let productivity = 1;
         if (!!factoryState) {
             productivity = factoryState.productivity;
         }
-        const productionPerMinutePerBuilding = output.Amount * (60 / cycleTime) * productivity;
+        const productionPerMinutePerBuilding = (60 / cycleTime) * productivity;
         return Math.ceil(consumption / productionPerMinutePerBuilding);
     }
 }

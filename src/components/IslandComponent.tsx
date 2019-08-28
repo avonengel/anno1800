@@ -13,11 +13,10 @@ import {
     OLD_WORLD_POPULATION_LEVELS,
     POPULATION_LEVELS
 } from "../data/populations";
-import {ALL_FACTORIES, FactoryRaw, getFactoryById} from "../data/factories";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
-import {params} from "../data/params_2019-04-17_full";
 import {addTrade} from "../redux/trade/actions";
+import {FACTORIES_BY_ID, FactoryAsset} from "../data/factories";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -41,13 +40,13 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
 
 function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
-    const factoriesToShow: FactoryRaw[] = [];
-    factoryLoop: for (const factory of ALL_FACTORIES) {
+    const factoriesToShow: FactoryAsset[] = [];
+    FACTORIES_BY_ID.forEach((factory, factoryId) => {
         if (state.factories && state.factories[props.islandId]
-            && state.factories[props.islandId][factory.ID]
-            && state.factories[props.islandId][factory.ID].buildingCount > 0) {
+            && state.factories[props.islandId][factoryId]
+            && state.factories[props.islandId][factoryId].buildingCount > 0) {
             factoriesToShow.push(factory);
-            continue;
+            return;
         }
 
         if (!!populationStates) {
@@ -57,17 +56,17 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                     if (!populationLevel) {
                         continue;
                     }
-                    const needed = populationLevel.Inputs.find(input => factory.Outputs.find(output => output.ProductID === input.ProductID));
+                    const needed = populationLevel.Inputs.find(input => factory.output === input.ProductID);
                     if (needed) {
                         factoriesToShow.push(factory);
-                        continue factoryLoop;
+                        return;
                     }
                 }
             }
         }
         // also show factories for things that are consumed by factories
-        for (let output of factory.Outputs) {
-            const productState = getProductStateById(state, props.islandId, output.ProductID);
+        if (factory.output) {
+            const productState = getProductStateById(state, props.islandId, factory.output);
 
             if (!!productState) {
                 let consumptionPerMinute = 0;
@@ -79,11 +78,10 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                 }
                 if (consumptionPerMinute) {
                     factoriesToShow.push(factory);
-                    continue factoryLoop;
                 }
             }
         }
-    }
+    });
     return factoriesToShow;
 }
 
@@ -149,24 +147,21 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </IconButton>
             </div>
             <Grid container spacing={1} justify={"center"}>
-                {/*TODO: clean this up, get better source data*/}
-                {params.factories
-                    .map((factory) => getFactoryById(factory.guid))
-                    .filter((factory) => !!factory)
+                {Array.from(FACTORIES_BY_ID.values())
                     .filter((factory) => {
-                        if (factory.IsOldWorld !== factory.IsNewWorld) {
+                        if (populationDecided) {
                             if (isOldWorld) {
-                                return factory.IsOldWorld;
+                                return factory.associatedRegions === "Moderate";
                             }
                             if (isNewWorld) {
-                                return factory.IsNewWorld;
+                                return factory.associatedRegions === "Colony01";
                             }
                         }
                         return true;
                     })
-                    .filter((factory) => factory.Outputs.length > 0)
+                    .filter((factory) => factory.output !== undefined)
                     .map((factory) =>
-                        <Zoom key={factory.ID} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
+                        <Zoom key={factory.guid} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
                             <Grid item xs={6} md={3} lg={2}>
                                 <FactoryCard factory={factory} islandId={island.id}/>
                             </Grid>
@@ -206,7 +201,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
         this.setState({showAll: !this.state.showAll});
     }
 
-    private shouldShow(factory: FactoryRaw): boolean {
+    private shouldShow(factory: FactoryAsset): boolean {
 
         return this.state.showAll || this.props.factoriesToShow.includes(factory);
     }
