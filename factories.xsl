@@ -3,75 +3,67 @@
     <xsl:strip-space elements="*"/>
 
     <xsl:template match="/">
-        <xsl:text>export interface FactoryAsset {&#xa;</xsl:text>
-        <xsl:text>  guid: number;&#xa;</xsl:text>
-        <xsl:text>  name: string;&#xa;</xsl:text>
-        <xsl:text>  associatedRegions: string;&#xa;</xsl:text>
-        <xsl:text>  cycleTime?: number;&#xa;</xsl:text>
-        <xsl:text>  inputs?: number[];&#xa;</xsl:text>
-        <xsl:text>  output?: number;&#xa;</xsl:text>
-        <xsl:text>}&#xa;&#xa;</xsl:text>
-        <xsl:text>export const FACTORIES_BY_ID: ReadonlyMap&lt;number, FactoryAsset&gt; = new Map([</xsl:text>
+        <xsl:text>import {FactoryAsset} from "./factoryTypes";&#xa;</xsl:text>
+        <xsl:text>export const FACTORIES: Readonly&lt;FactoryAsset[]&gt; = [</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:for-each select="descendant::Asset[(Template='FactoryBuilding7'
-                                    or Template='FarmBuilding'
-                                    or Template='HeavyFactoryBuilding'
-                                    or Template='HeavyFreeAreaBuilding'
-                                    or Template = 'SlotFactoryBuilding7'
-                                    or Template = 'FreeAreaBuilding')
+                                        or Template='FarmBuilding'
+                                        or Template='HeavyFactoryBuilding'
+                                        or Template='HeavyFreeAreaBuilding'
+                                        or Template = 'SlotFactoryBuilding7'
+                                        or Template = 'FreeAreaBuilding'
+                                        or BaseAssetGUID != '' and Values/FactoryBase)
                                     and Values/Building/AssociatedRegions!='']">
             <!-- Values/Building/AssociatedRegions is empty for buildings like "Edvard's Timber Yard" -->
-            <!-- FIXME buildings that exist in both worlds are really strangely modeled in the XML, see <BaseAssetGUID>1010266</BaseAssetGUID> <GUID>101260</GUID> <Name>agriculture_colony01_06 (Timber Yard)</Name>-->
+            <!-- Asset with BaseAssetGUID means it's something that 'extends' a base: mostly buildings in the new world,
+                that are slightly different than in the old world (e.g. Sailmakers) -->
+            <!-- TODO last two lines are Zoo and Museum in the new world - didn't find a filter criterion for those, yet -->
             <xsl:apply-templates select="."/>
-            <xsl:if test="not(position() = last())">
-                <xsl:text>,</xsl:text>
-            </xsl:if>
-            <xsl:text>&#xa;</xsl:text>
+            <xsl:text>,&#xa;</xsl:text>
         </xsl:for-each>
-        <xsl:text>]);&#xa;</xsl:text>
+        <xsl:text>];&#xa;</xsl:text>
     </xsl:template>
 
     <xsl:template match="//Asset">
-        <xsl:text>  [</xsl:text><xsl:value-of select="Values/Standard/GUID"/><xsl:text>, {</xsl:text>
-        <xsl:text>name: "</xsl:text><xsl:value-of select="Values/Text/LocaText/English/Text"/><xsl:text>"</xsl:text>
-        <xsl:text>, "guid": </xsl:text><xsl:value-of select="Values/Standard/GUID"/>
+        <xsl:text>  {</xsl:text>
+        <xsl:text>guid: </xsl:text><xsl:value-of select="Values/Standard/GUID"/>
+        <xsl:if test="Values/Text/LocaText/English/Text != ''">
+            <xsl:text>, name: "</xsl:text><xsl:value-of select="Values/Text/LocaText/English/Text"/><xsl:text>"</xsl:text>
+        </xsl:if>
+        <xsl:if test="BaseAssetGUID != ''">
+            <xsl:text>, baseGuid: </xsl:text><xsl:value-of select="BaseAssetGUID"/>
+        </xsl:if>
         <xsl:text>, associatedRegions: "</xsl:text><xsl:value-of select="Values/Building/AssociatedRegions"/><xsl:text>"</xsl:text>
-        <xsl:apply-templates select="Values/FactoryBase" mode="population"/>
+        <xsl:apply-templates select="Values/FactoryBase" mode="factory"/>
         <xsl:if test="Values/FactoryBase/CycleTime">
             <xsl:text>, cycleTime: </xsl:text><xsl:value-of select="Values/FactoryBase/CycleTime"/>
         </xsl:if>
-        <xsl:text>}]</xsl:text>
+        <xsl:text>}</xsl:text>
     </xsl:template>
 
-    <xsl:template name="getTemplateText">
-        <xsl:value-of select="Template"/>
+    <xsl:template match="FactoryBase" mode="factory">
+        <xsl:apply-templates mode="factory"/>
     </xsl:template>
 
-    <xsl:template match="FactoryBase" mode="population">
-        <xsl:apply-templates mode="population"/>
-    </xsl:template>
-
-    <xsl:template match="Item" mode="population">
-        <!-- TODO: PublicServiceOutputs is not handled at all -->
-        <!-- TODO: check what's about the variant handling in anno1800assistant -->
+    <xsl:template match="Item" mode="factory">
         <xsl:value-of select="Product"/>
         <xsl:if test="following-sibling::Item">
             <xsl:text>, </xsl:text>
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="FactoryOutputs" mode="population">
+    <xsl:template match="FactoryOutputs[Item/Product]" mode="factory">
         <xsl:text>, output: </xsl:text>
-        <xsl:apply-templates select="Item" mode="population"/>
+        <xsl:apply-templates select="Item" mode="factory"/>
     </xsl:template>
-    <xsl:template match="FactoryInputs" mode="population">
+    <xsl:template match="FactoryInputs" mode="factory">
         <xsl:text>, inputs: [</xsl:text>
-        <xsl:apply-templates select="Item" mode="population"/>
+        <xsl:apply-templates select="Item" mode="factory"/>
         <xsl:text>]</xsl:text>
     </xsl:template>
 
     <xsl:template match="text()|@*">
     </xsl:template>
-    <xsl:template match="text()|@*" mode="population">
+    <xsl:template match="text()|@*" mode="factory">
     </xsl:template>
 </xsl:stylesheet>

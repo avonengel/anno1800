@@ -19,8 +19,8 @@ import {updateFactoryCount, updateFactoryProductivity} from "../redux/production
 import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
-import {Warning, Error} from "@material-ui/icons";
-import {FactoryAsset} from "../data/factories";
+import {Error, Warning} from "@material-ui/icons";
+import {Factory} from "../data/factoryTypes";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -30,7 +30,7 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface ReactProps extends WithStyles<typeof styles> {
-    factory: FactoryAsset,
+    factory: Factory,
     islandId: number,
 }
 

@@ -16,7 +16,7 @@ import {
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {FACTORIES_BY_ID, FactoryAsset} from "../data/factories";
+import {ALL_FACTORIES, FACTORIES_BY_ID, Factory} from "../data/factoryTypes";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -40,7 +40,7 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
 
 function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
-    const factoriesToShow: FactoryAsset[] = [];
+    const factoriesToShow: Factory[] = [];
     FACTORIES_BY_ID.forEach((factory, factoryId) => {
         if (state.factories && state.factories[props.islandId]
             && state.factories[props.islandId][factoryId]
@@ -147,18 +147,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </IconButton>
             </div>
             <Grid container spacing={1} justify={"center"}>
-                {Array.from(FACTORIES_BY_ID.values())
-                    .filter((factory) => {
-                        if (populationDecided) {
-                            if (isOldWorld) {
-                                return factory.associatedRegions === "Moderate";
-                            }
-                            if (isNewWorld) {
-                                return factory.associatedRegions === "Colony01";
-                            }
-                        }
-                        return true;
-                    })
+                {ALL_FACTORIES.filter((factory) => !populationDecided || (isOldWorld && factory.isOldWorld) || (isNewWorld && factory.isNewWorld))
                     .filter((factory) => factory.output !== undefined)
                     .map((factory) =>
                         <Zoom key={factory.guid} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>
@@ -201,7 +190,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
         this.setState({showAll: !this.state.showAll});
     }
 
-    private shouldShow(factory: FactoryAsset): boolean {
+    private shouldShow(factory: Factory): boolean {
 
         return this.state.showAll || this.props.factoriesToShow.includes(factory);
     }

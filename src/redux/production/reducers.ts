@@ -6,7 +6,7 @@ import {FactoryState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
-import {FACTORIES_BY_ID} from "../../data/factories";
+import {FACTORIES_BY_ID} from "../../data/factoryTypes";
 
 const initialProductState = {
     factoryConsumers: {},
