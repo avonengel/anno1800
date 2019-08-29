@@ -109,8 +109,8 @@ class FactoryCard extends React.Component<Props> {
     render() {
         const {factoryState, outputProductState} = this.props;
         const iconData = getIconData(this.props.factory.name);
-        const production = outputProductState && getProduction(outputProductState) || 0;
-        const consumption = outputProductState && getConsumption(outputProductState) || 0;
+        const production = (outputProductState && getProduction(outputProductState)) || 0;
+        const consumption = (outputProductState && getConsumption(outputProductState)) || 0;
         let warnIcon = null;
         if (production < consumption) {
             warnIcon = <Error fontSize={"large"} color={"error"}/>
