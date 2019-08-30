@@ -2,6 +2,9 @@
     <xsl:output method="text"/>
     <xsl:strip-space elements="*"/>
 
+    <xsl:variable name="zoo" select="1010470"/>
+    <xsl:variable name="museum" select="1010471"/>
+
     <xsl:template match="/">
         <xsl:text>import {FactoryAsset} from "./factoryTypes";&#xa;</xsl:text>
         <xsl:text>export const FACTORIES: Readonly&lt;FactoryAsset[]&gt; = [</xsl:text>
@@ -12,12 +15,12 @@
                                         or Template='HeavyFreeAreaBuilding'
                                         or Template = 'SlotFactoryBuilding7'
                                         or Template = 'FreeAreaBuilding'
-                                        or BaseAssetGUID != '' and Values/FactoryBase)
+                                        or (BaseAssetGUID != '' and Values/FactoryBase
+                                        and BaseAssetGUID != $zoo and BaseAssetGUID != $museum))
                                     and Values/Building/AssociatedRegions!='']">
             <!-- Values/Building/AssociatedRegions is empty for buildings like "Edvard's Timber Yard" -->
             <!-- Asset with BaseAssetGUID means it's something that 'extends' a base: mostly buildings in the new world,
                 that are slightly different than in the old world (e.g. Sailmakers) -->
-            <!-- TODO last two lines are Zoo and Museum in the new world - didn't find a filter criterion for those, yet -->
             <xsl:apply-templates select="."/>
             <xsl:text>,&#xa;</xsl:text>
         </xsl:for-each>
