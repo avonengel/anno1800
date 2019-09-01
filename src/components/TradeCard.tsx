@@ -22,8 +22,9 @@ import {
 } from "@material-ui/core";
 import {CompareArrows, Delete} from "@material-ui/icons";
 import {params} from '../data/params_2019-04-17_full';
-import {getProductById} from "../data/products";
+import {getProductById} from "../data/productTypes";
 import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
+import {PRODUCTS} from "../data/products";
 
 const styles = (theme: Theme) => createStyles({
     card: {
@@ -101,9 +102,8 @@ class TradeCard extends React.Component<Props> {
         this.props.delete();
     }
 
-    private generateTitle(): string {
-        const {productId, fromIslandId, toIslandId} = this.props.trade;
-        const productName = getProductById(productId).Name;
+    private generateTitle(productName: string): string {
+        const {fromIslandId, toIslandId} = this.props.trade;
         const fromIsland = this.props.islandState.islandsById[fromIslandId];
         const toIsland = this.props.islandState.islandsById[toIslandId];
         return `${productName} ${fromIsland ? fromIsland.name.substr(0, 3) : '?'} - ${toIsland ? toIsland.name.substr(0, 3) : '?'}`
@@ -111,16 +111,16 @@ class TradeCard extends React.Component<Props> {
 
     render() {
         const {classes, islandState, trade, thisIslandId} = this.props;
-        const product = getProductById(trade.productId);
+        const productName = trade.productId ? getProductById(trade.productId).name : "?";
         const otherIslandId = thisIslandId === trade.fromIslandId ? trade.toIslandId : trade.fromIslandId;
         return (
             <Card className={classes.card}>
                 <CardHeader
                     avatar={
-                        <Avatar aria-label={product.Name} className={classes.avatar}
+                        <Avatar aria-label={productName} className={classes.avatar}
                                 src={getIconData(trade.productId)}/>
                     }
-                    title={this.generateTitle()}
+                    title={this.generateTitle(productName)}
                 />
                 <CardContent>
                     <Button variant={"outlined"} size={"medium"}
@@ -140,7 +140,10 @@ class TradeCard extends React.Component<Props> {
                                 id: 'productSelect',
                             }}>
                             {
-                                params.products.map(p => (
+                                PRODUCTS
+                                    .filter(p => p.productCategory && !p.isAbstract)
+                                    .sort((a,b) => a.name.localeCompare(b.name))
+                                    .map(p => (
                                     <MenuItem value={p.guid} key={p.guid}>{p.name}</MenuItem>
                                 ))
                             }
