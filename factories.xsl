@@ -4,6 +4,7 @@
 
     <xsl:variable name="zoo" select="1010470"/>
     <xsl:variable name="museum" select="1010471"/>
+    <xsl:variable name="coalPowerPlant" select="100779"/>
 
     <xsl:template match="/">
         <xsl:text>import {FactoryAsset} from "./factoryTypes";&#xa;</xsl:text>
@@ -15,8 +16,10 @@
                                         or Template='HeavyFreeAreaBuilding'
                                         or Template = 'SlotFactoryBuilding7'
                                         or Template = 'FreeAreaBuilding'
+                                        or Template = 'PowerplantBuilding'
                                         or (BaseAssetGUID != '' and Values/FactoryBase
                                         and BaseAssetGUID != $zoo and BaseAssetGUID != $museum))
+                                    and Values/Standard/GUID != $coalPowerPlant
                                     and Values/Building/AssociatedRegions!='']">
             <!-- Values/Building/AssociatedRegions is empty for buildings like "Edvard's Timber Yard" -->
             <!-- Asset with BaseAssetGUID means it's something that 'extends' a base: mostly buildings in the new world,
