@@ -34,9 +34,6 @@ export enum Region {
 
 const factoryAssetsById = new Map(FACTORIES.map(asset => [asset.guid, asset]));
 
-export const ALL_FACTORIES = FACTORIES.map(asset => new Factory(asset));
-export const FACTORIES_BY_ID = new Map(ALL_FACTORIES.map(factory => [factory.guid, factory]));
-
 export class Factory {
 
     constructor(asset: FactoryAsset) {
@@ -81,6 +78,8 @@ export class Factory {
         return (this.associatedRegions.indexOf(Region.NEW_WORLD) >= 0);
     }
 }
+export const ALL_FACTORIES = FACTORIES.map(asset => new Factory(asset));
+export const FACTORIES_BY_ID = new Map(ALL_FACTORIES.map(factory => [factory.guid, factory]));
 
 export interface ProductAsset {
     guid: number;
