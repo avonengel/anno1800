@@ -8,7 +8,7 @@ import {
     UpdatePopulationAction
 } from "./types";
 import {AnyAction} from "redux";
-import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets";
+import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -74,15 +74,15 @@ export function islandReducer(state = initialState, action: AnyAction): IslandSt
         case UPDATE_POPULATION:
             const popAction = action as UpdatePopulationAction;
             const islandState = {...state};
-            const islandsById = {...islandState.islandsById};
-            islandState.islandsById = islandsById;
-            const island = {...islandsById[popAction.islandId]};
-            islandsById[popAction.islandId] = island;
-            const islandPopulation = {...island.population};
-            island.population = islandPopulation;
-            const populationState = {...islandPopulation[popAction.level]};
-            islandPopulation[popAction.level] = populationState;
-            populationState.population = popAction.population;
+            islandState.islandsById = {...islandState.islandsById};
+            islandState.islandsById[popAction.islandId] = {...islandState.islandsById[popAction.islandId]};
+            islandState.islandsById[popAction.islandId].population = {...islandState.islandsById[popAction.islandId].population};
+            islandState.islandsById[popAction.islandId].population[popAction.level] = {
+                ...islandState.islandsById[popAction.islandId].population[popAction.level],
+                population: popAction.population,
+                houses: getHouses(getPopulationLevelByName(popAction.level), popAction.population, [])
+            };
+
             return islandState;
         default:
             return state;

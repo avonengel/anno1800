@@ -111,19 +111,29 @@ export interface PublicServiceAsset {
 
 const BASE_SUPPLY_WEIGHT = 5;
 
-export function getPopulation(level: PopulationAsset, houses: number, enabledProducts: number[]): number {
-    const popPerHouse = level.inputs.filter(input => enabledProducts.includes(input.product))
+function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[]) {
+    return level.inputs.filter(input => enabledProducts.includes(input.product))
         .filter(input => input.supplyWeight !== undefined)
         // @ts-ignore
         .reduce((current: number, input: PopulationInput) => current + input.supplyWeight, BASE_SUPPLY_WEIGHT);
+}
 
-    return popPerHouse * houses;
+export function getPopulation(level: PopulationAsset, houses: number, enabledProducts: number[]): number {
+    return getPopulationPerHouse(level, enabledProducts) * houses;
+}
+
+export function getHouses(level: PopulationAsset, population: number, enabledProducts: number[]): number {
+    return Math.ceil(population / getPopulationPerHouse(level, enabledProducts));
 }
 
 export const NEW_WORLD_POPULATION_LEVELS = POPULATIONS.filter(asset => asset.associatedRegions === Region.NEW_WORLD).map(asset => asset.name);
 export const OLD_WORLD_POPULATION_LEVELS = POPULATIONS.filter(asset => asset.associatedRegions === Region.OLD_WORLD).map(asset => asset.name);
 export const POPULATION_LEVELS = [...OLD_WORLD_POPULATION_LEVELS, ...NEW_WORLD_POPULATION_LEVELS];
 
-export function getPopulationLevelByName(name: string) {
-    return POPULATIONS.find(asset => asset.name === name);
+export function getPopulationLevelByName(name: string): PopulationAsset {
+    const level = POPULATIONS.find(asset => asset.name === name);
+    if (level === undefined) {
+        throw Error(`Unknown population level: ${name}!`);
+    }
+    return level;
 }
