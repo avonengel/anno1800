@@ -33,8 +33,8 @@ export const initialState = {
 };
 
 function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
-    const islandState = islandReducer(state.island, action);
-    state = populationConsumptionReducer({...state, island: islandState}, action);
+    state = islandReducer(state, action);
+    state = populationConsumptionReducer(state, action);
     state = factoryReducer(state, action);
     state = factoryProductionConsumptionReducer(state, action);
     if (isOfType(getType(selectIsland), action)) {

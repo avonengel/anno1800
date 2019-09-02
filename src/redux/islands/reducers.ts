@@ -8,7 +8,8 @@ import {
     UpdatePopulationAction
 } from "./types";
 import {AnyAction} from "redux";
-import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets";
+import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
+import {initialState as initialRootState, RootState} from "../store";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -28,52 +29,58 @@ export const initialState: IslandState = {
     }
 };
 
-export function islandReducer(state = initialState, action: AnyAction): IslandState {
+export function islandReducer(state = initialRootState, action: AnyAction): RootState {
     if (!state) {
-        return initialState;
+        return initialRootState;
     }
     switch (action.type) {
         case DELETE_ISLAND:
             // TODO implement deletion
             return state;
         case ADD_ISLAND:
-            const newId = Math.max(...state.islandIds) + 1;
+            const newId = Math.max(...state.island.islandIds) + 1;
             return {
-                islandsById: {
-                    ...state.islandsById,
-                    [newId]: {
-                        name: action.name,
-                        id: newId,
-                        population: newPopulationStateObject(),
-                    }
-                },
-                islandIds: [...state.islandIds, newId]
+                ...state,
+                island: {
+                    islandsById: {
+                        ...state.island.islandsById,
+                        [newId]: {
+                            name: action.name,
+                            id: newId,
+                            population: newPopulationStateObject(),
+                        }
+                    },
+                    islandIds: [...state.island.islandIds, newId]
+                }
             };
         case UPDATE_HOUSES:
             const {islandId, level, houses} = action;
             const result = {
                 ...state,
-                islandsById: {
-                    ...state.islandsById,
+                island: {
+                    ...state.island,
+                    islandsById: {
+                        ...state.island.islandsById,
+                    }
                 }
             };
-            result.islandsById[islandId] = {
-                ...state.islandsById[islandId],
+            result.island.islandsById[islandId] = {
+                ...state.island.islandsById[islandId],
             };
-            result.islandsById[islandId].population = {
-                ...result.islandsById[islandId].population,
+            result.island.islandsById[islandId].population = {
+                ...result.island.islandsById[islandId].population,
             };
-            const old = result.islandsById[islandId].population[level];
+            const old = result.island.islandsById[islandId].population[level];
             const popLevel = getPopulationLevelByName(level);
             let population = old.population;
             if (popLevel) {
                 population = getPopulation(popLevel, houses, []);
             }
-            result.islandsById[islandId].population[level] = new PopulationState(level, houses, population);
+            result.island.islandsById[islandId].population[level] = new PopulationState(level, houses, population);
             return result;
         case UPDATE_POPULATION:
             const popAction = action as UpdatePopulationAction;
-            const islandState = {...state};
+            const islandState = {...state.island};
             islandState.islandsById = {...islandState.islandsById};
             islandState.islandsById[popAction.islandId] = {...islandState.islandsById[popAction.islandId]};
             islandState.islandsById[popAction.islandId].population = {...islandState.islandsById[popAction.islandId].population};
@@ -83,7 +90,7 @@ export function islandReducer(state = initialState, action: AnyAction): IslandSt
                 houses: getHouses(getPopulationLevelByName(popAction.level), popAction.population, [])
             };
 
-            return islandState;
+            return {...state, island: islandState};
         default:
             return state;
     }
