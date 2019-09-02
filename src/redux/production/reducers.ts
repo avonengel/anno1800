@@ -1,12 +1,13 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
-import {getPopulationLevelByName, PopulationLevelRaw} from "../../data/populations";
+import {getPopulationLevelByName} from "../../data/populations";
 import {FactoryState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 import {FACTORIES_BY_ID} from "../../data/factoryTypes";
+import {PopulationAsset} from "../../data/populationTypes";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -14,8 +15,8 @@ const initialProductState = {
     producers: {},
 };
 
-function getMaxPeoplePerHouse(level: PopulationLevelRaw) {
-    return level.Inputs.reduce((acc, input) => acc + input.SupplyWeight, 0);
+function getMaxPeoplePerHouse(level: PopulationAsset) {
+    return level.inputs.reduce((acc, input) => acc + (input.supplyWeight || 0), 0);
 }
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
@@ -29,11 +30,13 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                 const islandProductStates = {...products[islandId]} || {};
                 products[islandId] = islandProductStates;
 
-                level.Inputs.forEach((input) => {
-                    let productState = {...(islandProductStates[input.ProductID] || initialProductState)};
-                    islandProductStates[input.ProductID] = productState;
-                    productState.populationConsumers = {...productState.populationConsumers};
-                    productState.populationConsumers[level.Name] = input.Amount * people * 60 / getMaxPeoplePerHouse(level);
+                level.inputs.forEach((input) => {
+                    if (input.amount) {
+                        let productState = {...(islandProductStates[input.product] || initialProductState)};
+                        islandProductStates[input.product] = productState;
+                        productState.populationConsumers = {...productState.populationConsumers};
+                        productState.populationConsumers[level.name] = input.amount * people * 60 / getMaxPeoplePerHouse(level);
+                    }
                 });
                 return {
                     ...state,
@@ -51,7 +54,7 @@ const initialFactoryState: FactoryState = {
 };
 
 export function factoryReducer(state: RootState, action: AnyAction): RootState {
-    if(isActionOf(FactoryActions, action)) {
+    if (isActionOf(FactoryActions, action)) {
         const {islandId, factoryId} = action.payload;
         const factories = {...state.factories};
         const islandFactories = {...factories[islandId]};

@@ -56,7 +56,7 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
                     if (!populationLevel) {
                         continue;
                     }
-                    const needed = populationLevel.Inputs.find(input => factory.output === input.ProductID);
+                    const needed = populationLevel.inputs.find(input => factory.output === input.product);
                     if (needed) {
                         factoriesToShow.push(factory);
                         return;
