@@ -1,7 +1,7 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
-import {FactoryState} from "./types";
+import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
@@ -123,4 +123,15 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
         };
     }
     return state;
+}
+
+export function getProduction(productState: ProductState): number {
+    let production = 0;
+    for (let factoryId in productState.producers) {
+        production += productState.producers[factoryId];
+    }
+    for (let tradeId in productState.imports) {
+        production += productState.imports[tradeId];
+    }
+    return production;
 }

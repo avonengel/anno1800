@@ -1,15 +1,9 @@
-import {
-    ADD_ISLAND,
-    DELETE_ISLAND,
-    IslandState,
-    PopulationState,
-    UPDATE_HOUSES,
-    UPDATE_POPULATION,
-    UpdatePopulationAction
-} from "./types";
+import {ADD_ISLAND, DELETE_ISLAND, IslandState, PopulationState, UPDATE_HOUSES, UPDATE_POPULATION, UpdatePopulationAction} from "./types";
 import {AnyAction} from "redux";
 import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
+import {ProductState} from "../production/types";
+import {getProduction} from "../production/reducers";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -29,7 +23,24 @@ export const initialState: IslandState = {
     }
 };
 
-export function islandReducer(state = initialRootState, action: AnyAction): RootState {
+function getEnabledProducts(products: {[productId: number]: ProductState}) {
+    if (!products) {
+        return [];
+    }
+    const result = [];
+    for (let productId in products) {
+        const productState = products[productId];
+        if (productState) {
+            if (getProduction(productState) > 0) {
+                // FIXME how to do this properly?
+                result.push(Number(productId));
+            }
+        }
+    }
+    return result;
+}
+
+export function islandReducer(state: RootState = initialRootState, action: AnyAction): RootState {
     if (!state) {
         return initialRootState;
     }
@@ -74,7 +85,7 @@ export function islandReducer(state = initialRootState, action: AnyAction): Root
             const popLevel = getPopulationLevelByName(level);
             let population = old.population;
             if (popLevel) {
-                population = getPopulation(popLevel, houses, []);
+                population = getPopulation(popLevel, houses, getEnabledProducts(state.products[islandId]));
             }
             result.island.islandsById[islandId].population[level] = new PopulationState(level, houses, population);
             return result;
@@ -87,7 +98,7 @@ export function islandReducer(state = initialRootState, action: AnyAction): Root
             islandState.islandsById[popAction.islandId].population[popAction.level] = {
                 ...islandState.islandsById[popAction.islandId].population[popAction.level],
                 population: popAction.population,
-                houses: getHouses(getPopulationLevelByName(popAction.level), popAction.population, [])
+                houses: getHouses(getPopulationLevelByName(popAction.level), popAction.population, getEnabledProducts(state.products[popAction.islandId]))
             };
 
             return {...state, island: islandState};

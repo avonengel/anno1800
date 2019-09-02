@@ -1,17 +1,6 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
-import {
-    Avatar,
-    Card,
-    CardContent,
-    CardHeader,
-    createStyles,
-    InputAdornment,
-    TextField,
-    Theme,
-    WithStyles,
-    withStyles
-} from "@material-ui/core";
+import {Avatar, Card, CardContent, CardHeader, createStyles, InputAdornment, TextField, Theme, WithStyles, withStyles} from "@material-ui/core";
 import {RootState} from "../redux/store";
 import {getFactoryStateById, getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
@@ -21,6 +10,7 @@ import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Error, Warning} from "@material-ui/icons";
 import {Factory} from "../data/assets";
+import {getProduction} from "../redux/production/reducers";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -78,17 +68,6 @@ function getConsumption(productState: ProductState): number {
         consumption += productState.exports[tradeId];
     }
     return consumption;
-}
-
-function getProduction(productState: ProductState): number {
-    let production = 0;
-    for (let factoryId in productState.producers) {
-        production += productState.producers[factoryId];
-    }
-    for (let tradeId in productState.imports) {
-        production += productState.imports[tradeId];
-    }
-    return production;
 }
 
 
