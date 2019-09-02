@@ -7,7 +7,7 @@
     <!-- or (BaseAssetGUID != '' and Values/FactoryBase
                                         and BaseAssetGUID != $zoo and BaseAssetGUID != $museum))-->
     <xsl:template match="/">
-        <xsl:text>import {PublicServiceAsset} from "./publicServiceTypes";&#xa;</xsl:text>
+        <xsl:text>import {PublicServiceAsset} from "./assets";&#xa;</xsl:text>
         <xsl:text>export const PUBLIC_SERVICES: Readonly&lt;PublicServiceAsset[]&gt; = [</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:for-each select="descendant::Asset[Values/PublicService

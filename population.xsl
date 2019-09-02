@@ -3,7 +3,7 @@
     <xsl:strip-space elements="*"/>
 
     <xsl:template match="/">
-        <xsl:text>import {PopulationAsset} from "./populationTypes";&#xa;</xsl:text>
+        <xsl:text>import {PopulationAsset} from "./assets";&#xa;</xsl:text>
         <xsl:text>export const POPULATIONS: Readonly&lt;PopulationAsset[]&gt; = [&#xa;</xsl:text>
         <xsl:apply-templates/>
         <xsl:text>];&#xa;</xsl:text>

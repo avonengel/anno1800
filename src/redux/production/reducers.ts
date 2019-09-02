@@ -1,13 +1,11 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
 import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
-import {getPopulationLevelByName} from "../../data/populations";
 import {FactoryState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
-import {FACTORIES_BY_ID} from "../../data/factoryTypes";
-import {PopulationAsset} from "../../data/populationTypes";
+import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../data/assets";
 
 const initialProductState = {
     factoryConsumers: {},

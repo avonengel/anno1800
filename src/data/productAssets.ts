@@ -1,4 +1,4 @@
-import {ProductAsset} from "./productTypes";
+import {ProductAsset} from "./assets";
 export const PRODUCTS: Readonly<ProductAsset[]> = [
   {guid: 1010017, name: "Coins"},
   {guid: 1010190, name: "Influence"},

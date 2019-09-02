@@ -7,8 +7,8 @@ import {
     UPDATE_POPULATION,
     UpdatePopulationAction
 } from "./types";
-import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/populations";
 import {AnyAction} from "redux";
+import {getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {

@@ -20,7 +20,7 @@ import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Error, Warning} from "@material-ui/icons";
-import {Factory} from "../data/factoryTypes";
+import {Factory} from "../data/assets";
 
 
 const styles = (theme: Theme) => createStyles({

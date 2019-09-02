@@ -9,7 +9,7 @@
     <xsl:variable name="unknownStuff" select="193482"/>
 
     <xsl:template match="/">
-        <xsl:text>import {ProductAsset} from "./productTypes";&#xa;</xsl:text>
+        <xsl:text>import {ProductAsset} from "./assets";&#xa;</xsl:text>
         <xsl:text>export const PRODUCTS: Readonly&lt;ProductAsset[]&gt; = [</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:for-each select="descendant::Asset[(Template='Product'

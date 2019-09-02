@@ -7,16 +7,10 @@ import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
 import {Add, Visibility, VisibilityOff} from "@material-ui/icons";
 import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
-import {
-    getPopulationLevelByName,
-    NEW_WORLD_POPULATION_LEVELS,
-    OLD_WORLD_POPULATION_LEVELS,
-    POPULATION_LEVELS
-} from "../data/populations";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {ALL_FACTORIES, FACTORIES_BY_ID, Factory} from "../data/factoryTypes";
+import {ALL_FACTORIES, FACTORIES_BY_ID, Factory, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS} from "../data/assets";
 
 
 const styles = (theme: Theme) => createStyles({

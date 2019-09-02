@@ -1,4 +1,4 @@
-import {FactoryAsset} from "./factoryTypes";
+import {FactoryAsset} from "./assets";
 export const FACTORIES: Readonly<FactoryAsset[]> = [
   {guid: 1010262, name: "Grain Farm", associatedRegions: "Moderate", output: 1010192, cycleTime: 60},
   {guid: 1010263, name: "Cattle Farm", associatedRegions: "Moderate", output: 1010193, cycleTime: 120},

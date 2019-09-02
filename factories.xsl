@@ -7,7 +7,7 @@
     <xsl:variable name="coalPowerPlant" select="100779"/>
 
     <xsl:template match="/">
-        <xsl:text>import {FactoryAsset} from "./factoryTypes";&#xa;</xsl:text>
+        <xsl:text>import {FactoryAsset} from "./assets";&#xa;</xsl:text>
         <xsl:text>export const FACTORIES: Readonly&lt;FactoryAsset[]&gt; = [</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         <xsl:for-each select="descendant::Asset[(Template='FactoryBuilding7'

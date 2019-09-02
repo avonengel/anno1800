@@ -1,4 +1,4 @@
-import {PopulationAsset} from "./populationTypes";
+import {PopulationAsset} from "./assets";
 export const POPULATIONS: Readonly<PopulationAsset[]> = [
   {name: "Farmers", guid: 15000000, associatedRegions: "Moderate", inputs: [
     {product: 120020, supplyWeight: 5},

@@ -22,9 +22,9 @@ import {
 } from "@material-ui/core";
 import {CompareArrows, Delete} from "@material-ui/icons";
 import {params} from '../data/params_2019-04-17_full';
-import {getProductById} from "../data/productTypes";
+import {getProductById} from "../data/assets";
 import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
-import {PRODUCTS} from "../data/products";
+import {PRODUCTS} from "../data/productAssets";
 
 const styles = (theme: Theme) => createStyles({
     card: {
