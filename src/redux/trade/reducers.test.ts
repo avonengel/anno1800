@@ -11,7 +11,7 @@ describe('tradeReducer', () => {
         const firstIslandId = initialState.selectedIsland;
         let state = tradeReducer(initialState, addTrade(1));
         const tradeId = state.trades.allTradeIds[0];
-        state = {...state, island: islandReducer(state.island, createIsland('Other'))};
+        state = islandReducer(state, createIsland('Other'));
         const otherIslandId = state.island.islandIds[state.island.islandIds.length - 1];
         state = tradeReducer(state, updateTradeProduct(tradeId, 1010200));
 
@@ -28,7 +28,7 @@ describe('tradeReducer', () => {
          // Arrange
         const initialState = {...initialRootState};
         // Add island 'Other'
-        let state: RootState = {...initialState, island: islandReducer(initialState.island, createIsland('Other'))};
+        let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
         const secondIslandId = state.island.islandIds[-1];
         // Add trade
@@ -50,7 +50,7 @@ describe('tradeReducer', () => {
         // Arrange
         const initialState = {...initialRootState};
         // Add island 'Other'
-        let state: RootState = {...initialState, island: islandReducer(initialState.island, createIsland('Other'))};
+        let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
         const secondIslandId = state.island.islandIds[-1];
         // Add trade
