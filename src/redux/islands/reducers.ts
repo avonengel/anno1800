@@ -1,9 +1,12 @@
 import {ADD_ISLAND, DELETE_ISLAND, IslandState, PopulationState, UPDATE_HOUSES, UPDATE_POPULATION, UpdatePopulationAction} from "./types";
 import {AnyAction} from "redux";
-import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
+import {getFactoryById, getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
+import {updateFactoryCount} from "../production/actions";
+import {isActionOf} from "typesafe-actions";
+import iassign from "immutable-assign";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -23,16 +26,15 @@ export const initialState: IslandState = {
     }
 };
 
-function getEnabledProducts(products: {[productId: number]: ProductState}) {
+function getEnabledProducts(products: { [productId: number]: ProductState }, excludedFactoryId?: number) {
     if (!products) {
         return [];
     }
-    const result = [];
+    const result: number[] = [];
     for (let productId in products) {
         const productState = products[productId];
         if (productState) {
-            if (getProduction(productState) > 0) {
-                // FIXME how to do this properly?
+            if (getProduction(productState, excludedFactoryId) > 0) {
                 result.push(Number(productId));
             }
         }
@@ -44,6 +46,35 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
     if (!state) {
         return initialRootState;
     }
+    // if (isActionOf(updateFactoryCount, action)) {
+    //     const {count, factoryId, islandId} = action.payload;
+    //     const factoryOutputProduct = getFactoryById(factoryId).output;
+    //     // TODO honor input.noSupplyWeightCount
+    //     // TODO there may be unwanted changes to population count: set population count manually, then start to add required factories in the tool -> population count is reset based on invalid house count computation from before!
+    //     const affectedPopulationAssets = POPULATION_LEVELS
+    //         .filter(level => state.island.islandsById[islandId].population[level] !== undefined
+    //             && state.island.islandsById[islandId].population[level].population > 0)
+    //         .map(getPopulationLevelByName)
+    //         .filter(popAsset => popAsset.inputs.some(input => input.product === factoryOutputProduct && input.supplyWeight));
+    //     if (affectedPopulationAssets.length === 0) {
+    //         return state;
+    //     }
+    //     // get enabled products, but exclude the changed factory ID
+    //     const enabledProducts = getEnabledProducts(state.products[islandId], factoryId);
+    //     if (count > 0) {
+    //         // if factories will exist in new state, add enabled product ID locally
+    //         enabledProducts.push(factoryOutputProduct);
+    //     }
+    //     return iassign(state, (i, context) => i.island.islandsById[context.islandId].population, populations => {
+    //         affectedPopulationAssets.forEach(asset => {
+    //             populations[asset.name] = {
+    //                 ...populations[asset.name],
+    //                 population: getPopulation(asset, populations[asset.name].houses, enabledProducts),
+    //             };
+    //         });
+    //         return populations;
+    //     }, {islandId});
+    // }
     switch (action.type) {
         case DELETE_ISLAND:
             // TODO implement deletion

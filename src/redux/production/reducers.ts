@@ -19,6 +19,7 @@ function getMaxPeoplePerHouse(level: PopulationAsset) {
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
     if (action.type === UPDATE_HOUSES || action.type === UPDATE_POPULATION) {
+        // FIXME how to notice that population changed due to updateFactoryCount with population recomputation?!
         const {islandId, level: levelName} = action;
         if (!!state.island) {
             const level = getPopulationLevelByName(levelName);
@@ -125,10 +126,12 @@ export function factoryProductionConsumptionReducer(state: RootState, action: An
     return state;
 }
 
-export function getProduction(productState: ProductState): number {
+export function getProduction(productState: ProductState, excludedProducerId?: number): number {
     let production = 0;
     for (let factoryId in productState.producers) {
-        production += productState.producers[factoryId];
+        if (Number(factoryId) !== excludedProducerId) {
+            production += productState.producers[factoryId];
+        }
     }
     for (let tradeId in productState.imports) {
         production += productState.imports[tradeId];

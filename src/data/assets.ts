@@ -81,6 +81,14 @@ export class Factory {
 export const ALL_FACTORIES = FACTORIES.map(asset => new Factory(asset));
 export const FACTORIES_BY_ID = new Map(ALL_FACTORIES.map(factory => [factory.guid, factory]));
 
+export function getFactoryById(factoryId: number) {
+    const factory = FACTORIES_BY_ID.get(factoryId);
+    if (factory === undefined) {
+        throw Error(`Unknown Factory ID: ${factoryId}!`);
+    }
+    return factory;
+}
+
 export interface ProductAsset {
     guid: number;
     name: string;
@@ -112,12 +120,6 @@ export interface PublicServiceAsset {
 const BASE_SUPPLY_WEIGHT = 5;
 
 function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[]) {
-    console.log("filter enabledProducts", level.inputs.filter(input => enabledProducts.includes(input.product)));
-    console.log("filter supplyWeight", level.inputs.filter(input => enabledProducts.includes(input.product)).filter(input => input.supplyWeight !== undefined));
-    console.log("result", level.inputs.filter(input => enabledProducts.includes(input.product))
-        .filter(input => input.supplyWeight !== undefined)
-        // @ts-ignore
-        .reduce((current: number, input: PopulationInput) => current + input.supplyWeight, BASE_SUPPLY_WEIGHT));
     return level.inputs.filter(input => enabledProducts.includes(input.product))
         .filter(input => input.supplyWeight !== undefined)
         // @ts-ignore
