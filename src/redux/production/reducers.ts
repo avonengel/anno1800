@@ -34,7 +34,11 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                         let productState = {...(islandProductStates[input.product] || initialProductState)};
                         islandProductStates[input.product] = productState;
                         productState.populationConsumers = {...productState.populationConsumers};
-                        productState.populationConsumers[level.name] = input.amount * people * 60 / getMaxPeoplePerHouse(level);
+                        if (input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < people) {
+                            productState.populationConsumers[level.name] = input.amount * people * 60 / getMaxPeoplePerHouse(level);
+                        } else {
+                            productState.populationConsumers[level.name] = 0;
+                        }
                     }
                 });
                 return {

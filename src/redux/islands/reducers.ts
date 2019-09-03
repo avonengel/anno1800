@@ -1,12 +1,17 @@
-import {ADD_ISLAND, DELETE_ISLAND, IslandState, PopulationState, UPDATE_HOUSES, UPDATE_POPULATION, UpdatePopulationAction} from "./types";
+import {
+    ADD_ISLAND,
+    DELETE_ISLAND,
+    IslandState,
+    PopulationState,
+    UPDATE_HOUSES,
+    UPDATE_POPULATION,
+    UpdatePopulationAction
+} from "./types";
 import {AnyAction} from "redux";
-import {getFactoryById, getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
+import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
-import {updateFactoryCount} from "../production/actions";
-import {isActionOf} from "typesafe-actions";
-import iassign from "immutable-assign";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -51,6 +56,7 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
     //     const factoryOutputProduct = getFactoryById(factoryId).output;
     //     // TODO honor input.noSupplyWeightCount
     //     // TODO there may be unwanted changes to population count: set population count manually, then start to add required factories in the tool -> population count is reset based on invalid house count computation from before!
+    //     // idea to solve that: add an 'Options' or 'Settings' card that contains a toggle to disable computing population from houses & available products. Might as well disable the house count in general
     //     const affectedPopulationAssets = POPULATION_LEVELS
     //         .filter(level => state.island.islandsById[islandId].population[level] !== undefined
     //             && state.island.islandsById[islandId].population[level].population > 0)
