@@ -9,6 +9,7 @@ import storage from 'redux-persist/lib/storage'
 import {getType, isOfType} from "typesafe-actions";
 import {selectIsland} from "./islands/actions";
 import {initialTradeState, tradeReducer, TradeState} from "./trade/reducers";
+import {stateUploadReducer} from "./reducers";
 
 
 const composeEnhancers = composeWithDevTools({
@@ -33,6 +34,7 @@ export const initialState = {
 };
 
 function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
+    state = stateUploadReducer(state, action);
     state = islandReducer(state, action);
     state = populationConsumptionReducer(state, action);
     state = factoryReducer(state, action);

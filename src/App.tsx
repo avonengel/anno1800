@@ -1,21 +1,5 @@
 import React from 'react';
-import './App.css';
-import {
-    AppBar,
-    Container,
-    createStyles,
-    CssBaseline,
-    Divider,
-    Drawer, InputAdornment,
-    List,
-    ListItem,
-    ListItemText,
-    TextField,
-    Toolbar,
-    Typography,
-    withStyles,
-    WithStyles
-} from "@material-ui/core";
+import {AppBar, Container, createStyles, CssBaseline, Divider, Drawer, InputAdornment, List, ListItem, ListItemText, TextField, Toolbar, Typography, withStyles, WithStyles} from "@material-ui/core";
 import {ThemeProvider} from '@material-ui/styles';
 import theme from "./theme";
 import {connect} from "react-redux";
@@ -25,7 +9,9 @@ import {Dispatch} from "redux";
 import {createIsland, selectIsland} from "./redux/islands/actions";
 import clsx from "clsx";
 import IconButton from "@material-ui/core/IconButton";
-import {Add, ChevronLeft, ChevronRight, Menu} from "@material-ui/icons"
+import {Add, ChevronLeft, ChevronRight, Menu, Publish} from "@material-ui/icons"
+import DownloadButton from "./components/DownloadButton";
+import {uploadState} from "./redux/actions";
 
 const drawerWidth = 240;
 
@@ -49,6 +35,9 @@ const styles = createStyles({
     },
     menuButton: {
         marginRight: theme.spacing(2),
+    },
+    title: {
+        flexGrow: 1,
     },
     hide: {
         display: 'none',
@@ -109,6 +98,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
         onCreateIsland: (name: string) => {
             dispatch(createIsland(name));
         },
+        onStateUpload: (state: RootState) => {
+            dispatch(uploadState(state));
+        }
     };
 };
 type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -119,6 +111,7 @@ interface OwnState {
 }
 
 class App extends React.Component<Props, OwnState> {
+    private fileInputRef: React.RefObject<HTMLInputElement>;
 
     constructor(props: Props) {
         super(props);
@@ -126,6 +119,7 @@ class App extends React.Component<Props, OwnState> {
             name: "",
             drawerOpen: false,
         };
+        this.fileInputRef = React.createRef();
     }
 
     handleDrawerOpen() {
@@ -135,7 +129,6 @@ class App extends React.Component<Props, OwnState> {
     handleDrawerClose() {
         this.setState({drawerOpen: false});
     }
-
 
     selectIsland(islandId: number) {
         this.props.onIslandSelected(islandId);
@@ -152,6 +145,19 @@ class App extends React.Component<Props, OwnState> {
         this.setState({
             name: event.target.value
         });
+    }
+
+    handleStateUpload(event: React.ChangeEvent<HTMLInputElement>) {
+        const {files} = event.target;
+        console.log("files:", files);
+        if (files && files.length > 0) {
+            const file = files.item(0);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = ((stateUpload) => (e: any) => {stateUpload(JSON.parse(e.target.result))})(this.props.onStateUpload);
+                reader.readAsText(file);
+            }
+        }
     }
 
     render() {
@@ -178,9 +184,19 @@ class App extends React.Component<Props, OwnState> {
                                 >
                                     <Menu/>
                                 </IconButton>
-                                <Typography variant="h6" noWrap>
+                                <Typography variant="h6" noWrap className={classes.title}>
                                     Anno 1800 Companion
                                 </Typography>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="Upload State"
+                                    onClick={() => {if(this.fileInputRef.current) this.fileInputRef.current.click();} }>
+                                    <Publish/>
+                                </IconButton>
+                                <input type={"file"} ref={this.fileInputRef}
+                                       style={{display: "none"}} onChange={this.handleStateUpload.bind(this)}
+                                       accept={"application/json"}/>
+                                <DownloadButton/>
                             </Toolbar>
                         </AppBar>
                         <Drawer
