@@ -12,6 +12,8 @@ import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} f
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
+import {isActionOf} from "typesafe-actions";
+import {renameIsland, selectNextIsland, selectPreviousIsland} from "./actions";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -45,6 +47,24 @@ function getEnabledProducts(products: { [productId: number]: ProductState }, exc
         }
     }
     return result;
+}
+
+function selectNextIslandId(islandIds: number[], currentIslandId: number) {
+    const currentIndex = islandIds.findIndex(value => value === currentIslandId);
+    let selectedIsland = islandIds[0];
+    if (currentIndex + 1 < islandIds.length) {
+        selectedIsland = islandIds[currentIndex + 1];
+    }
+    return selectedIsland;
+}
+
+function selectPreviousIslandId(islandIds: number[], currentIslandId: number) {
+    const currentIndex = islandIds.findIndex(value => value === currentIslandId);
+    let selectedIsland = islandIds[islandIds.length - 1];
+    if (currentIndex - 1 >= 0) {
+        selectedIsland = islandIds[currentIndex - 1];
+    }
+    return selectedIsland;
 }
 
 export function islandReducer(state: RootState = initialRootState, action: AnyAction): RootState {
@@ -81,9 +101,57 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
     //         return populations;
     //     }, {islandId});
     // }
+    if (isActionOf(renameIsland, action)) {
+        const {islandId, name} = action.payload;
+        return {
+            ...state,
+            island: {
+                ...state.island,
+                islandsById: {
+                    ...state.island.islandsById,
+                    [islandId]: {
+                        ...state.island.islandsById[islandId],
+                        name
+                    }
+                }
+            }
+        };
+    }
+    if (isActionOf(selectNextIsland, action)) {
+        const islandIds = state.island.islandIds;
+        if (islandIds.length > 1) {
+            const selectedIsland = selectNextIslandId(islandIds, state.selectedIsland);
+            return {
+                ...state,
+                selectedIsland
+            };
+        }
+    }
+    if (isActionOf(selectPreviousIsland, action)) {
+        const islandIds = state.island.islandIds;
+        if (islandIds.length > 1) {
+            let selectedIsland = selectPreviousIslandId(islandIds, state.selectedIsland);
+            return {
+                ...state,
+                selectedIsland
+            };
+        }
+    }
     switch (action.type) {
         case DELETE_ISLAND:
-            // TODO implement deletion
+            if (state.island.islandIds.length > 1) {
+                const selectedIsland = selectPreviousIslandId(state.island.islandIds, state.selectedIsland);
+                const {[action.id]: _, ...islandsById} = state.island.islandsById;
+                const islandIds = state.island.islandIds.filter(islandId => islandId !== action.id);
+                return {
+                    ...state,
+                    island: {
+                        islandIds,
+                        islandsById
+                    },
+                    selectedIsland
+                }
+            }
             return state;
         case ADD_ISLAND:
             const newId = Math.max(...state.island.islandIds) + 1;

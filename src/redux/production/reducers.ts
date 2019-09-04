@@ -80,6 +80,7 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
 }
 
 export function factoryProductionConsumptionReducer(state: RootState, action: AnyAction) {
+    // TODO delete entry when an island is deleted
     if (isActionOf([updateFactoryCount, updateFactoryProductivity], action)) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId

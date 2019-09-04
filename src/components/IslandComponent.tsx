@@ -1,23 +1,60 @@
 import * as React from "react";
-import {createStyles, Fab, Grid, IconButton, Theme, Typography, WithStyles, withStyles, Zoom} from "@material-ui/core";
-import {connect} from "react-redux";
+import {
+    Button,
+    createStyles,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Fab,
+    Grid,
+    IconButton,
+    Input,
+    Theme,
+    Tooltip,
+    Typography,
+    withStyles,
+    WithStyles,
+    Zoom
+} from "@material-ui/core";
 import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
-import PopulationCard from "./PopulationCard";
 import {Dispatch} from "redux";
-import {Add, Visibility, VisibilityOff} from "@material-ui/icons";
-import {updateHouseCount, updatePopulation} from "../redux/islands/actions";
+import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
+import {
+    deleteIsland,
+    renameIsland,
+    selectNextIsland,
+    selectPreviousIsland,
+    updateHouseCount,
+    updatePopulation
+} from "../redux/islands/actions";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {ALL_FACTORIES, FACTORIES_BY_ID, Factory, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS} from "../data/assets";
+import {
+    ALL_FACTORIES,
+    FACTORIES_BY_ID,
+    Factory,
+    getPopulationLevelByName,
+    NEW_WORLD_POPULATION_LEVELS,
+    OLD_WORLD_POPULATION_LEVELS,
+    POPULATION_LEVELS
+} from "../data/assets";
+import PopulationCard from "./PopulationCard";
+import {connect} from "react-redux";
 
 
 const styles = (theme: Theme) => createStyles({
     addTradeItem: {
         alignSelf: "center",
-        textAlign: "center"
+        textAlign: "center",
+        minHeight: "10em",
     },
+    input: {
+        margin: theme.spacing(1),
+    }
 });
 
 interface ReactProps extends WithStyles<typeof styles> {
@@ -29,6 +66,7 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
         island: getIslandById(state, reactProps.islandId),
         factoriesToShow: factoriesToShow(state, reactProps),
         tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
+        hasMultipleIslands: state.island.islandIds.length > 1,
     };
 };
 
@@ -91,13 +129,28 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
         },
         addTrade: () => {
             dispatch(addTrade(props.islandId));
-        }
+        },
+        renameIsland: (name: string) => {
+            dispatch(renameIsland(props.islandId, name));
+        },
+        deleteIsland: () => {
+            dispatch(deleteIsland(props.islandId));
+        },
+        selectPreviousIsland: () => {
+            dispatch(selectPreviousIsland());
+        },
+        selectNextIsland: () => {
+            dispatch(selectNextIsland());
+        },
     };
 };
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 interface OwnState {
     showAll: boolean;
+    editName: boolean;
+    islandName: string;
+    deleteDialogOpen: boolean;
 }
 
 class IslandComponent extends React.Component<Props, OwnState> {
@@ -107,6 +160,9 @@ class IslandComponent extends React.Component<Props, OwnState> {
         super(props);
         this.state = {
             showAll: false,
+            editName: false,
+            islandName: props.island.name,
+            deleteDialogOpen: false,
         };
     }
 
@@ -114,8 +170,18 @@ class IslandComponent extends React.Component<Props, OwnState> {
         this.props.addTrade();
     }
 
+    private handleEdit() {
+        this.setState({editName: !this.state.editName})
+    }
+
+    private handleNameChange(event: React.FormEvent) {
+        event.preventDefault();
+        this.props.renameIsland(this.state.islandName);
+        this.setState({editName: false});
+    }
+
     render() {
-        const {island, tradeIds, classes} = this.props;
+        const {island, tradeIds, classes, hasMultipleIslands} = this.props;
         const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
         const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
         const populationDecided = isOldWorld !== isNewWorld;
@@ -129,7 +195,41 @@ class IslandComponent extends React.Component<Props, OwnState> {
         }
 
         return <React.Fragment>
-            <Typography variant="h3" align={"center"} gutterBottom>{island.name}</Typography>
+            {this.renderNameFragment()}
+            <div style={{textAlign: "center"}}>
+                <IconButton aria-label={"rename island"} onClick={this.handleEdit.bind(this)}>
+                    <Edit/>
+                </IconButton>
+                <Tooltip title={(hasMultipleIslands && "Delete island") || "Cannot delete last island"}><span>
+                    <IconButton aria-label={"delete island"} color={"secondary"}
+                                onClick={() => this.setState({deleteDialogOpen: true})}
+                                disabled={!hasMultipleIslands}>
+                        <Delete/>
+                    </IconButton>
+                </span></Tooltip>
+                <Dialog
+                    open={this.state.deleteDialogOpen}
+                    onClose={() => this.handleDeleteClose(false)}
+                    aria-labelledby="delete-dialog-title"
+                    aria-describedby="delete-dialog-description"
+                >
+                    <DialogTitle id="delete-dialog-title">Delete island {island.name}?</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="delete-dialog-description">
+                            Are you sure? There is no undo functionality, yet.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant={"contained"} onClick={() => this.handleDeleteClose(false)} color="primary">
+                            Cancel
+                        </Button>
+                        <Button variant={"contained"} onClick={() => this.handleDeleteClose(true)} color="primary"
+                                autoFocus>
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
             <Grid container spacing={1} justify={"center"}>
                 {populationCards.map((card) =>
                     (<Grid item xs={6} md={3} lg={2} key={card.props.level}>
@@ -165,7 +265,47 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     </Fab>
                 </Grid>
             </Grid>
-        </React.Fragment>;
+        </React.Fragment>
+            ;
+    }
+
+    private renderNameFragment() {
+        const {classes, island, hasMultipleIslands} = this.props;
+        if (this.state.editName) {
+            return <form onSubmit={this.handleNameChange.bind(this)}>
+                <div style={{textAlign: "center"}}>
+                    <Input
+                        value={this.state.islandName}
+                        className={classes.input}
+                        inputProps={{
+                            'aria-label': 'new name',
+                        }}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({islandName: event.target.value})}
+                    />
+                </div>
+            </form>;
+        }
+        return <Typography variant="h3" align={"center"}>
+            <Tooltip
+                title={(hasMultipleIslands && "Select previous island") || "There is only one island, cannot select previous one"}>
+                <span>
+                    <IconButton color={"secondary"} disabled={!hasMultipleIslands}
+                                onClick={() => this.props.selectPreviousIsland()}>
+                        <ChevronLeft/>
+                    </IconButton>
+                </span>
+            </Tooltip>
+            {island.name}
+            <Tooltip
+                title={(hasMultipleIslands && "Select next island") || "There is only one island, cannot select next one"}>
+                <span>
+                    <IconButton color={"secondary"} disabled={!hasMultipleIslands}
+                                onClick={() => this.props.selectNextIsland()}>
+                        <ChevronRight/>
+                    </IconButton>
+                </span>
+            </Tooltip>
+        </Typography>;
     }
 
     private hasPopulation(levelNames: string[]) {
@@ -187,7 +327,6 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     private shouldShow(factory: Factory): boolean {
-
         return this.state.showAll || this.props.factoriesToShow.includes(factory);
     }
 
@@ -200,6 +339,13 @@ class IslandComponent extends React.Component<Props, OwnState> {
     createOnPopulationChange(level: string): (population: number) => void {
         return (population: number) => {
             this.props.onPopulationChange(level, population);
+        }
+    }
+
+    private handleDeleteClose(deleteIsland: boolean) {
+        this.setState({deleteDialogOpen: false});
+        if (deleteIsland) {
+            this.props.deleteIsland();
         }
     }
 }

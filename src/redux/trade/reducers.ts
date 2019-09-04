@@ -224,5 +224,6 @@ export function tradeReducer(state: RootState, action: AnyAction) {
             }
         }
     }
+    // TODO delete trades when an Island is deleted?
     return state;
 }
