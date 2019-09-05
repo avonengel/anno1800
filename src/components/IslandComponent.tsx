@@ -148,7 +148,7 @@ type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof
 
 interface OwnState {
     showAll: boolean;
-    editName: boolean;
+    isEditingIslandName: boolean;
     islandName: string;
     deleteDialogOpen: boolean;
 }
@@ -160,7 +160,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
         super(props);
         this.state = {
             showAll: false,
-            editName: false,
+            isEditingIslandName: false,
             islandName: props.island.name,
             deleteDialogOpen: false,
         };
@@ -171,13 +171,22 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     private handleEdit() {
-        this.setState({editName: !this.state.editName})
+        this.setState({
+            isEditingIslandName: !this.state.isEditingIslandName,
+            islandName: this.props.island.name,
+        });
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<OwnState>, snapshot?: any): void {
+        if (this.props.islandId !== prevProps.islandId) {
+            this.setState({isEditingIslandName: false});
+        }
     }
 
     private handleNameChange(event: React.FormEvent) {
         event.preventDefault();
         this.props.renameIsland(this.state.islandName);
-        this.setState({editName: false});
+        this.setState({isEditingIslandName: false});
     }
 
     render() {
@@ -266,12 +275,11 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </Grid>
             </Grid>
         </React.Fragment>
-            ;
     }
 
     private renderNameFragment() {
         const {classes, island, hasMultipleIslands} = this.props;
-        if (this.state.editName) {
+        if (this.state.isEditingIslandName) {
             return <form onSubmit={this.handleNameChange.bind(this)}>
                 <div style={{textAlign: "center"}}>
                     <Input
