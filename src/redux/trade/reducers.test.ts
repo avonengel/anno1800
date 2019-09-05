@@ -1,7 +1,7 @@
 import {tradeReducer} from './reducers';
 import {initialState as initialRootState, RootState} from "../store";
 import {addTrade, updateTradeIslands, updateTradeProduct} from "./actions";
-import {createIsland} from "../islands/actions";
+import {createIsland, deleteIsland} from "../islands/actions";
 import {islandReducer} from "../islands/reducers";
 
 describe('tradeReducer', () => {
@@ -30,7 +30,7 @@ describe('tradeReducer', () => {
         // Add island 'Other'
         let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
-        const secondIslandId = state.island.islandIds[-1];
+        const secondIslandId = state.island.islandIds[state.island.islandIds.length-1];
         // Add trade
         state = tradeReducer(state, addTrade(firstIslandId));
         const tradeId = state.trades.allTradeIds[0];
@@ -52,7 +52,7 @@ describe('tradeReducer', () => {
         // Add island 'Other'
         let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
-        const secondIslandId = state.island.islandIds[-1];
+        const secondIslandId = state.island.islandIds[state.island.islandIds.length-1];
         // Add trade
         state = tradeReducer(state, addTrade(firstIslandId));
         const tradeId = state.trades.allTradeIds[0];
@@ -63,5 +63,28 @@ describe('tradeReducer', () => {
 
         // Act
         state = tradeReducer(state, updateTradeIslands(tradeId, secondIslandId, firstIslandId));
+    });
+
+    describe('delete island', () => {
+        test('should delete affected trades', () => {
+            // Arrange
+            const initialState = {...initialRootState};
+            // Add island 'Other'
+            let state: RootState = islandReducer(initialState, createIsland('Other'));
+            const firstIslandId = initialState.selectedIsland;
+            const secondIslandId = state.island.islandIds[state.island.islandIds.length-1];
+            // Add trade
+            state = tradeReducer(state, addTrade(firstIslandId));
+            const tradeId = state.trades.allTradeIds[0];
+            state = tradeReducer(state, updateTradeIslands(tradeId, firstIslandId, secondIslandId));
+            state = tradeReducer(state, updateTradeProduct(tradeId, 1010200));
+
+            // Act
+            state = tradeReducer(state, deleteIsland(secondIslandId));
+
+            // Assert
+            expect(state.trades.allTradeIds).toHaveLength(0);
+            expect(state.trades.tradesById).toStrictEqual({});
+        });
     });
 });

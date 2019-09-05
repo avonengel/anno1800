@@ -140,7 +140,7 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
     switch (action.type) {
         case DELETE_ISLAND:
             if (state.island.islandIds.length > 1) {
-                const selectedIsland = selectPreviousIslandId(state.island.islandIds, state.selectedIsland);
+                const selectedIsland = action.id === state.selectedIsland ? selectPreviousIslandId(state.island.islandIds, state.selectedIsland) : state.selectedIsland;
                 const {[action.id]: _, ...islandsById} = state.island.islandsById;
                 const islandIds = state.island.islandIds.filter(islandId => islandId !== action.id);
                 return {

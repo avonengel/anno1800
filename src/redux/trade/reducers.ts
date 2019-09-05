@@ -2,6 +2,7 @@ import {isActionOf} from "typesafe-actions";
 import {addTrade, deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "./actions";
 import {AnyAction} from "redux";
 import {RootState} from "../store";
+import {DELETE_ISLAND} from "../islands/types";
 
 export interface Trade {
     fromIslandId: number,
@@ -21,7 +22,24 @@ export const initialTradeState: TradeState = {
 };
 
 export function tradeReducer(state: RootState, action: AnyAction) {
-    if (isActionOf(updateTradeIslands, action)) {
+    if (action.type === DELETE_ISLAND) {
+        const tradesToDelete = state.trades.allTradeIds.filter(tradeId => {
+            const trade = state.trades.tradesById[tradeId];
+            return trade.toIslandId === action.id || trade.fromIslandId === action.id;
+        });
+        const tradesById: { [tradeId: number]: Trade } = {};
+        const remainingTradeIds = state.trades.allTradeIds.filter(tradeId => !tradesToDelete.includes(tradeId))
+        for (let tradeId of remainingTradeIds) {
+            tradesById[tradeId] = state.trades.tradesById[tradeId];
+        }
+        return {
+            ...state,
+            trades: {
+                allTradeIds: remainingTradeIds,
+                tradesById,
+            }
+        };
+    } else if (isActionOf(updateTradeIslands, action)) {
         const previousTrade = state.trades.tradesById[action.payload.tradeId];
         const trade = {
             ...previousTrade,
@@ -53,7 +71,7 @@ export function tradeReducer(state: RootState, action: AnyAction) {
                 const {[action.payload.tradeId]: _, ...newImports} = products[previousTrade.toIslandId][previousTrade.productId].imports;
                 products[previousTrade.toIslandId][previousTrade.productId].imports = newImports;
             }
-            if(action.payload.toIslandId) {
+            if (action.payload.toIslandId) {
                 // create the new import
                 products[action.payload.toIslandId] = {...products[action.payload.toIslandId]};
                 const newProductState = {...products[action.payload.toIslandId][trade.productId]};

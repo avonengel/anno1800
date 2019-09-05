@@ -1,6 +1,6 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
-import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
+import {DELETE_ISLAND, UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
@@ -46,6 +46,12 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                     products
                 };
             }
+        }
+    } else if (action.type === DELETE_ISLAND) {
+        const {[action.id]: _, ...products} = state.products;
+        return {
+            ...state,
+            products
         }
     }
     return state;
