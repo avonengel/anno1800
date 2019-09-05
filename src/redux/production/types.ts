@@ -26,24 +26,12 @@ export interface UpdateFactoryProductivityPayload {
 
 export type ProductionActionTypes = UpdateFactoryCountAction | UpdateFactoryProductivityAction
 
-// export interface Consumption {
-//     // FIXME this and Production may be redundant: they are always contained in structures that already contain everything except the value!
-//     productId: number;
-//     consumptionPerMinute: number;
-// }
-
 export type Consumption = number;
 
 export interface FactoryState {
     readonly buildingCount: number;
     readonly productivity: number;
 }
-
-// export interface Production {
-//     owner: number;
-//     productId: number;
-//     productionPerMinute: number;
-// }
 
 export type Production = number;
 

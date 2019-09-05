@@ -43,7 +43,7 @@ describe('tradeReducer', () => {
         state = tradeReducer(state, updateTradeIslands(tradeId, secondIslandId, firstIslandId));
 
         // Assert
-        // TODO
+        expect(state.trades).toMatchSnapshot();
     });
 
     test('create new trade, inverse im/export, select product, select island', () => {
@@ -63,6 +63,9 @@ describe('tradeReducer', () => {
 
         // Act
         state = tradeReducer(state, updateTradeIslands(tradeId, secondIslandId, firstIslandId));
+
+        // Assert
+        expect(state.trades).toMatchSnapshot();
     });
 
     describe('delete island', () => {

@@ -15,7 +15,7 @@ describe('populationConsumptionReducer', () => {
             let state = populationConsumptionReducer(initialState, deleteIsland(firstIslandId));
 
             // Assert
-            expect(state).toBe(initialState);
+            expect(state).toStrictEqual(initialState);
         });
         test('should delete whole island product state tree', () => {
             // Arrange

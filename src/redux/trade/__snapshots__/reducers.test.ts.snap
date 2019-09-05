@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tradeReducer create new trade, inverse im/export, select product, select island 1`] = `
+Object {
+  "allTradeIds": Array [
+    1,
+  ],
+  "tradesById": Object {
+    "1": Object {
+      "fromIslandId": 2,
+      "productId": 1010200,
+      "toIslandId": 1,
+      "tonsPerMinute": 0,
+    },
+  },
+}
+`;
+
+exports[`tradeReducer create new trade, select island, select product, inverse im/export 1`] = `
+Object {
+  "allTradeIds": Array [
+    1,
+  ],
+  "tradesById": Object {
+    "1": Object {
+      "fromIslandId": 2,
+      "productId": 1010200,
+      "toIslandId": 1,
+      "tonsPerMinute": 0,
+    },
+  },
+}
+`;
