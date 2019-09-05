@@ -47,10 +47,12 @@ import {connect} from "react-redux";
 
 
 const styles = (theme: Theme) => createStyles({
+    tradeContainer: {
+        minHeight: "20em",
+    },
     addTradeItem: {
         alignSelf: "center",
         textAlign: "center",
-        minHeight: "10em",
     },
     input: {
         margin: theme.spacing(1),
@@ -60,15 +62,6 @@ const styles = (theme: Theme) => createStyles({
 interface ReactProps extends WithStyles<typeof styles> {
     islandId: number;
 }
-
-const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
-    return {
-        island: getIslandById(state, reactProps.islandId),
-        factoriesToShow: factoriesToShow(state, reactProps),
-        tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
-        hasMultipleIslands: state.island.islandIds.length > 1,
-    };
-};
 
 function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
@@ -119,6 +112,15 @@ function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
     return factoriesToShow;
 }
 
+const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
+    return {
+        island: getIslandById(state, reactProps.islandId),
+        factoriesToShow: factoriesToShow(state, reactProps),
+        tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
+        hasMultipleIslands: state.island.islandIds.length > 1,
+    };
+};
+
 const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
     return {
         onHouseChange: (level: string, houses: number) => {
@@ -147,7 +149,8 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 interface OwnState {
-    showAll: boolean;
+    showAllFactories: boolean;
+    showAllPublicServices: boolean;
     isEditingIslandName: boolean;
     islandName: string;
     deleteDialogOpen: boolean;
@@ -155,11 +158,11 @@ interface OwnState {
 
 class IslandComponent extends React.Component<Props, OwnState> {
 
-
     constructor(props: Readonly<Props>) {
         super(props);
         this.state = {
-            showAll: false,
+            showAllFactories: false,
+            showAllPublicServices: false,
             isEditingIslandName: false,
             islandName: props.island.name,
             deleteDialogOpen: false,
@@ -245,10 +248,29 @@ class IslandComponent extends React.Component<Props, OwnState> {
                         {card}
                     </Grid>))}
             </Grid>
+
+            <div style={{textAlign: "center"}}>
+                <Typography component="div" variant="h5">Public Services</Typography>
+                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("publicServices")} color={"primary"}>
+                    {this.state.showAllPublicServices ? <VisibilityOff/> : <Visibility/>}
+                </IconButton>
+            </div>
+            <Grid container spacing={1} justify={"center"}>
+                {/*TODO: commit public service assets*/}
+                {/*{ALL_FACTORIES.filter((factory) => !populationDecided || (isOldWorld && factory.isOldWorld) || (isNewWorld && factory.isNewWorld))*/}
+                {/*    .filter((factory) => factory.output !== undefined)*/}
+                {/*    .map((factory) =>*/}
+                {/*        <Zoom key={factory.guid} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>*/}
+                {/*            <Grid item xs={6} md={3} lg={2}>*/}
+                {/*                <FactoryCard factory={factory} islandId={island.id}/>*/}
+                {/*            </Grid>*/}
+                {/*        </Zoom>)}*/}
+            </Grid>
+
             <div style={{textAlign: "center"}}>
                 <Typography component="div" variant="h5">Factories</Typography>
-                <IconButton aria-label="toggle visibility" onClick={this.toggleVisibility.bind(this)} color={"primary"}>
-                    {this.state.showAll ? <VisibilityOff/> : <Visibility/>}
+                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("factories")} color={"primary"}>
+                    {this.state.showAllFactories ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>
             </div>
             <Grid container spacing={1} justify={"center"}>
@@ -261,8 +283,9 @@ class IslandComponent extends React.Component<Props, OwnState> {
                             </Grid>
                         </Zoom>)}
             </Grid>
+
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
-            <Grid container spacing={1} justify={"center"}>
+            <Grid container spacing={1} justify={"center"} classes={{container: classes.tradeContainer}}>
                 {tradeIds.map(tradeId =>
                     <Grid item xs={3} key={tradeId}>
                         <TradeCard tradeId={tradeId}/>
@@ -330,12 +353,16 @@ class IslandComponent extends React.Component<Props, OwnState> {
                                onPopulationChange={this.createOnPopulationChange(level)}/>;
     }
 
-    private toggleVisibility() {
-        this.setState({showAll: !this.state.showAll});
+    private toggleVisibility(kind: "publicServices" | "factories") {
+        if (kind === "publicServices") {
+            this.setState({showAllPublicServices: !this.state.showAllPublicServices});
+        } else {
+            this.setState({showAllFactories: !this.state.showAllFactories});
+        }
     }
 
     private shouldShow(factory: Factory): boolean {
-        return this.state.showAll || this.props.factoriesToShow.includes(factory);
+        return this.state.showAllFactories || this.props.factoriesToShow.includes(factory);
     }
 
     createOnHouseChange(level: string): (houses: number) => void {
