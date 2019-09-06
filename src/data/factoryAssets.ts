@@ -60,6 +60,7 @@ export const FACTORIES: Readonly<FactoryAsset[]> = [
   {guid: 1010327, name: "Goldsmiths", associatedRegions: "Moderate", inputs: [1010226, 1010233], output: 1010249, cycleTime: 60},
   {guid: 1010328, name: "Jewellers", associatedRegions: "Moderate", inputs: [1010256, 1010249], output: 1010250},
   {guid: 101250, name: "Spectacle Factory", associatedRegions: "Moderate", inputs: [1010241, 1010204], output: 120030, cycleTime: 90},
+    // FIXME there is no output of electricity (1010354) here, but electricity is an input with supplyWeight in populationAssets!
   {guid: 100780, name: "Oil Power Plant", associatedRegions: "Moderate", inputs: [1010566], cycleTime: 5},
   {guid: 1010329, name: "Sugar Cane Plantation", associatedRegions: "Colony01", output: 1010251},
   {guid: 1010330, name: "Tobacco Plantation", associatedRegions: "Colony01", output: 1010252, cycleTime: 120},

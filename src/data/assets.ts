@@ -1,6 +1,7 @@
 import {FACTORIES} from "./factoryAssets";
 import {PRODUCTS} from "./productAssets";
 import {POPULATIONS} from "./populationAssets";
+import {PUBLIC_SERVICES} from "./publicservices";
 
 export interface PopulationAsset {
     name: string;
@@ -114,8 +115,49 @@ export interface PublicServiceAsset {
     baseGuid?: number;
     associatedRegions: string;
     output?: number;
-    cycleTime?: number;
 }
+const publicServiceAssetsById = new Map(PUBLIC_SERVICES.map(asset => [asset.guid, asset]));
+
+export class PublicService {
+
+    constructor(asset: PublicServiceAsset) {
+        this.guid = asset.guid;
+        this.associatedRegions = asset.associatedRegions;
+        if (asset.baseGuid) {
+            const baseAsset = publicServiceAssetsById.get(asset.baseGuid);
+            if (baseAsset) {
+                this.setValues(baseAsset);
+            }
+        }
+        this.setValues(asset);
+    }
+
+    private setValues(asset: PublicServiceAsset) {
+        if (asset.name) {
+            this.name = asset.name;
+        }
+        if (asset.output) {
+            this.output = asset.output;
+        }
+    }
+
+    associatedRegions: string = "";
+    cycleTime: number = 30;
+    guid: number;
+    inputs: number[] = [];
+    name: string = ""; // TODO figure out how to properly do this without useless defaults
+    output: number = 0;
+
+    get isOldWorld(): boolean {
+        return (this.associatedRegions.indexOf(Region.OLD_WORLD) >= 0);
+    }
+
+    get isNewWorld(): boolean {
+        return (this.associatedRegions.indexOf(Region.NEW_WORLD) >= 0);
+    }
+}
+export const ALL_PUBLIC_SERVICES = PUBLIC_SERVICES.map(asset => new PublicService(asset));
+export const PUBLIC_SERVICES_BY_ID = new Map(ALL_PUBLIC_SERVICES.map(ps => [ps.guid, ps]));
 
 const BASE_SUPPLY_WEIGHT = 5;
 

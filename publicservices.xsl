@@ -30,9 +30,6 @@
             <xsl:text>, baseGuid: </xsl:text><xsl:value-of select="BaseAssetGUID"/>
         </xsl:if>
         <xsl:text>, associatedRegions: "</xsl:text><xsl:value-of select="Values/Building/AssociatedRegions"/><xsl:text>"</xsl:text>
-        <xsl:if test="Values/FactoryBase/CycleTime">
-            <xsl:text>, cycleTime: </xsl:text><xsl:value-of select="Values/FactoryBase/CycleTime"/>
-        </xsl:if>
         <xsl:apply-templates select="Values/PublicService" mode="publicService"/>
         <xsl:text>}</xsl:text>
     </xsl:template>
