@@ -1,17 +1,55 @@
 import * as React from "react";
-import {Button, createStyles, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid, IconButton, Input, Theme, Tooltip, Typography, withStyles, WithStyles, Zoom} from "@material-ui/core";
+import {
+    Button,
+    createStyles,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Fab,
+    Grid,
+    IconButton,
+    Input,
+    Theme,
+    Tooltip,
+    Typography,
+    withStyles,
+    WithStyles,
+    Zoom
+} from "@material-ui/core";
 import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
-import {deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "../redux/islands/actions";
+import {
+    deleteIsland,
+    renameIsland,
+    selectNextIsland,
+    selectPreviousIsland,
+    updateHouseCount,
+    updatePopulation
+} from "../redux/islands/actions";
 import FactoryCard from "./FactoryCard";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {ALL_FACTORIES, ALL_PUBLIC_SERVICES, FACTORIES_BY_ID, Factory, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS, PUBLIC_SERVICES_BY_ID, PublicService} from "../data/assets";
+import {
+    ALL_FACTORIES,
+    ALL_PUBLIC_SERVICES,
+    FACTORIES_BY_ID,
+    Factory,
+    getPopulationLevelByName,
+    NEW_WORLD_POPULATION_LEVELS,
+    OLD_WORLD_POPULATION_LEVELS,
+    POPULATION_LEVELS, ProductAsset,
+    PUBLIC_SERVICES_BY_ID,
+    PublicService
+} from "../data/assets";
 import PopulationCard from "./PopulationCard";
 import {connect} from "react-redux";
 import PublicServiceCard from "./PublicServiceCard";
+import {PRODUCTS} from "../data/productAssets";
+import ProductCard from "./ProductCard";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -112,12 +150,59 @@ function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
     });
     return servicesToShow;
 }
+function productsToShow(state: Readonly<RootState>, props: ReactProps) {
+    const populationStates = state.island.islandsById[props.islandId].population;
+    const productsToShow: ProductAsset[] = [];
+    PRODUCTS.forEach((product) => {
+        if (!!populationStates) {
+            for (let level in populationStates) {
+                if (populationStates[level].population > 0) {
+                    const populationLevel = getPopulationLevelByName(level);
+                    if (!populationLevel) {
+                        continue;
+                    }
+                    const needed = populationLevel.inputs
+                        .filter(input => input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < populationStates[level].population)
+                        .find(input => product.guid === input.product);
+                    if (needed) {
+                        productsToShow.push(product);
+                        return;
+                    }
+                }
+            }
+        }
+        // also show factories for things that are consumed by factories
+        const productState = getProductStateById(state, props.islandId, product.guid);
+
+        if (!!productState) {
+            let consumptionPerMinute = 0;
+            for (let factoryId in productState.factoryConsumers) {
+                consumptionPerMinute += productState.factoryConsumers[factoryId];
+            }
+            for (let tradeId in productState.exports) {
+                consumptionPerMinute += productState.exports[tradeId];
+            }
+            let productionPerMinute = 0;
+            for (let producerId in productState.producers) {
+                productionPerMinute += productState.producers[producerId];
+            }
+            for (let tradeId in productState.imports) {
+                productionPerMinute += productState.imports[tradeId];
+            }
+            if (consumptionPerMinute > 0 || productionPerMinute > 0) {
+                productsToShow.push(product);
+            }
+        }
+    });
+    return productsToShow;
+}
 
 const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     return {
         island: getIslandById(state, reactProps.islandId),
         factoriesToShow: factoriesToShow(state, reactProps),
         publicServicesToShow: publicServicesToShow(state, reactProps),
+        productsToShow: productsToShow(state, reactProps),
         tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
         hasMultipleIslands: state.island.islandIds.length > 1,
     };
@@ -153,6 +238,7 @@ type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof
 interface OwnState {
     showAllFactories: boolean;
     showAllPublicServices: boolean;
+    showAllProducts: boolean;
     isEditingIslandName: boolean;
     islandName: string;
     deleteDialogOpen: boolean;
@@ -165,6 +251,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
         this.state = {
             showAllFactories: false,
             showAllPublicServices: false,
+            showAllProducts: false,
             isEditingIslandName: false,
             islandName: props.island.name,
             deleteDialogOpen: false,
@@ -269,6 +356,22 @@ class IslandComponent extends React.Component<Props, OwnState> {
             </Grid>
 
             <div style={{textAlign: "center"}}>
+                <Typography component="div" variant="h5">Products</Typography>
+                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("products")} color={"primary"}>
+                    {this.state.showAllProducts ? <VisibilityOff/> : <Visibility/>}
+                </IconButton>
+            </div>
+            <Grid container spacing={1} justify={"center"}>
+                {PRODUCTS.filter(p => !p.isAbstract && p.civLevel !== undefined)
+                    .map((product) =>
+                        <Zoom key={product.guid} in={this.shouldShowProduct(product)} mountOnEnter={true} unmountOnExit={true}>
+                            <Grid item xs={6} md={3} lg={2}>
+                                <ProductCard product={product} islandId={island.id}/>
+                            </Grid>
+                        </Zoom>)}
+            </Grid>
+
+            <div style={{textAlign: "center"}}>
                 <Typography component="div" variant="h5">Factories</Typography>
                 <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("factories")} color={"primary"}>
                     {this.state.showAllFactories ? <VisibilityOff/> : <Visibility/>}
@@ -354,9 +457,11 @@ class IslandComponent extends React.Component<Props, OwnState> {
                                onPopulationChange={this.createOnPopulationChange(level)}/>;
     }
 
-    private toggleVisibility(kind: "publicServices" | "factories") {
+    private toggleVisibility(kind: "publicServices" | "factories" | "products") {
         if (kind === "publicServices") {
             this.setState({showAllPublicServices: !this.state.showAllPublicServices});
+        } if (kind === "products") {
+            this.setState({showAllProducts: !this.state.showAllProducts});
         } else {
             this.setState({showAllFactories: !this.state.showAllFactories});
         }
@@ -368,6 +473,9 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
     private shouldShowPublicService(ps: PublicService): boolean {
         return this.state.showAllPublicServices || this.props.publicServicesToShow.includes(ps);
+    }
+    private shouldShowProduct(product: ProductAsset): boolean {
+        return this.state.showAllProducts || this.props.productsToShow.includes(product);
     }
 
     createOnHouseChange(level: string): (houses: number) => void {
