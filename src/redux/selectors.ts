@@ -7,7 +7,9 @@ export const getIslandById = (store: RootState, islandId: number): Readonly<Isla
 };
 
 export function getFactoryStateByIdOrDefault(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> {
-    return getFactoryStateById(store, islandId, factoryId) || {buildingCount: 0, productivity: 1};
+    const factoryStateById = getFactoryStateById(store, islandId, factoryId);
+    console.log(`factoryStateById(${islandId}, ${factoryId}: `, factoryStateById);
+    return factoryStateById || {buildingCount: 0, productivity: 1};
 }
 
 export function getFactoryStateById(store: RootState, islandId: number, factoryId: number): Readonly<FactoryState> | undefined {

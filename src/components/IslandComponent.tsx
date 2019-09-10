@@ -371,22 +371,22 @@ class IslandComponent extends React.Component<Props, OwnState> {
                         </Zoom>)}
             </Grid>
 
-            <div style={{textAlign: "center"}}>
-                <Typography component="div" variant="h5">Factories</Typography>
-                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("factories")} color={"primary"}>
-                    {this.state.showAllFactories ? <VisibilityOff/> : <Visibility/>}
-                </IconButton>
-            </div>
-            <Grid container spacing={1} justify={"center"}>
-                {ALL_FACTORIES.filter((factory) => !populationDecided || (isOldWorld && factory.isOldWorld) || (isNewWorld && factory.isNewWorld))
-                    .filter((factory) => factory.output !== undefined)
-                    .map((factory) =>
-                        <Zoom key={factory.guid} in={this.shouldShowFactory(factory)} mountOnEnter={true} unmountOnExit={true}>
-                            <Grid item xs={6} md={3} lg={2}>
-                                <FactoryCard factory={factory} islandId={island.id}/>
-                            </Grid>
-                        </Zoom>)}
-            </Grid>
+            {/*<div style={{textAlign: "center"}}>*/}
+            {/*    <Typography component="div" variant="h5">Factories</Typography>*/}
+            {/*    <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("factories")} color={"primary"}>*/}
+            {/*        {this.state.showAllFactories ? <VisibilityOff/> : <Visibility/>}*/}
+            {/*    </IconButton>*/}
+            {/*</div>*/}
+            {/*<Grid container spacing={1} justify={"center"}>*/}
+            {/*    {ALL_FACTORIES.filter((factory) => !populationDecided || (isOldWorld && factory.isOldWorld) || (isNewWorld && factory.isNewWorld))*/}
+            {/*        .filter((factory) => factory.output !== undefined)*/}
+            {/*        .map((factory) =>*/}
+            {/*            <Zoom key={factory.guid} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>*/}
+            {/*                <Grid item xs={6} md={3} lg={2}>*/}
+            {/*                    <FactoryCard factory={factory} islandId={island.id}/>*/}
+            {/*                </Grid>*/}
+            {/*            </Zoom>)}*/}
+            {/*</Grid>*/}
 
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
             <Grid container spacing={1} justify={"center"} classes={{container: classes.tradeContainer}}>

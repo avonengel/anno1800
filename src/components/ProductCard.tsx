@@ -2,17 +2,18 @@
 import * as React from "react";
 import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, InputAdornment, TextField, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
 import {RootState} from "../redux/store";
-import {getProductStateById} from "../redux/selectors";
+import {getFactoryStateByIdOrDefault, getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
-import {ProductState} from "../redux/production/types";
+import {FactoryState, ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Error, GetApp, Publish, Warning} from "@material-ui/icons";
-import {ALL_FACTORIES, Factory, ProductAsset} from "../data/assets";
+import {ALL_FACTORIES, Factory, getProductById, ProductAsset} from "../data/assets";
 import {getProduction} from "../redux/production/reducers";
 import createCachedSelector from "re-reselect";
 import {PRODUCTS} from "../data/productAssets";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
+import {createSelector, Selector} from "reselect";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -39,12 +40,38 @@ export const relevantFactoryStatesById = createCachedSelector(
     (_state: any, props: OwnProps) => props.product.guid
 );
 
+export function makeFactoryStatesByIdSelector(islandId: number, productId: number) {
+    const factoryList = producingFactoriesByProductId.get(productId);
+    if (factoryList) {
+        const factoryStateSelectors: Selector<RootState, Map<number, FactoryState>>[] = factoryList.map(factory => (state: RootState) => {
+            const factoryStateByIdOrDefault = getFactoryStateByIdOrDefault(state, islandId, factory.guid);
+            console.log(`Select factoryState of ${factory.name}`, factoryStateByIdOrDefault);
+            return new Map([[factory.guid, factoryStateByIdOrDefault]]);
+        });
+        return createSelector<RootState, Map<number, FactoryState>, Map<number, FactoryState>>(factoryStateSelectors, (...states) => {
+            console.log(`Combining factory states for ${islandId}/${getProductById(productId).name}`, states);
+            return states.reduce((p, u) => {
+                u.forEach((v, k) => p.set(k, v));
+                console.log(`Reducing factoryStates for ${islandId}/${getProductById(productId).name}`, p);
+                return p;
+            }, new Map());
+        });
+    }
+    // FIXME reselect doesn't work as intended - it recomputes whenever ANY factoryState changed!
+    console.log(`created new factoryStates selector for ${islandId}/${getProductById(productId).name}`);
+    return (state: RootState) => new Map<number, FactoryState>();
+}
 
-const mapStateToProps = (state: RootState, ownProps: OwnProps) => {
-    return {
-        productState: getProductStateById(state, ownProps.islandId, ownProps.product.guid),
-        factories: producingFactoriesByProductId.get(ownProps.product.guid) || [],
-        factoryStatesById: relevantFactoryStatesById(state, ownProps),
+const makeMapStateToProps = (state: RootState, ownProps: OwnProps) => {
+    console.log(`makeMapStateToProps`, ownProps);
+    const factoryStatesSelector = makeFactoryStatesByIdSelector(ownProps.islandId, ownProps.product.guid);
+    return (state: RootState, ownProps: OwnProps) => {
+        console.log(`mapStateToProps`, ownProps);
+        return {
+            productState: getProductStateById(state, ownProps.islandId, ownProps.product.guid),
+            factories: producingFactoriesByProductId.get(ownProps.product.guid) || [],
+            factoryStatesById: factoryStatesSelector(state),
+        };
     };
 };
 
@@ -53,12 +80,12 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
         onBuildingCountChange: (factoryId: number, count: number) => {
             dispatch(updateFactoryCount(props.islandId, factoryId, count));
         },
-        onProductivityChange: (factoryId:number, productivity: number) => {
+        onProductivityChange: (factoryId: number, productivity: number) => {
             dispatch(updateFactoryProductivity(props.islandId, factoryId, productivity));
         }
     };
 };
-type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & WithStyles<typeof styles>;
+type Props = OwnProps & ReturnType<ReturnType<typeof makeMapStateToProps>> & ReturnType<typeof mapDispatchToProps> & WithStyles<typeof styles>;
 
 function getPopulationConsumption(productState: ProductState | undefined) {
     if (productState === undefined) {
@@ -143,11 +170,11 @@ class ProductCard extends React.Component<Props> {
     }
 
     private renderFactoryFragment(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity:1, buildingCount:0};
+        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
         const productivity = factoryState.productivity ? (factoryState.productivity * 100).toFixed(0) : 100;
         const perfectProductivity = (this.computePerfectProductivity(f) * 100).toFixed(1);
         const buildingCount = factoryState.buildingCount ? factoryState.buildingCount : 0;
-        return (<React.Fragment key={f.name}>
+        return (<React.Fragment key={f.guid}>
             <Divider/>
             <Typography gutterBottom variant={"subtitle2"}>
                 {f.name}
@@ -156,7 +183,6 @@ class ProductCard extends React.Component<Props> {
                 <Grid item xs={6}>
                     <Tooltip title={`Required with ${productivity} % productivity: ${this.computeMinimumRequiredCount(f)}`}>
                         <TextField label={"count"} type={"number"} inputProps={{min: 0}}
-                            // style={{width: "5em"}}
                                    value={buildingCount}
                                    onChange={(event) => this.props.onBuildingCountChange(f.guid, Number(event.target.value))}/>
                     </Tooltip>
@@ -166,12 +192,12 @@ class ProductCard extends React.Component<Props> {
                     <Tooltip title={`Required with ${buildingCount} buildings: ${perfectProductivity} %`}>
                         <div>
                             <TextField label={"productivity"} type={"number"} inputProps={{min: 0}}
-                                       // style={{width: "5em"}}
                                        value={productivity}
                                        onChange={(event) => this.props.onProductivityChange(f.guid, Number(event.target.value) / 100)}
                                        InputProps={{
                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                       }}/>                        </div>
+                                       }}/>
+                        </div>
                     </Tooltip>
                 </Grid>
             </Grid>
@@ -179,7 +205,7 @@ class ProductCard extends React.Component<Props> {
     }
 
     private computePerfectProductivity(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity:1, buildingCount:0};
+        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
         const {productState} = this.props;
         if (!productState) {
             return 0;
@@ -198,7 +224,7 @@ class ProductCard extends React.Component<Props> {
     }
 
     private computeMinimumRequiredCount(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity:1, buildingCount:0};
+        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
         const {productState} = this.props;
         if (!productState) {
             return 0;
@@ -211,4 +237,4 @@ class ProductCard extends React.Component<Props> {
     }
 }
 
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(ProductCard));
+export default withStyles(styles)(connect(makeMapStateToProps, mapDispatchToProps)(ProductCard));
