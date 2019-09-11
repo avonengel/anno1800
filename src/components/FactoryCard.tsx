@@ -118,7 +118,7 @@ class FactoryCard extends React.Component<Props> {
                         </tr>
                         <tr>
                             <td>
-                                <TextField label={"count"} type={"number"} inputProps={{min: 0, step: "any"}}
+                                <TextField label={"count"} type={"number"} inputProps={{min: 0}}
                                            style={{width: "5em"}}
                                            value={factoryState && factoryState.buildingCount ? factoryState.buildingCount : 0}
                                            onChange={this.onBuildingCountChange.bind(this)}/>

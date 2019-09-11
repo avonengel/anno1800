@@ -149,7 +149,6 @@ class App extends React.Component<Props, OwnState> {
 
     handleStateUpload(event: React.ChangeEvent<HTMLInputElement>) {
         const {files} = event.target;
-        console.log("files:", files);
         if (files && files.length > 0) {
             const file = files.item(0);
             if (file) {

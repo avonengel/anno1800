@@ -1,50 +1,13 @@
 import * as React from "react";
-import {
-    Button,
-    createStyles,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Fab,
-    Grid,
-    IconButton,
-    Input,
-    Theme,
-    Tooltip,
-    Typography,
-    withStyles,
-    WithStyles,
-    Zoom
-} from "@material-ui/core";
+import {Button, createStyles, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid, IconButton, Input, Theme, Tooltip, Typography, withStyles, WithStyles, Zoom} from "@material-ui/core";
 import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
-import {
-    deleteIsland,
-    renameIsland,
-    selectNextIsland,
-    selectPreviousIsland,
-    updateHouseCount,
-    updatePopulation
-} from "../redux/islands/actions";
-import FactoryCard from "./FactoryCard";
+import {deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {
-    ALL_FACTORIES,
-    ALL_PUBLIC_SERVICES,
-    FACTORIES_BY_ID,
-    Factory,
-    getPopulationLevelByName,
-    NEW_WORLD_POPULATION_LEVELS,
-    OLD_WORLD_POPULATION_LEVELS,
-    POPULATION_LEVELS, ProductAsset,
-    PUBLIC_SERVICES_BY_ID,
-    PublicService
-} from "../data/assets";
+import {ALL_PUBLIC_SERVICES, FACTORIES_BY_ID, Factory, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS, ProductAsset, PUBLIC_SERVICES_BY_ID, PublicService, Region} from "../data/assets";
 import PopulationCard from "./PopulationCard";
 import {connect} from "react-redux";
 import PublicServiceCard from "./PublicServiceCard";
@@ -150,6 +113,7 @@ function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
     });
     return servicesToShow;
 }
+
 function productsToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[props.islandId].population;
     const productsToShow: ProductAsset[] = [];
@@ -283,16 +247,18 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
     render() {
         const {island, tradeIds, classes, hasMultipleIslands} = this.props;
-        const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
-        const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
-        const populationDecided = isOldWorld !== isNewWorld;
+        const region = this.determineIslandRegion();
         let populationCards;
-        if (populationDecided && isOldWorld) {
-            populationCards = OLD_WORLD_POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
-        } else if (populationDecided && isNewWorld) {
-            populationCards = NEW_WORLD_POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
-        } else {
-            populationCards = POPULATION_LEVELS.map(this.renderPopulationCard.bind(this));
+        switch (region) {
+            case Region.OLD_WORLD:
+                populationCards = OLD_WORLD_POPULATION_LEVELS.map((level) => this.renderPopulationCard(level));
+                break;
+            case Region.NEW_WORLD:
+                populationCards = NEW_WORLD_POPULATION_LEVELS.map((level) => this.renderPopulationCard(level));
+                break;
+            default:
+                populationCards = POPULATION_LEVELS.map((level) => this.renderPopulationCard(level));
+                break;
         }
 
         return <React.Fragment>
@@ -345,7 +311,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </IconButton>
             </div>
             <Grid container spacing={1} justify={"center"}>
-                {ALL_PUBLIC_SERVICES.filter((ps) => !populationDecided || (isOldWorld && ps.isOldWorld) || (isNewWorld && ps.isNewWorld))
+                {ALL_PUBLIC_SERVICES.filter((ps) => region === undefined || ps.associatedRegions.indexOf(region) >= 0)
                     .filter((ps) => ps.output !== undefined)
                     .map((ps) =>
                         <Zoom key={ps.guid} in={this.shouldShowPublicService(ps)} mountOnEnter={true} unmountOnExit={true}>
@@ -366,27 +332,10 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     .map((product) =>
                         <Zoom key={product.guid} in={this.shouldShowProduct(product)} mountOnEnter={true} unmountOnExit={true}>
                             <Grid item xs={6} md={3} lg={2}>
-                                <ProductCard product={product} islandId={island.id}/>
+                                <ProductCard product={product} islandId={island.id} region={region}/>
                             </Grid>
                         </Zoom>)}
             </Grid>
-
-            {/*<div style={{textAlign: "center"}}>*/}
-            {/*    <Typography component="div" variant="h5">Factories</Typography>*/}
-            {/*    <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("factories")} color={"primary"}>*/}
-            {/*        {this.state.showAllFactories ? <VisibilityOff/> : <Visibility/>}*/}
-            {/*    </IconButton>*/}
-            {/*</div>*/}
-            {/*<Grid container spacing={1} justify={"center"}>*/}
-            {/*    {ALL_FACTORIES.filter((factory) => !populationDecided || (isOldWorld && factory.isOldWorld) || (isNewWorld && factory.isNewWorld))*/}
-            {/*        .filter((factory) => factory.output !== undefined)*/}
-            {/*        .map((factory) =>*/}
-            {/*            <Zoom key={factory.guid} in={this.shouldShow(factory)} mountOnEnter={true} unmountOnExit={true}>*/}
-            {/*                <Grid item xs={6} md={3} lg={2}>*/}
-            {/*                    <FactoryCard factory={factory} islandId={island.id}/>*/}
-            {/*                </Grid>*/}
-            {/*            </Zoom>)}*/}
-            {/*</Grid>*/}
 
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
             <Grid container spacing={1} justify={"center"} classes={{container: classes.tradeContainer}}>
@@ -402,6 +351,18 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 </Grid>
             </Grid>
         </React.Fragment>
+    }
+
+    private determineIslandRegion() {
+        const isOldWorld = this.hasPopulation(OLD_WORLD_POPULATION_LEVELS);
+        const isNewWorld = this.hasPopulation(NEW_WORLD_POPULATION_LEVELS);
+        if (isOldWorld === isNewWorld) {
+            return undefined;
+        }
+        if (isOldWorld) {
+            return Region.OLD_WORLD;
+        }
+        return Region.NEW_WORLD;
     }
 
     private renderNameFragment() {
@@ -460,7 +421,8 @@ class IslandComponent extends React.Component<Props, OwnState> {
     private toggleVisibility(kind: "publicServices" | "factories" | "products") {
         if (kind === "publicServices") {
             this.setState({showAllPublicServices: !this.state.showAllPublicServices});
-        } if (kind === "products") {
+        }
+        if (kind === "products") {
             this.setState({showAllProducts: !this.state.showAllProducts});
         } else {
             this.setState({showAllFactories: !this.state.showAllFactories});
@@ -474,6 +436,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
     private shouldShowPublicService(ps: PublicService): boolean {
         return this.state.showAllPublicServices || this.props.publicServicesToShow.includes(ps);
     }
+
     private shouldShowProduct(product: ProductAsset): boolean {
         return this.state.showAllProducts || this.props.productsToShow.includes(product);
     }

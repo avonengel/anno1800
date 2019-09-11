@@ -25,7 +25,7 @@ export interface RootState {
     readonly trades: TradeState,
 }
 
-export const initialState = {
+export const initialState: Readonly<RootState> = {
     island: initialIslandState,
     products: {},
     factories: {},

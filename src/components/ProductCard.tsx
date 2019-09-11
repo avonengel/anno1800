@@ -1,77 +1,40 @@
-/* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
-import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, InputAdornment, TextField, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
+import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
 import {RootState} from "../redux/store";
-import {getFactoryStateByIdOrDefault, getProductStateById} from "../redux/selectors";
+import {getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
-import {FactoryState, ProductState} from "../redux/production/types";
+import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Error, GetApp, Publish, Warning} from "@material-ui/icons";
-import {ALL_FACTORIES, Factory, getProductById, ProductAsset} from "../data/assets";
+import {ALL_FACTORIES, ProductAsset, Region} from "../data/assets";
 import {getProduction} from "../redux/production/reducers";
-import createCachedSelector from "re-reselect";
 import {PRODUCTS} from "../data/productAssets";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
-import {createSelector, Selector} from "reselect";
+import FactoryFragment from "./FactoryFragment";
+import TradeFragment from "./TradeFragment";
 
 
 const styles = (theme: Theme) => createStyles({
     card: {
         padding: theme.spacing(1)
+    },
+    divider: {
+        margin: theme.spacing(1, 0, 1, 0)
     }
 });
 
 interface OwnProps {
-    product: ProductAsset,
-    islandId: number,
+    product: ProductAsset;
+    islandId: number;
+    region: Region | undefined;
 }
 
 const producingFactoriesByProductId = new Map(PRODUCTS.map(product => [product.guid, ALL_FACTORIES.filter(factory => factory.output === product.guid)]));
 
-export const relevantFactoryStatesById = createCachedSelector(
-    (state: RootState, props: OwnProps) => state.factories[props.islandId],
-    (_state: RootState, props: OwnProps) => props.product.guid,
-    (islandFactoryStates, productId: number) => {
-        const producingFactories = producingFactoriesByProductId.get(productId) || [];
-        return new Map(producingFactories.map(f => [f.guid, islandFactoryStates[f.guid]]));
-    }
-)(
-    (_state: any, props: OwnProps) => props.product.guid
-);
-
-export function makeFactoryStatesByIdSelector(islandId: number, productId: number) {
-    const factoryList = producingFactoriesByProductId.get(productId);
-    if (factoryList) {
-        const factoryStateSelectors: Selector<RootState, Map<number, FactoryState>>[] = factoryList.map(factory => (state: RootState) => {
-            const factoryStateByIdOrDefault = getFactoryStateByIdOrDefault(state, islandId, factory.guid);
-            console.log(`Select factoryState of ${factory.name}`, factoryStateByIdOrDefault);
-            return new Map([[factory.guid, factoryStateByIdOrDefault]]);
-        });
-        return createSelector<RootState, Map<number, FactoryState>, Map<number, FactoryState>>(factoryStateSelectors, (...states) => {
-            console.log(`Combining factory states for ${islandId}/${getProductById(productId).name}`, states);
-            return states.reduce((p, u) => {
-                u.forEach((v, k) => p.set(k, v));
-                console.log(`Reducing factoryStates for ${islandId}/${getProductById(productId).name}`, p);
-                return p;
-            }, new Map());
-        });
-    }
-    // FIXME reselect doesn't work as intended - it recomputes whenever ANY factoryState changed!
-    console.log(`created new factoryStates selector for ${islandId}/${getProductById(productId).name}`);
-    return (state: RootState) => new Map<number, FactoryState>();
-}
-
-const makeMapStateToProps = (state: RootState, ownProps: OwnProps) => {
-    console.log(`makeMapStateToProps`, ownProps);
-    const factoryStatesSelector = makeFactoryStatesByIdSelector(ownProps.islandId, ownProps.product.guid);
-    return (state: RootState, ownProps: OwnProps) => {
-        console.log(`mapStateToProps`, ownProps);
-        return {
-            productState: getProductStateById(state, ownProps.islandId, ownProps.product.guid),
-            factories: producingFactoriesByProductId.get(ownProps.product.guid) || [],
-            factoryStatesById: factoryStatesSelector(state),
-        };
+const mapStateToProps = (state: RootState, ownProps: OwnProps) => {
+    return {
+        productState: getProductStateById(state, ownProps.islandId, ownProps.product.guid),
     };
 };
 
@@ -85,7 +48,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
         }
     };
 };
-type Props = OwnProps & ReturnType<ReturnType<typeof makeMapStateToProps>> & ReturnType<typeof mapDispatchToProps> & WithStyles<typeof styles>;
+type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & WithStyles<typeof styles>;
 
 function getPopulationConsumption(productState: ProductState | undefined) {
     if (productState === undefined) {
@@ -98,7 +61,10 @@ function getPopulationConsumption(productState: ProductState | undefined) {
     return consumption;
 }
 
-function getConsumption(productState: ProductState): number {
+function getConsumption(productState: ProductState | undefined): number {
+    if (!productState) {
+        return 0;
+    }
     let consumption = 0;
     consumption += getPopulationConsumption(productState);
     for (let factoryId in productState.factoryConsumers) {
@@ -123,10 +89,10 @@ function getIconData(productId: number) {
     return null;
 }
 
-class ProductCard extends React.Component<Props> {
+class ProductCard extends React.PureComponent<Props> {
 
     render() {
-        const {productState, product} = this.props;
+        const {productState, product, classes} = this.props;
         const productName = product.name;
         const iconData = getIconData(product.guid);
         const production = (productState && getProduction(productState)) || 0;
@@ -137,6 +103,8 @@ class ProductCard extends React.Component<Props> {
         } else if (production * 0.9 < consumption && getPopulationConsumption(productState) > 0) {
             warnIcon = <Warning fontSize={"large"}/>;
         }
+        const factories = producingFactoriesByProductId.get(this.props.product.guid) || [];
+        const tradeIds = this.getTradeIds();
         return (
             <Card>
                 <CardHeader
@@ -150,7 +118,7 @@ class ProductCard extends React.Component<Props> {
                         <Grid item xs={6}>
                             <Tooltip title={"Production in t/min"}>
                                 <div>
-                                    <GetApp/> {production.toFixed(2) || 0}
+                                    <GetApp style={{verticalAlign: "middle"}}/> {production.toFixed(2) || 0}
                                 </div>
                             </Tooltip>
                         </Grid>
@@ -158,83 +126,42 @@ class ProductCard extends React.Component<Props> {
                         <Grid item xs={6}>
                             <Tooltip title={"Consumption in t/min"}>
                                 <div>
-                                    <Publish/> {consumption.toFixed(2) || 0}
+                                    <Publish style={{verticalAlign: "middle"}}/> {consumption.toFixed(2) || 0}
                                 </div>
                             </Tooltip>
                         </Grid>
                     </Grid>
 
-                    {this.props.factories.map((f) => this.renderFactoryFragment(f))}
+                    {factories
+                        .filter(f => !this.props.region || f.associatedRegions.indexOf(this.props.region) >= 0)
+                        .map((f) => <FactoryFragment islandId={this.props.islandId} factoryId={f.guid} consumption={getConsumption(productState)}/>)}
+
+                    {tradeIds.length > 0 &&
+                    <React.Fragment>
+                        <Divider className={classes.divider}/>
+                        <Typography gutterBottom variant={"subtitle2"}>
+                            Trade
+                        </Typography>
+                        {tradeIds.map(id => <TradeFragment islandId={this.props.islandId} tradeId={id} key={id}/>)}
+                    </React.Fragment>
+                    }
                 </CardContent>
             </Card>);
     }
 
-    private renderFactoryFragment(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
-        const productivity = factoryState.productivity ? (factoryState.productivity * 100).toFixed(0) : 100;
-        const perfectProductivity = (this.computePerfectProductivity(f) * 100).toFixed(1);
-        const buildingCount = factoryState.buildingCount ? factoryState.buildingCount : 0;
-        return (<React.Fragment key={f.guid}>
-            <Divider/>
-            <Typography gutterBottom variant={"subtitle2"}>
-                {f.name}
-            </Typography>
-            <Grid container spacing={1}>
-                <Grid item xs={6}>
-                    <Tooltip title={`Required with ${productivity} % productivity: ${this.computeMinimumRequiredCount(f)}`}>
-                        <TextField label={"count"} type={"number"} inputProps={{min: 0}}
-                                   value={buildingCount}
-                                   onChange={(event) => this.props.onBuildingCountChange(f.guid, Number(event.target.value))}/>
-                    </Tooltip>
-                </Grid>
-
-                <Grid item xs={6}>
-                    <Tooltip title={`Required with ${buildingCount} buildings: ${perfectProductivity} %`}>
-                        <div>
-                            <TextField label={"productivity"} type={"number"} inputProps={{min: 0}}
-                                       value={productivity}
-                                       onChange={(event) => this.props.onProductivityChange(f.guid, Number(event.target.value) / 100)}
-                                       InputProps={{
-                                           endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                       }}/>
-                        </div>
-                    </Tooltip>
-                </Grid>
-            </Grid>
-        </React.Fragment>);
-    }
-
-    private computePerfectProductivity(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
+    private getTradeIds() {
         const {productState} = this.props;
-        if (!productState) {
-            return 0;
-        }
-        const consumption = getConsumption(productState);
-        let cycleTime = f.cycleTime;
-        const productionPerMinutePerBuilding = (60 / cycleTime);
-        let buildingCount = 1;
-        if (!!factoryState) {
-            buildingCount = factoryState.buildingCount || 1;
-            if (buildingCount === 0) {
-                buildingCount = 1;
+        const tradeIds: number[] = [];
+        if (productState) {
+            for (let tradeId in productState.imports) {
+                tradeIds.push(Number(tradeId));
+            }
+            for (let tradeId in productState.exports) {
+                tradeIds.push(Number(tradeId));
             }
         }
-        return consumption / productionPerMinutePerBuilding / buildingCount;
-    }
-
-    private computeMinimumRequiredCount(f: Factory) {
-        const factoryState = this.props.factoryStatesById.get(f.guid) || {productivity: 1, buildingCount: 0};
-        const {productState} = this.props;
-        if (!productState) {
-            return 0;
-        }
-        const consumption = getConsumption(productState);
-        let cycleTime = f.cycleTime;
-        let productivity = factoryState ? factoryState.productivity : 1;
-        const productionPerMinutePerBuilding = (60 / cycleTime) * productivity;
-        return Math.ceil(consumption / productionPerMinutePerBuilding);
+        return tradeIds;
     }
 }
 
-export default withStyles(styles)(connect(makeMapStateToProps, mapDispatchToProps)(ProductCard));
+export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(ProductCard));
