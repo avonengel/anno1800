@@ -52,7 +52,7 @@ class TradeFragment extends React.Component<Props> {
             <div className={classes.container}>
                 {trade.fromIslandId === islandId && <Publish/>}
                 {trade.toIslandId === islandId && <GetApp/>}
-                <TextField type={"number"} inputProps={{min: 0, step: "any"}} style={{flexShrink: 0, width: "3em"}}
+                <TextField type={"number"} inputProps={{min: 0, step: "any"}} style={{flexShrink: 0, width: "4em"}}
                            value={trade.tonsPerMinute}
                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onTonsPerMinuteChange(e)}/>
                 <span style={{flexGrow: 1, flexShrink: 1, textOverflow: "ellipsis"}}>{otherIslandName}</span>
@@ -64,27 +64,5 @@ class TradeFragment extends React.Component<Props> {
         this.props.updateTonsPerMinute(event.target.valueAsNumber);
     }
 }
-
-
-//<Grid item xs={6}>
-//<Tooltip title={`Required with ${productivity} % productivity: ${this.computeMinimumRequiredCount()}`}>
-//        <TextField label={"count"} type={"number"} inputProps={{min: 0}}
-//                   value={buildingCount}
-//                   onChange={(event) => this.props.onBuildingCountChange(Number(event.target.value))}/>
-//    </Tooltip>
-//</Grid>
-
-//<Grid item xs={6}>
-//    <Tooltip title={`Required with ${buildingCount} buildings: ${perfectProductivity} %`}>
-//<div>
-//<TextField label={"productivity"} type={"number"} inputProps={{min: 0}}
-//value={productivity}
-//onChange={(event) => this.props.onProductivityChange(Number(event.target.value) / 100)}
-//InputProps={{
-//    endAdornment: <InputAdornment position="end">%</InputAdornment>,
-//}}/>
-//</div>
-//</Tooltip>
-//</Grid>
 
 export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(TradeFragment));

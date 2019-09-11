@@ -1,12 +1,25 @@
 import * as React from "react";
-import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
+import {
+    Avatar,
+    Card,
+    CardContent,
+    CardHeader,
+    createStyles,
+    Divider,
+    Grid,
+    Theme,
+    Tooltip,
+    Typography,
+    WithStyles,
+    withStyles
+} from "@material-ui/core";
 import {RootState} from "../redux/store";
 import {getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
-import {Error, GetApp, Publish, Warning} from "@material-ui/icons";
+import {Add, Error, Remove, Warning} from "@material-ui/icons";
 import {ALL_FACTORIES, ProductAsset, Region} from "../data/assets";
 import {getProduction} from "../redux/production/reducers";
 import {PRODUCTS} from "../data/productAssets";
@@ -118,7 +131,7 @@ class ProductCard extends React.PureComponent<Props> {
                         <Grid item xs={6}>
                             <Tooltip title={"Production in t/min"}>
                                 <div>
-                                    <GetApp style={{verticalAlign: "middle"}}/> {production.toFixed(2) || 0}
+                                    <Add style={{verticalAlign: "middle"}}/> {production.toFixed(2) || 0}
                                 </div>
                             </Tooltip>
                         </Grid>
@@ -126,7 +139,7 @@ class ProductCard extends React.PureComponent<Props> {
                         <Grid item xs={6}>
                             <Tooltip title={"Consumption in t/min"}>
                                 <div>
-                                    <Publish style={{verticalAlign: "middle"}}/> {consumption.toFixed(2) || 0}
+                                    <Remove style={{verticalAlign: "middle"}}/> {consumption.toFixed(2) || 0}
                                 </div>
                             </Tooltip>
                         </Grid>
