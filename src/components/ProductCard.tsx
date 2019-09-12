@@ -20,7 +20,7 @@ import {connect} from "react-redux";
 import {ProductState} from "../redux/production/types";
 import {params} from '../data/params_2019-04-17_full'
 import {Add, Error, Remove, Warning} from "@material-ui/icons";
-import {ALL_FACTORIES, ProductAsset, Region} from "../data/assets";
+import {ALL_FACTORIES, getFactoryById, ProductAsset, Region} from "../data/assets";
 import {getProduction} from "../redux/production/reducers";
 import {PRODUCTS} from "../data/productAssets";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
@@ -61,7 +61,11 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
         }
     };
 };
-type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & WithStyles<typeof styles>;
+type Props =
+    OwnProps
+    & ReturnType<typeof mapStateToProps>
+    & ReturnType<typeof mapDispatchToProps>
+    & WithStyles<typeof styles>;
 
 function getPopulationConsumption(productState: ProductState | undefined) {
     if (productState === undefined) {
@@ -137,7 +141,7 @@ class ProductCard extends React.PureComponent<Props> {
                         </Grid>
 
                         <Grid item xs={6}>
-                            <Tooltip title={"Consumption in t/min"}>
+                            <Tooltip title={this.consumptionTooltipText()}>
                                 <div>
                                     <Remove style={{verticalAlign: "middle"}}/> {consumption.toFixed(2) || 0}
                                 </div>
@@ -147,7 +151,8 @@ class ProductCard extends React.PureComponent<Props> {
 
                     {factories
                         .filter(f => !this.props.region || f.associatedRegions.indexOf(this.props.region) >= 0)
-                        .map((f) => <FactoryFragment islandId={this.props.islandId} factoryId={f.guid} consumption={getConsumption(productState)}/>)}
+                        .map((f) => <FactoryFragment islandId={this.props.islandId} factoryId={f.guid}
+                                                     consumption={getConsumption(productState)}/>)}
 
                     {tradeIds.length > 0 &&
                     <React.Fragment>
@@ -160,6 +165,42 @@ class ProductCard extends React.PureComponent<Props> {
                     }
                 </CardContent>
             </Card>);
+    }
+
+    private consumptionTooltipText() {
+        const {productState} = this.props;
+        if (!productState) {
+            return "Consumption in t/min";
+        }
+        const populationLevels = [];
+        for (let level in productState.populationConsumers) {
+            if (productState.populationConsumers[level] > 0) {
+                populationLevels.push(level);
+            }
+        }
+        const factoryIds: number[] = [];
+        for (let factoryId in productState.factoryConsumers) {
+            if (productState.factoryConsumers[factoryId] > 0) {
+                factoryIds.push(Number(factoryId));
+            }
+        }
+        const tradeIds: number[] = [];
+        for (let tradeId in productState.exports) {
+            if (productState.exports[tradeId] > 0) {
+                tradeIds.push(Number(tradeId));
+            }
+        }
+        return (<React.Fragment>
+            Consumption in t/min:<br/>
+            {populationLevels.map((value, index) => <React.Fragment>
+                {index > 0 && <br/>}
+                {productState.populationConsumers[value].toFixed(2)} {value}
+            </React.Fragment>)}
+            {factoryIds.map((value, index) => <React.Fragment>
+                {index > 0 && <br/>}
+                {productState.factoryConsumers[value].toFixed(2)} {getFactoryById(value).name}
+            </React.Fragment>)}
+        </React.Fragment>);
     }
 
     private getTradeIds() {
