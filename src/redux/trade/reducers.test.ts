@@ -3,6 +3,7 @@ import {initialState as initialRootState, RootState} from "../store";
 import {addTrade, updateTradeIslands, updateTradeProduct} from "./actions";
 import {createIsland, deleteIsland} from "../islands/actions";
 import {islandReducer} from "../islands/reducers";
+import {populationConsumptionReducer} from "../production/reducers";
 
 describe('tradeReducer', () => {
     test('create new trade, select product before other island', () => {
@@ -88,6 +89,54 @@ describe('tradeReducer', () => {
             // Assert
             expect(state.trades.allTradeIds).toHaveLength(0);
             expect(state.trades.tradesById).toStrictEqual({});
+        });
+
+        it("should delete exports from the other island", () => {
+            // Arrange
+            const initialState = {...initialRootState};
+            // Add island 'Other'
+            let state: RootState = islandReducer(initialState, createIsland('Other'));
+            const firstIslandId = initialState.selectedIsland;
+            const secondIslandId = state.island.islandIds[state.island.islandIds.length-1];
+            // Add trade
+            state = tradeReducer(state, addTrade(firstIslandId));
+            const tradeId = state.trades.allTradeIds[0];
+            state = tradeReducer(state, updateTradeIslands(tradeId, firstIslandId, secondIslandId));
+            state = tradeReducer(state, updateTradeProduct(tradeId, 1010200));
+
+
+            // Act
+            const deleteIslandAction = deleteIsland(secondIslandId);
+            state = islandReducer(state, deleteIslandAction);
+            state = populationConsumptionReducer(state, deleteIslandAction);
+            state = tradeReducer(state, deleteIslandAction);
+
+            // Assert
+            expect(state.products[firstIslandId][1010200].exports).toStrictEqual({});
+        });
+
+        it("should delete imports from the other island", () => {
+            // Arrange
+            const initialState = {...initialRootState};
+            // Add island 'Other'
+            let state: RootState = islandReducer(initialState, createIsland('Other'));
+            const firstIslandId = initialState.selectedIsland;
+            const secondIslandId = state.island.islandIds[state.island.islandIds.length-1];
+            // Add trade
+            state = tradeReducer(state, addTrade(firstIslandId));
+            const tradeId = state.trades.allTradeIds[0];
+            state = tradeReducer(state, updateTradeIslands(tradeId, secondIslandId, firstIslandId));
+            state = tradeReducer(state, updateTradeProduct(tradeId, 1010200));
+
+
+            // Act
+            const deleteIslandAction = deleteIsland(secondIslandId);
+            state = islandReducer(state, deleteIslandAction);
+            state = populationConsumptionReducer(state, deleteIslandAction);
+            state = tradeReducer(state, deleteIslandAction);
+
+            // Assert
+            expect(state.products[firstIslandId][1010200].imports).toStrictEqual({});
         });
     });
 });

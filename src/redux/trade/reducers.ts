@@ -23,17 +23,53 @@ export const initialTradeState: TradeState = {
 
 export function tradeReducer(state: RootState, action: AnyAction) {
     if (action.type === DELETE_ISLAND) {
+        const deletedIslandId = action.id;
         const tradesToDelete = state.trades.allTradeIds.filter(tradeId => {
             const trade = state.trades.tradesById[tradeId];
-            return trade.toIslandId === action.id || trade.fromIslandId === action.id;
+            return trade.toIslandId === deletedIslandId || trade.fromIslandId === deletedIslandId;
         });
         const tradesById: { [tradeId: number]: Trade } = {};
-        const remainingTradeIds = state.trades.allTradeIds.filter(tradeId => !tradesToDelete.includes(tradeId))
+        const remainingTradeIds = state.trades.allTradeIds.filter(tradeId => !tradesToDelete.includes(tradeId));
         for (let tradeId of remainingTradeIds) {
             tradesById[tradeId] = state.trades.tradesById[tradeId];
         }
+        let intermediate: RootState = state;
+        tradesToDelete.forEach(tradeId => {
+            const trade = state.trades.tradesById[tradeId];
+            if (trade.toIslandId === deletedIslandId) {
+                const {[tradeId]: _, ...exports} = intermediate.products[trade.fromIslandId][trade.productId].exports;
+                intermediate = {
+                    ...intermediate,
+                    products: {
+                        ...intermediate.products,
+                        [trade.fromIslandId]: {
+                            ...intermediate.products[trade.fromIslandId],
+                            [trade.productId]: {
+                                ...intermediate.products[trade.fromIslandId][trade.productId],
+                                exports
+                            }
+                        }
+                    }
+                }
+            } else {
+                const {[tradeId]: _, ...imports} = intermediate.products[trade.toIslandId][trade.productId].imports;
+                intermediate = {
+                    ...intermediate,
+                    products: {
+                        ...intermediate.products,
+                        [trade.toIslandId]: {
+                            ...intermediate.products[trade.toIslandId],
+                            [trade.productId]: {
+                                ...intermediate.products[trade.toIslandId][trade.productId],
+                                imports
+                            }
+                        }
+                    }
+                }
+            }
+        });
         return {
-            ...state,
+            ...intermediate,
             trades: {
                 allTradeIds: remainingTradeIds,
                 tradesById,
