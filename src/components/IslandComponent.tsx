@@ -1,13 +1,13 @@
 import * as React from "react";
 import {Button, createStyles, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid, IconButton, Input, Theme, Tooltip, Typography, withStyles, WithStyles, Zoom} from "@material-ui/core";
-import {getIslandById, getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
+import {getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
 import {deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "../redux/islands/actions";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {ALL_PUBLIC_SERVICES, FACTORIES_BY_ID, Factory, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS, ProductAsset, PUBLIC_SERVICES_BY_ID, PublicService, Region} from "../data/assets";
+import {ALL_PUBLIC_SERVICES, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS, ProductAsset, PUBLIC_SERVICES_BY_ID, PublicService, Region} from "../data/assets";
 import PopulationCard from "./PopulationCard";
 import {connect} from "react-redux";
 import PublicServiceCard from "./PublicServiceCard";
@@ -29,60 +29,10 @@ const styles = (theme: Theme) => createStyles({
 });
 
 interface ReactProps extends WithStyles<typeof styles> {
-    islandId: number;
-}
-
-function factoriesToShow(state: Readonly<RootState>, props: ReactProps) {
-    const populationStates = state.island.islandsById[props.islandId].population;
-    const factoriesToShow: Factory[] = [];
-    FACTORIES_BY_ID.forEach((factory, factoryId) => {
-        if (state.factories && state.factories[props.islandId]
-            && state.factories[props.islandId][factoryId]
-            && state.factories[props.islandId][factoryId].buildingCount > 0) {
-            factoriesToShow.push(factory);
-            return;
-        }
-
-        if (!!populationStates) {
-            for (let level in populationStates) {
-                if (populationStates[level].population > 0) {
-                    const populationLevel = getPopulationLevelByName(level);
-                    if (!populationLevel) {
-                        continue;
-                    }
-                    const needed = populationLevel.inputs
-                        .filter(input => input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < populationStates[level].population)
-                        .find(input => factory.output === input.product);
-                    if (needed) {
-                        factoriesToShow.push(factory);
-                        return;
-                    }
-                }
-            }
-        }
-        // also show factories for things that are consumed by factories
-        if (factory.output) {
-            const productState = getProductStateById(state, props.islandId, factory.output);
-
-            if (!!productState) {
-                let consumptionPerMinute = 0;
-                for (let factoryId in productState.factoryConsumers) {
-                    consumptionPerMinute += productState.factoryConsumers[factoryId];
-                }
-                for (let tradeId in productState.exports) {
-                    consumptionPerMinute += productState.exports[tradeId];
-                }
-                if (consumptionPerMinute) {
-                    factoriesToShow.push(factory);
-                }
-            }
-        }
-    });
-    return factoriesToShow;
 }
 
 function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
-    const populationStates = state.island.islandsById[props.islandId].population;
+    const populationStates = state.island.islandsById[state.selectedIsland].population;
     const servicesToShow: PublicService[] = [];
     PUBLIC_SERVICES_BY_ID.forEach((publicService, publicServiceId) => {
         // TODO introduce public service state
@@ -115,7 +65,7 @@ function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
 }
 
 function productsToShow(state: Readonly<RootState>, props: ReactProps) {
-    const populationStates = state.island.islandsById[props.islandId].population;
+    const populationStates = state.island.islandsById[state.selectedIsland].population;
     const productsToShow: ProductAsset[] = [];
     PRODUCTS.forEach((product) => {
         if (!!populationStates) {
@@ -136,7 +86,7 @@ function productsToShow(state: Readonly<RootState>, props: ReactProps) {
             }
         }
         // also show factories for things that are consumed by factories
-        const productState = getProductStateById(state, props.islandId, product.guid);
+        const productState = getProductStateById(state, state.selectedIsland, product.guid);
 
         if (!!productState) {
             let consumptionPerMinute = 0;
@@ -163,31 +113,31 @@ function productsToShow(state: Readonly<RootState>, props: ReactProps) {
 
 const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
     return {
-        island: getIslandById(state, reactProps.islandId),
-        factoriesToShow: factoriesToShow(state, reactProps),
+        islandId: state.selectedIsland,
+        island: state.island.islandsById[state.selectedIsland],
         publicServicesToShow: publicServicesToShow(state, reactProps),
         productsToShow: productsToShow(state, reactProps),
-        tradeIds: getTradeIdsForIslandId(state, reactProps.islandId),
+        tradeIds: getTradeIdsForIslandId(state, state.selectedIsland),
         hasMultipleIslands: state.island.islandIds.length > 1,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
     return {
-        onHouseChange: (level: string, houses: number) => {
-            dispatch(updateHouseCount(props.islandId, level, houses));
+        onHouseChange: (islandId: number, level: string, houses: number) => {
+            dispatch(updateHouseCount(islandId, level, houses));
         },
-        onPopulationChange: (level: string, population: number) => {
-            dispatch(updatePopulation(props.islandId, level, population));
+        onPopulationChange: (islandId: number, level: string, population: number) => {
+            dispatch(updatePopulation(islandId, level, population));
         },
-        addTrade: () => {
-            dispatch(addTrade(props.islandId));
+        addTrade: (islandId: number, ) => {
+            dispatch(addTrade(islandId));
         },
-        renameIsland: (name: string) => {
-            dispatch(renameIsland(props.islandId, name));
+        renameIsland: (islandId: number, name: string) => {
+            dispatch(renameIsland(islandId, name));
         },
-        deleteIsland: () => {
-            dispatch(deleteIsland(props.islandId));
+        deleteIsland: (islandId: number) => {
+            dispatch(deleteIsland(islandId));
         },
         selectPreviousIsland: () => {
             dispatch(selectPreviousIsland());
@@ -200,7 +150,6 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 interface OwnState {
-    showAllFactories: boolean;
     showAllPublicServices: boolean;
     showAllProducts: boolean;
     isEditingIslandName: boolean;
@@ -213,7 +162,6 @@ class IslandComponent extends React.Component<Props, OwnState> {
     constructor(props: Readonly<Props>) {
         super(props);
         this.state = {
-            showAllFactories: false,
             showAllPublicServices: false,
             showAllProducts: false,
             isEditingIslandName: false,
@@ -223,7 +171,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     private handleAddTrade() {
-        this.props.addTrade();
+        this.props.addTrade(this.props.islandId);
     }
 
     private handleEdit() {
@@ -241,7 +189,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
     private handleNameChange(event: React.FormEvent) {
         event.preventDefault();
-        this.props.renameIsland(this.state.islandName);
+        this.props.renameIsland(this.props.islandId, this.state.islandName);
         this.setState({isEditingIslandName: false});
     }
 
@@ -418,19 +366,13 @@ class IslandComponent extends React.Component<Props, OwnState> {
                                onPopulationChange={this.createOnPopulationChange(level)}/>;
     }
 
-    private toggleVisibility(kind: "publicServices" | "factories" | "products") {
+    private toggleVisibility(kind: "publicServices" | "products") {
         if (kind === "publicServices") {
             this.setState({showAllPublicServices: !this.state.showAllPublicServices});
         }
         if (kind === "products") {
             this.setState({showAllProducts: !this.state.showAllProducts});
-        } else {
-            this.setState({showAllFactories: !this.state.showAllFactories});
         }
-    }
-
-    private shouldShowFactory(factory: Factory): boolean {
-        return this.state.showAllFactories || this.props.factoriesToShow.includes(factory);
     }
 
     private shouldShowPublicService(ps: PublicService): boolean {
@@ -443,20 +385,20 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
     createOnHouseChange(level: string): (houses: number) => void {
         return (houses: number) => {
-            this.props.onHouseChange(level, houses);
+            this.props.onHouseChange(this.props.islandId, level, houses);
         }
     }
 
     createOnPopulationChange(level: string): (population: number) => void {
         return (population: number) => {
-            this.props.onPopulationChange(level, population);
+            this.props.onPopulationChange(this.props.islandId, level, population);
         }
     }
 
     private handleDeleteClose(deleteIsland: boolean) {
         this.setState({deleteDialogOpen: false});
         if (deleteIsland) {
-            this.props.deleteIsland();
+            this.props.deleteIsland(this.props.islandId);
         }
     }
 }
