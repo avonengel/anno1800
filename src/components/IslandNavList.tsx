@@ -67,8 +67,8 @@ class IslandNavList extends React.PureComponent<Props, State> {
         const {islandIds, islandsById, classes} = this.props;
         return <List component={"nav"}>
             {islandIds.map((islandId) => (
-                <React.Fragment>
-                    <ListItem button key={islandId}>
+                <React.Fragment key={islandId}>
+                    <ListItem button>
                         <ListItemText primary={islandsById[islandId].name}
                                       onClick={() => this.props.onIslandSelected(islandId)}/>
                     </ListItem>
