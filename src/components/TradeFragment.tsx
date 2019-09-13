@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
 import {RootState} from "../redux/store";
-import {createStyles, TextField, Theme, withStyles, WithStyles} from "@material-ui/core";
+import {createStyles, TextField, withStyles, WithStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {Dispatch} from "redux";
 import {GetApp, Publish} from "@material-ui/icons";
@@ -33,7 +33,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
     };
 };
 
-const styles = (theme: Theme) => createStyles({
+const styles = () => createStyles({
     container: {
         display: "flex",
         flexDirection: "row",
@@ -52,10 +52,10 @@ class TradeFragment extends React.Component<Props> {
             <div className={classes.container}>
                 {trade.fromIslandId === islandId && <Publish/>}
                 {trade.toIslandId === islandId && <GetApp/>}
-                <TextField type={"number"} inputProps={{min: 0, step: "any"}} style={{flexShrink: 0, width: "4em"}}
+                <TextField type={"number"} inputProps={{min: 0, step: "any"}} style={{flexGrow: 1, flexBasis: "4em"}}
                            value={trade.tonsPerMinute}
+                           label={otherIslandName}
                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onTonsPerMinuteChange(e)}/>
-                <span style={{flexGrow: 1, flexShrink: 1, textOverflow: "ellipsis"}}>{otherIslandName}</span>
             </div>
         </React.Fragment>);
     }

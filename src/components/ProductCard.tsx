@@ -160,7 +160,12 @@ class ProductCard extends React.PureComponent<Props> {
                         <Typography gutterBottom variant={"subtitle2"}>
                             Trade
                         </Typography>
-                        {tradeIds.map(id => <TradeFragment islandId={this.props.islandId} tradeId={id} key={id}/>)}
+                        {tradeIds.map((id, index) =>
+                            <React.Fragment>
+                                {index > 0 && <Divider className={classes.divider}/>}
+                                <TradeFragment islandId={this.props.islandId} tradeId={id} key={id}/>
+                            </React.Fragment>
+                        )}
                     </React.Fragment>
                     }
                 </CardContent>
@@ -169,8 +174,9 @@ class ProductCard extends React.PureComponent<Props> {
 
     private consumptionTooltipText() {
         const {productState} = this.props;
+        const headline = "Consumption in t/min";
         if (!productState) {
-            return "Consumption in t/min";
+            return headline;
         }
         const populationLevels = [];
         for (let level in productState.populationConsumers) {
@@ -190,8 +196,11 @@ class ProductCard extends React.PureComponent<Props> {
                 tradeIds.push(Number(tradeId));
             }
         }
+        if (populationLevels.length === 0 && factoryIds.length === 0) {
+            return headline;
+        }
         return (<React.Fragment>
-            Consumption in t/min:<br/>
+            {headline}:<br/>
             {populationLevels.map((value, index) => <React.Fragment>
                 {index > 0 && <br/>}
                 {productState.populationConsumers[value].toFixed(2)} {value}
