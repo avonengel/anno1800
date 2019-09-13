@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Avatar, Card, CardContent, CardHeader, createStyles, FormControlLabel, Switch, Theme, WithStyles, withStyles} from "@material-ui/core";
+import {Card, CardContent, createStyles, FormControlLabel, Switch, Theme, WithStyles, withStyles} from "@material-ui/core";
 import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
@@ -36,11 +36,11 @@ const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
 };
 type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-function getIconData(name: string) {
-    for (let factory of params.factories) {
-        if (factory.name === name) {
-            if (!!factory.icon) {
-                return factory.icon;
+function getIconData(productId: number) {
+    for (let product of params.products) {
+        if (product.guid === productId) {
+            if (!!product.icon) {
+                return product.icon;
             }
             return null;
         }
@@ -51,28 +51,22 @@ function getIconData(name: string) {
 class PublicServiceCard extends React.Component<Props> {
 
     render() {
-        // const {factoryState, outputProductState} = this.props;
-        const iconData = getIconData(this.props.publicService.name);
+        const iconData = getIconData(this.props.publicService.output);
         return (
             <Card>
-                <CardHeader
-                    avatar={
-                        iconData && <Avatar alt={this.props.publicService.name} src={iconData} />
+                <CardContent style={{textAlign: "center"}}>
+                    {
+                        iconData && <img alt={this.props.publicService.name} src={iconData}/>
                     }
-                    title={this.props.publicService.name}
-                    // titleTypographyProps={{component: 'h6', variant: 'h6'}}
-                />
-                <CardContent>
                     <FormControlLabel
-                        control={
-                            <Switch
+                        style={{display: "block"}}
+                        control={<Switch
                                 // checked={state.checkedB}
                                 onChange={() => this.handleEnabledToggle()}
                                 value="checkedB"
                                 color="primary"
-                            />
-                        }
-                        label="Enable"
+                            />}
+                        label={this.props.publicService.name}
                     />
                 </CardContent>
             </Card>);

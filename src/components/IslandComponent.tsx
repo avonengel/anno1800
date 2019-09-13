@@ -263,7 +263,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     .filter((ps) => ps.output !== undefined)
                     .map((ps) =>
                         <Zoom key={ps.guid} in={this.shouldShowPublicService(ps)} mountOnEnter={true} unmountOnExit={true}>
-                            <Grid item xs={6} md={3} lg={2}>
+                            <Grid item xs={6} md={4} lg={3}>
                                 <PublicServiceCard publicService={ps} islandId={island.id}/>
                             </Grid>
                         </Zoom>)}
