@@ -1,18 +1,5 @@
 import * as React from "react";
-import {
-    Avatar,
-    Card,
-    CardContent,
-    CardHeader,
-    createStyles,
-    Divider,
-    Grid,
-    Theme,
-    Tooltip,
-    Typography,
-    WithStyles,
-    withStyles
-} from "@material-ui/core";
+import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
 import {RootState} from "../redux/store";
 import {getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
