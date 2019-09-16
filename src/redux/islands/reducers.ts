@@ -13,7 +13,7 @@ import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
 import {isActionOf} from "typesafe-actions";
-import {renameIsland, selectNextIsland, selectPreviousIsland} from "./actions";
+import {createIsland, renameIsland, selectNextIsland, selectPreviousIsland} from "./actions";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -137,6 +137,23 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
             };
         }
     }
+    if (isActionOf(createIsland, action)) {
+        const newId = Math.max(...state.island.islandIds) + 1;
+        return {
+            ...state,
+            island: {
+                islandsById: {
+                    ...state.island.islandsById,
+                    [newId]: {
+                        name: action.payload,
+                        id: newId,
+                        population: newPopulationStateObject(),
+                    }
+                },
+                islandIds: [...state.island.islandIds, newId]
+            }
+        };
+    }
     switch (action.type) {
         case DELETE_ISLAND:
             if (state.island.islandIds.length > 1) {
@@ -153,22 +170,6 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
                 }
             }
             return state;
-        case ADD_ISLAND:
-            const newId = Math.max(...state.island.islandIds) + 1;
-            return {
-                ...state,
-                island: {
-                    islandsById: {
-                        ...state.island.islandsById,
-                        [newId]: {
-                            name: action.name,
-                            id: newId,
-                            population: newPopulationStateObject(),
-                        }
-                    },
-                    islandIds: [...state.island.islandIds, newId]
-                }
-            };
         case UPDATE_HOUSES:
             const {islandId, level, houses} = action;
             const result = {

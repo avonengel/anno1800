@@ -1,12 +1,7 @@
-import {ADD_ISLAND, DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
+import {DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
 import {createCustomAction, createStandardAction} from "typesafe-actions";
 
-export function createIsland(name: string): IslandActionTypes {
-    return {
-        type: ADD_ISLAND,
-        name: name
-    }
-}
+export const createIsland = createStandardAction('islands/CREATE')<string>();
 
 export function deleteIsland(id: number): IslandActionTypes {
     return {
