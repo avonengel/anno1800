@@ -6,6 +6,7 @@ import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../data/assets";
+import iassign from "immutable-assign";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -81,6 +82,11 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
             ...state,
             factories
         }
+    } else if (action.type === DELETE_ISLAND) {
+        return iassign(state, state => state.factories, factoryState => {
+            const {[action.id]: _, ...result} = factoryState;
+            return result;
+        });
     }
     return state;
 }
