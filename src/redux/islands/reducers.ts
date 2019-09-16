@@ -10,7 +10,7 @@ import iassign from "immutable-assign";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
-        map[level] = new PopulationState(level);
+        map[level] = {level, houses: 0, population: 0};
         return map;
     }, {});
 }
@@ -167,14 +167,14 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
         let population = getPopulation(getPopulationLevelByName(level), houses, getEnabledProducts(state.products[islandId]));
         return iassign(state,
             state => state.island.islandsById[islandId].population[level],
-            () => new PopulationState(level, houses, population));
+            () => ({level, houses, population}));
     }
     if (isActionOf(updatePopulation, action)) {
         const {islandId, level, population} = action;
         const houses = getHouses(getPopulationLevelByName(level), population, getEnabledProducts(state.products[islandId]));
         return iassign(state,
             state => state.island.islandsById[islandId].population[level],
-            () => new PopulationState(level, houses, population));
+            () => ({level, houses, population}));
     }
     return state;
 }
