@@ -17,15 +17,7 @@ export interface IslandState {
     islandIds: number[];
 }
 
-export const UPDATE_HOUSES = 'UPDATE_HOUSES';
 export const UPDATE_POPULATION = 'UPDATE_POPULATION';
-
-export interface UpdateHousesAction extends Action {
-    type: typeof UPDATE_HOUSES;
-    islandId: number;
-    level: string;
-    houses: number;
-}
 
 export interface UpdatePopulationAction extends Action {
     type: typeof UPDATE_POPULATION;
@@ -34,4 +26,4 @@ export interface UpdatePopulationAction extends Action {
     population: number;
 }
 
-export type IslandActionTypes = UpdateHousesAction | UpdatePopulationAction;
+export type IslandActionTypes = UpdatePopulationAction;
