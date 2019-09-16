@@ -1,12 +1,13 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
-import {DELETE_ISLAND, UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
+import {UPDATE_HOUSES, UPDATE_POPULATION} from "../islands/types";
 import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../data/assets";
 import iassign from "immutable-assign";
+import {deleteIsland} from "../islands/actions";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -48,8 +49,8 @@ export function populationConsumptionReducer(state: RootState, action: AnyAction
                 };
             }
         }
-    } else if (action.type === DELETE_ISLAND) {
-        const {[action.id]: _, ...products} = state.products;
+    } else if (isActionOf(deleteIsland, action)) {
+        const {[action.payload]: _, ...products} = state.products;
         return {
             ...state,
             products
@@ -82,9 +83,9 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
             ...state,
             factories
         }
-    } else if (action.type === DELETE_ISLAND) {
+    } else if (isActionOf(deleteIsland, action)) {
         return iassign(state, state => state.factories, factoryState => {
-            const {[action.id]: _, ...result} = factoryState;
+            const {[action.payload]: _, ...result} = factoryState;
             return result;
         });
     }

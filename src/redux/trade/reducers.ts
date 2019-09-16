@@ -2,7 +2,7 @@ import {isActionOf} from "typesafe-actions";
 import {addTrade, deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "./actions";
 import {AnyAction} from "redux";
 import {RootState} from "../store";
-import {DELETE_ISLAND} from "../islands/types";
+import {deleteIsland} from "../islands/actions";
 
 export interface Trade {
     fromIslandId: number,
@@ -22,8 +22,8 @@ export const initialTradeState: TradeState = {
 };
 
 export function tradeReducer(state: RootState, action: AnyAction) {
-    if (action.type === DELETE_ISLAND) {
-        const deletedIslandId = action.id;
+    if (isActionOf(deleteIsland, action)) {
+        const deletedIslandId = action.payload;
         const tradesToDelete = state.trades.allTradeIds.filter(tradeId => {
             const trade = state.trades.tradesById[tradeId];
             return trade.toIslandId === deletedIslandId || trade.fromIslandId === deletedIslandId;

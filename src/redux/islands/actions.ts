@@ -1,16 +1,11 @@
-import {DELETE_ISLAND, IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
+import {IslandActionTypes, UPDATE_HOUSES, UPDATE_POPULATION} from "./types";
 import {createCustomAction, createStandardAction} from "typesafe-actions";
 
-export const createIsland = createStandardAction('islands/CREATE')<string>();
+export const createIsland = createStandardAction("islands/CREATE")<string>();
 
-export function deleteIsland(id: number): IslandActionTypes {
-    return {
-        type: DELETE_ISLAND,
-        id: id
-    }
-}
+export const deleteIsland = createStandardAction("islands/DELETE")<number>();
 
-export const selectIsland = createStandardAction('islands/SELECT')<number>();
+export const selectIsland = createStandardAction("islands/SELECT")<number>();
 
 export function updateHouseCount(id: number, level: string, houses: number): IslandActionTypes {
     return {
@@ -30,11 +25,11 @@ export function updatePopulation(id: number, level: string, population: number):
     }
 }
 
-export const renameIsland = createCustomAction('islands/RENAME',
+export const renameIsland = createCustomAction("islands/RENAME",
     type => (islandId: number, name: string) => ({
         type,
         payload: {islandId, name}
     }));
 
-export const selectPreviousIsland = createStandardAction('islands/SELECT_PREVIOUS')();
-export const selectNextIsland = createStandardAction('islands/SELECT_NEXT')();
+export const selectPreviousIsland = createStandardAction("islands/SELECT_PREVIOUS")();
+export const selectNextIsland = createStandardAction("islands/SELECT_NEXT")();

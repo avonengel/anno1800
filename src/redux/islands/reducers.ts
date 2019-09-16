@@ -1,19 +1,11 @@
-import {
-    ADD_ISLAND,
-    DELETE_ISLAND,
-    IslandState,
-    PopulationState,
-    UPDATE_HOUSES,
-    UPDATE_POPULATION,
-    UpdatePopulationAction
-} from "./types";
+import {IslandState, PopulationState, UPDATE_HOUSES, UPDATE_POPULATION, UpdatePopulationAction} from "./types";
 import {AnyAction} from "redux";
 import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
 import {isActionOf} from "typesafe-actions";
-import {createIsland, renameIsland, selectNextIsland, selectPreviousIsland} from "./actions";
+import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland} from "./actions";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -154,22 +146,23 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
             }
         };
     }
-    switch (action.type) {
-        case DELETE_ISLAND:
-            if (state.island.islandIds.length > 1) {
-                const selectedIsland = action.id === state.selectedIsland ? selectPreviousIslandId(state.island.islandIds, state.selectedIsland) : state.selectedIsland;
-                const {[action.id]: _, ...islandsById} = state.island.islandsById;
-                const islandIds = state.island.islandIds.filter(islandId => islandId !== action.id);
-                return {
-                    ...state,
-                    island: {
-                        islandIds,
-                        islandsById
-                    },
-                    selectedIsland
-                }
+    if (isActionOf(deleteIsland, action)) {
+        if (state.island.islandIds.length > 1) {
+            const selectedIsland = action.payload === state.selectedIsland ? selectPreviousIslandId(state.island.islandIds, state.selectedIsland) : state.selectedIsland;
+            const {[action.payload]: _, ...islandsById} = state.island.islandsById;
+            const islandIds = state.island.islandIds.filter(islandId => islandId !== action.payload);
+            return {
+                ...state,
+                island: {
+                    islandIds,
+                    islandsById
+                },
+                selectedIsland
             }
-            return state;
+        }
+    }
+    return state;
+    switch (action.type) {
         case UPDATE_HOUSES:
             const {islandId, level, houses} = action;
             const result = {

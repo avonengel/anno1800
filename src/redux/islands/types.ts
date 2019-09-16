@@ -17,14 +17,8 @@ export interface IslandState {
     islandIds: number[];
 }
 
-export const DELETE_ISLAND = 'DELETE_ISLAND';
 export const UPDATE_HOUSES = 'UPDATE_HOUSES';
 export const UPDATE_POPULATION = 'UPDATE_POPULATION';
-
-export interface DeleteIslandAction extends Action {
-    type: typeof DELETE_ISLAND;
-    id: number;
-}
 
 export interface UpdateHousesAction extends Action {
     type: typeof UPDATE_HOUSES;
@@ -40,4 +34,4 @@ export interface UpdatePopulationAction extends Action {
     population: number;
 }
 
-export type IslandActionTypes = DeleteIslandAction | UpdateHousesAction | UpdatePopulationAction;
+export type IslandActionTypes = UpdateHousesAction | UpdatePopulationAction;
