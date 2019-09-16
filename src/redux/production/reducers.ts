@@ -1,13 +1,12 @@
 import {RootState} from "../store";
 import {AnyAction} from "redux";
-import {UPDATE_POPULATION} from "../islands/types";
 import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
 import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
 import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../data/assets";
 import iassign from "immutable-assign";
-import {deleteIsland, updateHouseCount} from "../islands/actions";
+import {deleteIsland, updateHouseCount, updatePopulation} from "../islands/actions";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -20,7 +19,7 @@ function getMaxPeoplePerHouse(level: PopulationAsset) {
 }
 
 export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
-    if (isActionOf(updateHouseCount, action) || action.type === UPDATE_POPULATION) {
+    if (isActionOf([updateHouseCount, updatePopulation], action)) {
         // FIXME how to notice that population changed due to updateFactoryCount with population recomputation?!
         const {islandId, level: levelName} = action;
         if (!!state.island) {

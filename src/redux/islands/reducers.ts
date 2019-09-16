@@ -1,11 +1,11 @@
-import {IslandState, PopulationState, UPDATE_POPULATION, UpdatePopulationAction} from "./types";
+import {IslandState, PopulationState} from "./types";
 import {AnyAction} from "redux";
 import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
 import {isActionOf} from "typesafe-actions";
-import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount} from "./actions";
+import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "./actions";
 import iassign from "immutable-assign";
 
 function newPopulationStateObject() {
@@ -166,24 +166,15 @@ export function islandReducer(state: RootState = initialRootState, action: AnyAc
         const {islandId, level, houses} = action;
         let population = getPopulation(getPopulationLevelByName(level), houses, getEnabledProducts(state.products[islandId]));
         return iassign(state,
-            (state, context) => state.island.islandsById[islandId].population[level],
+            state => state.island.islandsById[islandId].population[level],
             () => new PopulationState(level, houses, population));
     }
-    switch (action.type) {
-        case UPDATE_POPULATION:
-            const popAction = action as UpdatePopulationAction;
-            const islandState = {...state.island};
-            islandState.islandsById = {...islandState.islandsById};
-            islandState.islandsById[popAction.islandId] = {...islandState.islandsById[popAction.islandId]};
-            islandState.islandsById[popAction.islandId].population = {...islandState.islandsById[popAction.islandId].population};
-            islandState.islandsById[popAction.islandId].population[popAction.level] = {
-                ...islandState.islandsById[popAction.islandId].population[popAction.level],
-                population: popAction.population,
-                houses: getHouses(getPopulationLevelByName(popAction.level), popAction.population, getEnabledProducts(state.products[popAction.islandId]))
-            };
-
-            return {...state, island: islandState};
-        default:
-            return state;
+    if (isActionOf(updatePopulation, action)) {
+        const {islandId, level, population} = action;
+        const houses = getHouses(getPopulationLevelByName(level), population, getEnabledProducts(state.products[islandId]));
+        return iassign(state,
+            state => state.island.islandsById[islandId].population[level],
+            () => new PopulationState(level, houses, population));
     }
+    return state;
 }

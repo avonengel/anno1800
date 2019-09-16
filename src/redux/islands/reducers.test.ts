@@ -1,5 +1,5 @@
 import {initialState as initialRootState} from "../store";
-import {createIsland, deleteIsland, updateHouseCount} from "./actions";
+import {createIsland, deleteIsland, updateHouseCount, updatePopulation} from "./actions";
 import {islandReducer} from "./reducers";
 import {POPULATION_LEVELS} from "../../data/assets";
 
@@ -65,6 +65,21 @@ describe("islandReducer", () => {
 
             // Assert
             expect(state.island.islandsById[state.selectedIsland].population[popLevel].houses).toBe(newHouseCount);
+        });
+    });
+
+    describe("update population", () => {
+        it("should set population count", () => {
+            // Arrange
+            const initialState = {...initialRootState};
+            const newPopulationCount = 42;
+            const popLevel = POPULATION_LEVELS[0];
+
+            // Act
+            let state = islandReducer(initialState, updatePopulation(initialState.selectedIsland, popLevel, newPopulationCount));
+
+            // Assert
+            expect(state.island.islandsById[state.selectedIsland].population[popLevel].population).toBe(newPopulationCount);
         });
     });
 });
