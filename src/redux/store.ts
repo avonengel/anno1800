@@ -6,7 +6,7 @@ import {IslandState} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
 import {persistReducer, persistStore} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import {getType, isOfType} from "typesafe-actions";
+import {isActionOf} from "typesafe-actions";
 import {selectIsland} from "./islands/actions";
 import {initialTradeState, tradeReducer, TradeState} from "./trade/reducers";
 import {stateUploadReducer} from "./reducers";
@@ -39,7 +39,7 @@ function rootReducer(state: RootState | undefined = initialState, action: AnyAct
     state = populationConsumptionReducer(state, action);
     state = factoryReducer(state, action);
     state = factoryProductionConsumptionReducer(state, action);
-    if (isOfType(getType(selectIsland), action)) {
+    if (isActionOf(selectIsland, action)) {
         if (state.selectedIsland !== action.payload) {
             state = {...state,
                 selectedIsland: action.payload
