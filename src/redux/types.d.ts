@@ -1,9 +1,12 @@
 import {ActionType} from 'typesafe-actions';
+import * as islandActions from "./islands/actions";
+import * as productActions from "./production/actions";
+import * as tradeActions from "./trade/actions";
 
-export type RootAction = ActionType<typeof import('./actions').default>
-    & ActionType<typeof import('./islands/actions').default>
-    & ActionType<typeof import('./production/actions').default>
-    & ActionType<typeof import('./trade/actions').default>;
+
+export type RootAction = ActionType<typeof islandActions>
+    | ActionType<typeof productActions>
+    | ActionType<typeof tradeActions>;
 
 declare module 'typesafe-actions' {
     interface Types {

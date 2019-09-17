@@ -1,5 +1,5 @@
 import {initialState as initialRootState} from "../store";
-import {createIsland, deleteIsland, updateHouseCount, updatePopulation} from "./actions";
+import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "./actions";
 import {islandReducer} from "./reducers";
 import {POPULATION_LEVELS} from "../../data/assets";
 
@@ -80,6 +80,72 @@ describe("islandReducer", () => {
 
             // Assert
             expect(state.island.islandsById[state.selectedIsland].population[popLevel].population).toBe(newPopulationCount);
+        });
+    });
+
+    describe("rename island", () => {
+        it("should change the island name", () => {
+            // Arrange
+            const initialState = initialRootState;
+            const firstIslandId = initialState.island.islandIds[0];
+            const newName = "Other";
+            const renameAction = renameIsland(firstIslandId, newName);
+
+            // Act
+            let state = islandReducer(initialState, renameAction);
+
+            // Assert
+            expect(state.island.islandsById[firstIslandId].name).toBe(newName);
+        });
+    });
+
+    describe('select next island', function () {
+        it('should select the next island, if there are multiple', function () {
+            // Arrange
+            const initialState = initialRootState;
+            let state = islandReducer(initialState, createIsland("Other"));
+            const otherIslandId = state.island.islandIds[1];
+
+            // Act
+            state = islandReducer(state, selectNextIsland());
+
+            // Assert
+            expect(state.selectedIsland).toBe(otherIslandId);
+        });
+        it('should do nothing, if there is only one island', function () {
+            // Arrange
+            const initialState = initialRootState;
+
+            // Act
+            let state = islandReducer(initialState, selectNextIsland());
+
+            // Assert
+            expect(state).toBe(initialState);
+        });
+    });
+    describe('select previous island', function () {
+        it('should select the previous island, if there are multiple', function () {
+            // Arrange
+            const initialState = initialRootState;
+            let state = islandReducer(initialState, createIsland("Other"));
+            state = islandReducer(state, createIsland("Other2"));
+            const otherIslandId = state.island.islandIds[2];
+
+            // Act
+            state = islandReducer(state, selectPreviousIsland());
+
+            // Assert
+            expect(state.selectedIsland).toBe(otherIslandId);
+        });
+        it('should do nothing, if there is only one island', function () {
+            // Arrange
+            const initialState = initialRootState;
+
+            // Act
+            let state = islandReducer(initialState, selectPreviousIsland());
+
+            // Assert
+            expect(state).toBe(initialState);
         });
     });
 });
