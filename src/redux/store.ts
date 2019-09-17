@@ -11,6 +11,7 @@ import {selectIsland} from "./islands/actions";
 import {initialTradeState, tradeReducer, TradeState} from "./trade/reducers";
 import {stateUploadReducer} from "./reducers";
 import {RootAction} from "./types";
+import {PublicServiceStateByIslandId} from "./publicservices/types";
 
 
 const composeEnhancers = composeWithDevTools({
@@ -24,6 +25,7 @@ export interface RootState {
     readonly factories: { [islandId: number]: { [factoryId: number]: FactoryState } },
     readonly selectedIsland: number,
     readonly trades: TradeState,
+    readonly publicServices: PublicServiceStateByIslandId,
 }
 
 export const initialState: Readonly<RootState> = {
@@ -31,7 +33,10 @@ export const initialState: Readonly<RootState> = {
     products: {},
     factories: {},
     selectedIsland: 1,
-    trades: initialTradeState
+    trades: initialTradeState,
+    publicServices: {
+        byIslandId: {}
+    },
 };
 
 function rootReducer(state: RootState | undefined = initialState, action: RootAction): RootState {
@@ -42,7 +47,8 @@ function rootReducer(state: RootState | undefined = initialState, action: RootAc
     state = factoryProductionConsumptionReducer(state, action);
     if (isActionOf(selectIsland, action)) {
         if (state.selectedIsland !== action.payload) {
-            state = {...state,
+            state = {
+                ...state,
                 selectedIsland: action.payload
             };
         }
