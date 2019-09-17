@@ -1,10 +1,11 @@
 import * as React from "react";
 import {Card, CardContent, createStyles, FormControlLabel, Switch, Theme, WithStyles, withStyles} from "@material-ui/core";
-import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
 import {params} from '../data/params_2019-04-17_full'
 import {PublicService} from "../data/assets";
+import {disablePublicService, enablePublicService} from "../redux/publicservices/actions";
+import {RootState} from "../redux/root-state";
 
 const styles = (theme: Theme) => createStyles({
     card: {
@@ -17,21 +18,27 @@ interface OwnProps extends WithStyles<typeof styles> {
     islandId: number,
 }
 
-const mapStateToProps = (state: RootState, reactProps: OwnProps) => {
+function getEnabledFromState(state: RootState, props: OwnProps) {
+    if (!state.publicServices.byIslandId[props.islandId]) {
+        return false;
+    }
+    return state.publicServices.byIslandId[props.islandId].enabledPublicServices.includes(props.publicService.guid);
+}
+
+const mapStateToProps = (state: RootState, props: OwnProps) => {
     return {
-        // factoryState: getFactoryStateById(state, reactProps.islandId, reactProps.factory.guid),
-        // outputProductState
+        enabled: getEnabledFromState(state, props),
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, props: OwnProps) => {
     return {
-        // onBuildingCountChange: (count: number) => {
-        //     dispatch(updateFactoryCount(props.islandId, props.factory.guid, count));
-        // },
-        // onProductivityChange: (productivity: number) => {
-        //     dispatch(updateFactoryProductivity(props.islandId, props.factory.guid, productivity));
-        // }
+        enableService: () => {
+            dispatch(enablePublicService(props.islandId, props.publicService.guid));
+        },
+        disableService: () => {
+            dispatch(disablePublicService(props.islandId, props.publicService.guid));
+        }
     };
 };
 type Props = OwnProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -51,29 +58,34 @@ function getIconData(productId: number) {
 class PublicServiceCard extends React.Component<Props> {
 
     render() {
-        const iconData = getIconData(this.props.publicService.output);
+        const {publicService, enabled} = this.props;
+        const iconData = getIconData(publicService.output);
         return (
             <Card>
                 <CardContent style={{textAlign: "center"}}>
                     {
-                        iconData && <img alt={this.props.publicService.name} src={iconData}/>
+                        iconData && <img alt={publicService.name} src={iconData}/>
                     }
                     <FormControlLabel
                         style={{display: "block"}}
                         control={<Switch
-                                // checked={state.checkedB}
-                                onChange={() => this.handleEnabledToggle()}
-                                value="checkedB"
-                                color="primary"
-                            />}
-                        label={this.props.publicService.name}
+                            checked={enabled}
+                            onChange={() => this.handleEnabledToggle()}
+                            value={publicService.name}
+                            color="primary"
+                        />}
+                        label={publicService.name}
                     />
                 </CardContent>
             </Card>);
     }
 
     private handleEnabledToggle() {
-
+        if (this.props.enabled) {
+            this.props.disableService();
+        } else {
+            this.props.enableService();
+        }
     }
 
 }

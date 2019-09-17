@@ -1,6 +1,5 @@
 import * as React from "react";
 import {Avatar, Card, CardContent, CardHeader, createStyles, Divider, Grid, Theme, Tooltip, Typography, WithStyles, withStyles} from "@material-ui/core";
-import {RootState} from "../redux/store";
 import {getProductStateById} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
@@ -13,6 +12,7 @@ import {PRODUCTS} from "../data/productAssets";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
 import FactoryFragment from "./FactoryFragment";
 import TradeFragment from "./TradeFragment";
+import {RootState} from "../redux/root-state";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -139,7 +139,7 @@ class ProductCard extends React.PureComponent<Props> {
                     {factories
                         .filter(f => !this.props.region || f.associatedRegions.indexOf(this.props.region) >= 0)
                         .map((f) => <FactoryFragment islandId={this.props.islandId} factoryId={f.guid}
-                                                     consumption={getConsumption(productState)}/>)}
+                                                     consumption={getConsumption(productState)} key={f.guid}/>)}
 
                     {tradeIds.length > 0 &&
                     <React.Fragment>
@@ -148,7 +148,7 @@ class ProductCard extends React.PureComponent<Props> {
                             Trade
                         </Typography>
                         {tradeIds.map((id, index) =>
-                            <React.Fragment>
+                            <React.Fragment key={id}>
                                 {index > 0 && <Divider className={classes.divider}/>}
                                 <TradeFragment islandId={this.props.islandId} tradeId={id} key={id}/>
                             </React.Fragment>
@@ -188,13 +188,13 @@ class ProductCard extends React.PureComponent<Props> {
         }
         return (<React.Fragment>
             {headline}:<br/>
-            {populationLevels.map((value, index) => <React.Fragment>
+            {populationLevels.map((popLevel, index) => <React.Fragment key={popLevel}>
                 {index > 0 && <br/>}
-                {productState.populationConsumers[value].toFixed(2)} {value}
+                {productState.populationConsumers[popLevel].toFixed(2)} {popLevel}
             </React.Fragment>)}
-            {factoryIds.map((value, index) => <React.Fragment>
+            {factoryIds.map((factoryId, index) => <React.Fragment key={factoryId}>
                 {index > 0 && <br/>}
-                {productState.factoryConsumers[value].toFixed(2)} {getFactoryById(value).name}
+                {productState.factoryConsumers[factoryId].toFixed(2)} {getFactoryById(factoryId).name}
             </React.Fragment>)}
         </React.Fragment>);
     }

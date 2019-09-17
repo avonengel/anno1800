@@ -1,14 +1,13 @@
 import {tradeReducer} from './reducers';
-import {initialState as initialRootState, RootState} from "../store";
 import {addTrade, updateTradeIslands, updateTradeProduct} from "./actions";
 import {createIsland, deleteIsland} from "../islands/actions";
 import {islandReducer} from "../islands/reducers";
 import {populationConsumptionReducer} from "../production/reducers";
+import {initialState, RootState} from "../root-state";
 
 describe('tradeReducer', () => {
     test('create new trade, select product before other island', () => {
         // Arrange
-        const initialState = {...initialRootState};
         const firstIslandId = initialState.selectedIsland;
         let state = tradeReducer(initialState, addTrade(1));
         const tradeId = state.trades.allTradeIds[0];
@@ -27,7 +26,6 @@ describe('tradeReducer', () => {
 
     test('create new trade, select island, select product, inverse im/export', () => {
          // Arrange
-        const initialState = {...initialRootState};
         // Add island 'Other'
         let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
@@ -49,7 +47,6 @@ describe('tradeReducer', () => {
 
     test('create new trade, inverse im/export, select product, select island', () => {
         // Arrange
-        const initialState = {...initialRootState};
         // Add island 'Other'
         let state: RootState = islandReducer(initialState, createIsland('Other'));
         const firstIslandId = initialState.selectedIsland;
@@ -72,7 +69,6 @@ describe('tradeReducer', () => {
     describe('delete island', () => {
         test('should delete affected trades', () => {
             // Arrange
-            const initialState = {...initialRootState};
             // Add island 'Other'
             let state: RootState = islandReducer(initialState, createIsland('Other'));
             const firstIslandId = initialState.selectedIsland;
@@ -93,7 +89,6 @@ describe('tradeReducer', () => {
 
         it("should delete exports from the other island", () => {
             // Arrange
-            const initialState = {...initialRootState};
             // Add island 'Other'
             let state: RootState = islandReducer(initialState, createIsland('Other'));
             const firstIslandId = initialState.selectedIsland;
@@ -117,7 +112,6 @@ describe('tradeReducer', () => {
 
         it("should delete imports from the other island", () => {
             // Arrange
-            const initialState = {...initialRootState};
             // Add island 'Other'
             let state: RootState = islandReducer(initialState, createIsland('Other'));
             const firstIslandId = initialState.selectedIsland;

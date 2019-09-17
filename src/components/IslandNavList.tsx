@@ -2,10 +2,10 @@ import * as React from "react";
 import {createStyles, Divider, InputAdornment, List, ListItem, ListItemText, TextField, withStyles, WithStyles} from "@material-ui/core";
 import {Add} from "@material-ui/icons";
 import {Island} from "../redux/islands/types";
-import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {createIsland, selectIsland} from "../redux/islands/actions";
 import {connect} from "react-redux";
+import {RootState} from "../redux/root-state";
 
 interface OwnProps {
     islandIds: number[];

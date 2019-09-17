@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-no-duplicate-props */
 import * as React from "react";
-import {RootState} from "../redux/store";
 import {getFactoryStateById} from "../redux/selectors";
 import {createStyles, Divider, Grid, InputAdornment, TextField, Theme, Tooltip, Typography, withStyles, WithStyles} from "@material-ui/core";
 import {connect} from "react-redux";
 import {getFactoryById} from "../data/assets";
 import {Dispatch} from "redux";
 import {updateFactoryCount, updateFactoryProductivity} from "../redux/production/actions";
+import {RootState} from "../redux/root-state";
 
 interface OwnProps {
     islandId: number;

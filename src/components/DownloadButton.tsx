@@ -1,8 +1,8 @@
 import React from 'react';
 import {connect} from "react-redux";
-import {RootState} from "../redux/store";
 import IconButton from "@material-ui/core/IconButton";
 import {GetApp} from "@material-ui/icons"
+import {RootState} from "../redux/root-state";
 
 const mapStateToProps = (state: RootState) => ({
     state: state,

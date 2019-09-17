@@ -1,7 +1,6 @@
 import * as React from "react";
 import {Button, createStyles, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid, IconButton, Input, Theme, Tooltip, Typography, withStyles, WithStyles, Zoom} from "@material-ui/core";
 import {getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
-import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
 import {deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "../redux/islands/actions";
@@ -13,6 +12,7 @@ import {connect} from "react-redux";
 import PublicServiceCard from "./PublicServiceCard";
 import {PRODUCTS} from "../data/productAssets";
 import ProductCard from "./ProductCard";
+import {RootState} from "../redux/root-state";
 
 
 const styles = (theme: Theme) => createStyles({

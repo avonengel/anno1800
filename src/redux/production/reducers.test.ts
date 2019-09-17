@@ -1,15 +1,14 @@
 import {factoryReducer, populationConsumptionReducer} from './reducers';
-import {initialState as initialRootState} from "../store";
 import {createIsland, deleteIsland, updatePopulation} from "../islands/actions";
 import {islandReducer} from "../islands/reducers";
 import {ALL_FACTORIES, POPULATION_LEVELS} from "../../data/assets";
 import {updateFactoryCount} from "./actions";
+import {initialState} from "../root-state";
 
 describe('populationConsumptionReducer', () => {
     describe('delete island', () => {
         test('should not delete last island', () => {
             // Arrange
-            const initialState = {...initialRootState};
             const firstIslandId = initialState.selectedIsland;
 
             // Act
@@ -20,8 +19,6 @@ describe('populationConsumptionReducer', () => {
         });
         test('should delete whole island product state tree', () => {
             // Arrange
-            const initialState = {...initialRootState};
-
             // create another island, so we can delete one at the end
             let state = islandReducer(initialState, createIsland('other'));
             const islandId = state.island.islandIds[state.island.islandIds.length-1];
@@ -46,8 +43,6 @@ describe("factoryReducer", () => {
     describe("delete island", () => {
         it("should delete factory state for the island", () => {
             // Arrange
-            const initialState = {...initialRootState};
-
             // create another island, so we can delete one at the end
             let state = islandReducer(initialState, createIsland('other'));
             const islandId = state.island.islandIds[state.island.islandIds.length-1];

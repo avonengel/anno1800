@@ -1,6 +1,6 @@
-import {RootState} from "./store";
 import {Island} from "./islands/types";
 import {FactoryState, ProductState} from "./production/types";
+import {RootState} from "./root-state";
 
 export const getIslandById = (store: RootState, islandId: number): Readonly<Island> => {
     return store.island.islandsById[islandId];

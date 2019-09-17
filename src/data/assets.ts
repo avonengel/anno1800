@@ -159,21 +159,28 @@ export class PublicService {
 export const ALL_PUBLIC_SERVICES = PUBLIC_SERVICES.map(asset => new PublicService(asset));
 export const PUBLIC_SERVICES_BY_ID = new Map(ALL_PUBLIC_SERVICES.map(ps => [ps.guid, ps]));
 
-const BASE_SUPPLY_WEIGHT = 5;
-
-function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[]) {
-    return level.inputs.filter(input => enabledProducts.includes(input.product))
+function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[], enabledPublicServices: number[]) {
+    const publicServiceOutputs = enabledPublicServices.map(guid => {
+        const publicService = PUBLIC_SERVICES_BY_ID.get(guid);
+        if (publicService) {
+            return publicService.output;
+        }
+        return undefined;
+    }).filter(v => v !== undefined);
+    return level.inputs.filter(input => enabledProducts.includes(input.product) || publicServiceOutputs.includes(input.product))
         .filter(input => input.supplyWeight !== undefined)
         // @ts-ignore
-        .reduce((current: number, input: PopulationInput) => current + input.supplyWeight, BASE_SUPPLY_WEIGHT);
+        .reduce((current: number, input: PopulationInput) => current + input.supplyWeight, 0);
 }
 
-export function getPopulation(level: PopulationAsset, houses: number, enabledProducts: number[]): number {
-    return getPopulationPerHouse(level, enabledProducts) * houses;
+export function getPopulation(level: PopulationAsset, houses: number, enabledProducts: number[], enabledPublicServices: number[] = []): number {
+    return getPopulationPerHouse(level, enabledProducts, enabledPublicServices) * houses;
 }
 
-export function getHouses(level: PopulationAsset, population: number, enabledProducts: number[]): number {
-    return Math.ceil(population / getPopulationPerHouse(level, enabledProducts));
+export function getHouses(level: PopulationAsset, population: number, enabledProducts: number[], enabledPublicServices: number[] = []): number {
+    // assume at least 5 population per house (5 is supplyWeight of Marketplace)
+    const populationPerHouse = Math.max(5, getPopulationPerHouse(level, enabledProducts, enabledPublicServices));
+    return Math.ceil(population / populationPerHouse);
 }
 
 export const NEW_WORLD_POPULATION_LEVELS = POPULATIONS.filter(asset => asset.associatedRegions === Region.NEW_WORLD).map(asset => asset.name);

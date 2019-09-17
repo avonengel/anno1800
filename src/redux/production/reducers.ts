@@ -1,4 +1,3 @@
-import {RootState} from "../store";
 import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
@@ -7,6 +6,7 @@ import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../
 import iassign from "immutable-assign";
 import {deleteIsland, updateHouseCount, updatePopulation} from "../islands/actions";
 import {RootAction} from "../types";
+import {RootState} from "../root-state";
 
 const initialProductState = {
     factoryConsumers: {},

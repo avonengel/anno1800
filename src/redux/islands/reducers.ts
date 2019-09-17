@@ -1,29 +1,27 @@
-import {IslandState, PopulationState} from "./types";
+import {PopulationState} from "./types";
 import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
-import {initialState as initialRootState} from "../store";
 import {ProductState} from "../production/types";
 import {getProduction} from "../production/reducers";
 import {createReducer} from "typesafe-actions";
 import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "./actions";
 import iassign from "immutable-assign";
+import {initialState, RootState} from "../root-state";
 
-function newPopulationStateObject() {
+export function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
         map[level] = {level, houses: 0, population: 0};
         return map;
     }, {});
 }
 
-export const initialState: IslandState = {
-    islandIds: [1],
-    islandsById: {
-        1: {
-            id: 1,
-            name: "Ditchwater",
-            population: newPopulationStateObject(),
-        },
+
+function getEnabledPublicServices(state: RootState, islandId: number) {
+    const publicServiceState = state.publicServices.byIslandId[islandId];
+    if (!publicServiceState) {
+        return [];
     }
-};
+    return publicServiceState.enabledPublicServices;
+}
 
 function getEnabledProducts(products: { [productId: number]: ProductState }, excludedFactoryId?: number) {
     if (!products) {
@@ -90,7 +88,7 @@ function selectPreviousIslandId(islandIds: number[], currentIslandId: number) {
 //     }, {islandId});
 // }
 
-export const islandReducer = createReducer(initialRootState)
+export const islandReducer = createReducer(initialState)
     .handleAction(renameIsland, (state, action) => {
         const {islandId, name} = action.payload;
         return {
@@ -164,14 +162,14 @@ export const islandReducer = createReducer(initialRootState)
     })
     .handleAction(updateHouseCount, (state, action) => {
         const {islandId, level, houses} = action;
-        let population = getPopulation(getPopulationLevelByName(level), houses, getEnabledProducts(state.products[islandId]));
+        let population = getPopulation(getPopulationLevelByName(level), houses, getEnabledProducts(state.products[islandId]), getEnabledPublicServices(state, action.islandId));
         return iassign(state,
             state => state.island.islandsById[islandId].population[level],
             () => ({level, houses, population}));
     })
     .handleAction(updatePopulation, (state, action) => {
         const {islandId, level, population} = action;
-        const houses = getHouses(getPopulationLevelByName(level), population, getEnabledProducts(state.products[islandId]));
+        const houses = getHouses(getPopulationLevelByName(level), population, getEnabledProducts(state.products[islandId]), getEnabledPublicServices(state, action.islandId));
         return iassign(state,
             state => state.island.islandsById[islandId].population[level],
             () => ({level, houses, population}));

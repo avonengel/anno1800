@@ -1,7 +1,7 @@
 import {publicServiceReducer} from "./reducers";
-import {initialState} from "../store";
 import {disablePublicService, enablePublicService} from "./actions";
 import {ALL_PUBLIC_SERVICES} from "../../data/assets";
+import {initialState} from "../root-state";
 
 describe('publicServiceReducer', () => {
     describe('enable public service', () => {

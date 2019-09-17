@@ -1,8 +1,11 @@
 import {createReducer} from "typesafe-actions";
 import {disablePublicService, enablePublicService} from "./actions";
-import {initialState} from "../store";
 import iassign from "immutable-assign";
+import {initialState} from "../root-state";
 
+iassign.setOption({freezeOutput: false,
+freeze: false,
+freezeInput: false}); // FIXME this was necessary to avoid trouble with redux-persist. Is it disabled by default in production?
 export const publicServiceReducer = createReducer(initialState)
     .handleAction(enablePublicService, (state, action) => {
         return iassign(state, s => s.publicServices.byIslandId[action.payload.islandId], publicServiceState => {
@@ -10,7 +13,7 @@ export const publicServiceReducer = createReducer(initialState)
                 return {enabledPublicServices: [action.payload.publicServiceId]};
             }
             const previousValue = publicServiceState.enabledPublicServices;
-            if (previousValue.some(value => value === action.payload.publicServiceId)) {
+            if (previousValue.includes(action.payload.publicServiceId)) {
                 return publicServiceState;
             }
             return {
@@ -25,7 +28,7 @@ export const publicServiceReducer = createReducer(initialState)
                 return publicServiceState;
             }
             const previousValue = publicServiceState.enabledPublicServices as number[];
-            if (!previousValue.some(value => value === action.payload.publicServiceId)) {
+            if (!previousValue.includes(action.payload.publicServiceId)) {
                 return publicServiceState;
             }
             return {

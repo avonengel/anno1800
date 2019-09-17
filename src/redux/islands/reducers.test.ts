@@ -1,13 +1,14 @@
-import {initialState as initialRootState} from "../store";
 import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "./actions";
 import {islandReducer} from "./reducers";
-import {POPULATION_LEVELS} from "../../data/assets";
+import {POPULATION_LEVELS, PUBLIC_SERVICES_BY_ID, PublicService} from "../../data/assets";
+import {initialState} from "../root-state";
+import {publicServiceReducer} from "../publicservices/reducers";
+import {enablePublicService} from "../publicservices/actions";
 
 describe("islandReducer", () => {
     describe("create island", () => {
         test("should create new island state entry", () => {
             // Arrange
-            const initialState = {...initialRootState};
             const firstIslandId = initialState.selectedIsland;
             const islandName = "Other";
 
@@ -28,7 +29,6 @@ describe("islandReducer", () => {
     describe('delete island', () => {
         test('should not delete last island', () => {
             // Arrange
-            const initialState = {...initialRootState};
             const firstIslandId = initialState.selectedIsland;
 
             // Act
@@ -39,8 +39,6 @@ describe("islandReducer", () => {
         });
         test('should delete the island and the ID', () => {
             // Arrange
-            const initialState = {...initialRootState};
-
             // create another island, so we can delete one at the end
             let state = islandReducer(initialState, createIsland('other'));
             const islandId = state.island.islandIds[state.island.islandIds.length - 1];
@@ -56,22 +54,23 @@ describe("islandReducer", () => {
     describe("update house count", () => {
         it("should set the house count", () => {
             // Arrange
-            const initialState = {...initialRootState};
             const newHouseCount = 42;
             const popLevel = POPULATION_LEVELS[0];
+            const marketPlace = PUBLIC_SERVICES_BY_ID.get(1010372) as PublicService;
+            let state = publicServiceReducer(initialState, enablePublicService(initialState.selectedIsland, marketPlace.guid))
 
             // Act
-            let state = islandReducer(initialState, updateHouseCount(initialState.selectedIsland, popLevel, newHouseCount));
+            state = islandReducer(state, updateHouseCount(initialState.selectedIsland, popLevel, newHouseCount));
 
             // Assert
             expect(state.island.islandsById[state.selectedIsland].population[popLevel].houses).toBe(newHouseCount);
+            expect(state.island.islandsById[state.selectedIsland].population[popLevel].population).toBe(newHouseCount * 5);
         });
     });
 
     describe("update population", () => {
         it("should set population count", () => {
             // Arrange
-            const initialState = {...initialRootState};
             const newPopulationCount = 42;
             const popLevel = POPULATION_LEVELS[0];
 
@@ -86,7 +85,6 @@ describe("islandReducer", () => {
     describe("rename island", () => {
         it("should change the island name", () => {
             // Arrange
-            const initialState = initialRootState;
             const firstIslandId = initialState.island.islandIds[0];
             const newName = "Other";
             const renameAction = renameIsland(firstIslandId, newName);
@@ -102,7 +100,6 @@ describe("islandReducer", () => {
     describe('select next island', function () {
         it('should select the next island, if there are multiple', function () {
             // Arrange
-            const initialState = initialRootState;
             let state = islandReducer(initialState, createIsland("Other"));
             const otherIslandId = state.island.islandIds[1];
 
@@ -114,7 +111,6 @@ describe("islandReducer", () => {
         });
         it('should do nothing, if there is only one island', function () {
             // Arrange
-            const initialState = initialRootState;
 
             // Act
             let state = islandReducer(initialState, selectNextIsland());
@@ -126,7 +122,6 @@ describe("islandReducer", () => {
     describe('select previous island', function () {
         it('should select the previous island, if there are multiple', function () {
             // Arrange
-            const initialState = initialRootState;
             let state = islandReducer(initialState, createIsland("Other"));
             state = islandReducer(state, createIsland("Other2"));
             const otherIslandId = state.island.islandIds[2];
@@ -139,8 +134,6 @@ describe("islandReducer", () => {
         });
         it('should do nothing, if there is only one island', function () {
             // Arrange
-            const initialState = initialRootState;
-
             // Act
             let state = islandReducer(initialState, selectPreviousIsland());
 

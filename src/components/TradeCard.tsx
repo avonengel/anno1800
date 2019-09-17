@@ -1,5 +1,4 @@
 import * as React from "react";
-import {RootState} from "../redux/store";
 import {Dispatch} from "redux";
 import {connect} from "react-redux";
 import {
@@ -25,6 +24,7 @@ import {params} from '../data/params_2019-04-17_full';
 import {getProductById} from "../data/assets";
 import {deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "../redux/trade/actions";
 import {PRODUCTS} from "../data/productAssets";
+import {RootState} from "../redux/root-state";
 
 const styles = (theme: Theme) => createStyles({
     card: {

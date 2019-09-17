@@ -1,8 +1,8 @@
 import {isActionOf} from "typesafe-actions";
 import {addTrade, deleteTrade, updateTonsPerMinute, updateTradeIslands, updateTradeProduct} from "./actions";
-import {RootState} from "../store";
 import {deleteIsland} from "../islands/actions";
 import {RootAction} from "../types";
+import {RootState} from "../root-state";
 
 export interface Trade {
     fromIslandId: number,
@@ -14,11 +14,6 @@ export interface Trade {
 export type TradeState = {
     tradesById: { [tradeId: number]: Trade };
     allTradeIds: number[];
-};
-
-export const initialTradeState: TradeState = {
-    tradesById: {},
-    allTradeIds: [],
 };
 
 export function tradeReducer(state: RootState, action: RootAction) {

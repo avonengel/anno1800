@@ -4,7 +4,6 @@ import {ThemeProvider} from '@material-ui/styles';
 import theme from "./theme";
 import {connect} from "react-redux";
 import IslandComponent from "./components/IslandComponent";
-import {RootState} from "./redux/store";
 import {Dispatch} from "redux";
 import clsx from "clsx";
 import IconButton from "@material-ui/core/IconButton";
@@ -12,6 +11,7 @@ import {ChevronLeft, ChevronRight, Menu, Publish} from "@material-ui/icons"
 import DownloadButton from "./components/DownloadButton";
 import {uploadState} from "./redux/actions";
 import IslandNavList from "./components/IslandNavList";
+import {RootState} from "./redux/root-state";
 
 const drawerWidth = 240;
 
