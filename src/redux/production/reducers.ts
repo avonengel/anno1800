@@ -1,12 +1,12 @@
 import {RootState} from "../store";
-import {AnyAction} from "redux";
 import {FactoryState, ProductState} from "./types";
 import {getFactoryStateByIdOrDefault} from "../selectors";
 import {getType, isActionOf, isOfType} from "typesafe-actions";
-import {FactoryActions, updateFactoryCount, updateFactoryProductivity} from "./actions";
+import {updateFactoryCount, updateFactoryProductivity} from "./actions";
 import {FACTORIES_BY_ID, getPopulationLevelByName, PopulationAsset} from "../../data/assets";
 import iassign from "immutable-assign";
 import {deleteIsland, updateHouseCount, updatePopulation} from "../islands/actions";
+import {RootAction} from "../types";
 
 const initialProductState = {
     factoryConsumers: {},
@@ -18,7 +18,7 @@ function getMaxPeoplePerHouse(level: PopulationAsset) {
     return level.inputs.reduce((acc, input) => acc + (input.supplyWeight || 0), 0);
 }
 
-export function populationConsumptionReducer(state: RootState, action: AnyAction): RootState {
+export function populationConsumptionReducer(state: RootState, action: RootAction): RootState {
     if (isActionOf([updateHouseCount, updatePopulation], action)) {
         // FIXME how to notice that population changed due to updateFactoryCount with population recomputation?!
         const {islandId, level: levelName} = action;
@@ -63,8 +63,8 @@ const initialFactoryState: FactoryState = {
     productivity: 1,
 };
 
-export function factoryReducer(state: RootState, action: AnyAction): RootState {
-    if (isActionOf(FactoryActions, action)) {
+export function factoryReducer(state: RootState, action: RootAction): RootState {
+    if (isActionOf([updateFactoryCount, updateFactoryProductivity], action)) {
         const {islandId, factoryId} = action.payload;
         const factories = {...state.factories};
         const islandFactories = {...factories[islandId]};
@@ -91,7 +91,7 @@ export function factoryReducer(state: RootState, action: AnyAction): RootState {
     return state;
 }
 
-export function factoryProductionConsumptionReducer(state: RootState, action: AnyAction) {
+export function factoryProductionConsumptionReducer(state: RootState, action: RootAction) {
     if (isActionOf([updateFactoryCount, updateFactoryProductivity], action)) {
         const {islandId, factoryId} = action.payload;
         // recompute production for factoryId

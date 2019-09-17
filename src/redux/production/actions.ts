@@ -1,6 +1,5 @@
 import {createCustomAction} from "typesafe-actions";
 
-// export function updateFactoryCount(islandId: number, factoryId: number, count: number): ProductionActionTypes {
 export const updateFactoryCount = createCustomAction('factories/UPDATE_COUNT', type =>
     (islandId: number, factoryId: number, count: number) => ({
         type,
@@ -13,6 +12,3 @@ export const updateFactoryProductivity = createCustomAction('factories/UPDATE_PR
         type, payload: {islandId, factoryId, productivity}
     })
 );
-
-export const FactoryActions = [updateFactoryCount, updateFactoryProductivity];
-//(islandId: number, factoryId: number, productivity: number) => action(UPDATE_FACTORY_PRODUCTIVITY, {islandId, factoryId, productivity});

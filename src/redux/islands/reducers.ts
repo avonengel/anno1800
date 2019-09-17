@@ -1,5 +1,4 @@
 import {IslandState, PopulationState} from "./types";
-import {AnyAction} from "redux";
 import {getHouses, getPopulation, getPopulationLevelByName, POPULATION_LEVELS} from "../../data/assets"
 import {initialState as initialRootState, RootState} from "../store";
 import {ProductState} from "../production/types";
@@ -7,6 +6,7 @@ import {getProduction} from "../production/reducers";
 import {isActionOf} from "typesafe-actions";
 import {createIsland, deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "./actions";
 import iassign from "immutable-assign";
+import {RootAction} from "../types";
 
 function newPopulationStateObject() {
     return POPULATION_LEVELS.reduce((map: { [level: string]: PopulationState }, level: string) => {
@@ -60,7 +60,7 @@ function selectPreviousIslandId(islandIds: number[], currentIslandId: number) {
     return selectedIsland;
 }
 
-export function islandReducer(state: RootState = initialRootState, action: AnyAction): RootState {
+export function islandReducer(state: RootState = initialRootState, action: RootAction): RootState {
     if (!state) {
         return initialRootState;
     }

@@ -1,4 +1,4 @@
-import {AnyAction, createStore} from "redux";
+import {createStore} from "redux";
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {initialState as initialIslandState, islandReducer} from "./islands/reducers";
 import {factoryProductionConsumptionReducer, factoryReducer, populationConsumptionReducer} from "./production/reducers";
@@ -10,6 +10,7 @@ import {isActionOf} from "typesafe-actions";
 import {selectIsland} from "./islands/actions";
 import {initialTradeState, tradeReducer, TradeState} from "./trade/reducers";
 import {stateUploadReducer} from "./reducers";
+import {RootAction} from "./types";
 
 
 const composeEnhancers = composeWithDevTools({
@@ -33,7 +34,7 @@ export const initialState: Readonly<RootState> = {
     trades: initialTradeState
 };
 
-function rootReducer(state: RootState | undefined = initialState, action: AnyAction): RootState {
+function rootReducer(state: RootState | undefined = initialState, action: RootAction): RootState {
     state = stateUploadReducer(state, action);
     state = islandReducer(state, action);
     state = populationConsumptionReducer(state, action);
