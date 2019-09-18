@@ -1,6 +1,7 @@
 import * as React from "react";
-import {Card, createStyles, Grid, TextField, Theme, Typography, WithStyles, withStyles} from "@material-ui/core";
+import {Avatar, Card, CardContent, CardHeader, createStyles, Grid, TextField, Theme, WithStyles, withStyles} from "@material-ui/core";
 import {selectIconByName} from "../data/icons";
+import {params} from "../data/params_2019-04-17_full";
 
 interface Props {
     level: string;
@@ -12,7 +13,7 @@ interface Props {
 
 const styles = (theme: Theme) => createStyles({
     card: {
-        padding: theme.spacing(1)
+        // padding: theme.spacing(1)
     }
 });
 
@@ -20,31 +21,34 @@ class PopulationCard extends React.Component<Props & WithStyles<typeof styles>> 
 
     render() {
         const {classes, level, houses, population} = this.props;
+        const popLevelFromParams = params.populationLevels.find(l => l.name === level);
         return (
             <Card className={classes.card}>
-                <Typography variant={"caption"} color="textSecondary" gutterBottom>
-                    {level}
-                </Typography>
-                <Grid container spacing={1} alignItems={"flex-end"} direction={"row"} wrap={"nowrap"}>
-                    <Grid item>
-                        <img src={selectIconByName('residence')} alt={""} height={"36px"}/>
+                <CardHeader title={level} avatar={
+                    popLevelFromParams && <Avatar alt={level} src={popLevelFromParams.icon}/>
+                }/>
+                <CardContent>
+                    <Grid container spacing={1} alignItems={"flex-end"} direction={"row"} wrap={"nowrap"}>
+                        <Grid item>
+                            <img src={selectIconByName('residence')} alt={""} height={"36px"}/>
+                        </Grid>
+                        <Grid item>
+                            <TextField label={"Houses"} type={"number"} value={houses}
+                                       inputProps={{min: 0}}
+                                       onChange={this.onHouseChange.bind(this)}/>
+                        </Grid>
                     </Grid>
-                    <Grid item>
-                        <TextField label={"Houses"} type={"number"} value={houses}
-                                   inputProps={{min: 0}}
-                                   onChange={this.onHouseChange.bind(this)}/>
+                    <Grid container spacing={1} alignItems={"flex-end"} direction={"row"} wrap={"nowrap"}>
+                        <Grid item>
+                            <img src={selectIconByName('population')} alt={""} height={"36px"}/>
+                        </Grid>
+                        <Grid item>
+                            <TextField label={"Workforce"} type={"number"} value={population}
+                                       inputProps={{min: 0}}
+                                       onChange={this.onPopulationChange.bind(this)}/>
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Grid container spacing={1} alignItems={"flex-end"} direction={"row"} wrap={"nowrap"}>
-                    <Grid item>
-                        <img src={selectIconByName('population')} alt={""} height={"36px"}/>
-                    </Grid>
-                    <Grid item>
-                        <TextField label={"Workforce"} type={"number"} value={population}
-                                   inputProps={{min: 0}}
-                                   onChange={this.onPopulationChange.bind(this)}/>
-                    </Grid>
-                </Grid>
+                </CardContent>
             </Card>);
     }
 
