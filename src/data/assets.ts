@@ -79,6 +79,7 @@ export class Factory {
         return (this.associatedRegions.indexOf(Region.NEW_WORLD) >= 0);
     }
 }
+
 export const ALL_FACTORIES = FACTORIES.map(asset => new Factory(asset));
 export const FACTORIES_BY_ID = new Map(ALL_FACTORIES.map(factory => [factory.guid, factory]));
 
@@ -116,6 +117,7 @@ export interface PublicServiceAsset {
     associatedRegions: string;
     output?: number;
 }
+
 const publicServiceAssetsById = new Map(PUBLIC_SERVICES.map(asset => [asset.guid, asset]));
 
 export class PublicService {
@@ -156,6 +158,7 @@ export class PublicService {
         return (this.associatedRegions.indexOf(Region.NEW_WORLD) >= 0);
     }
 }
+
 export const ALL_PUBLIC_SERVICES = PUBLIC_SERVICES.map(asset => new PublicService(asset));
 export const PUBLIC_SERVICES_BY_ID = new Map(ALL_PUBLIC_SERVICES.map(ps => [ps.guid, ps]));
 
@@ -193,4 +196,10 @@ export function getPopulationLevelByName(name: string): PopulationAsset {
         throw Error(`Unknown population level: ${name}!`);
     }
     return level;
+}
+
+export interface FilterAsset {
+    guid: number;
+    name: string;
+    options: { [description: string]: number[] };
 }
