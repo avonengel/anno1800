@@ -45,7 +45,7 @@ function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
 
         if (!!populationStates) {
             for (let level in populationStates) {
-                if (populationStates[level].population > 0) {
+                if (populationStates[level].houses > 0) {
                     const populationLevel = getPopulationLevelByName(level);
                     if (!populationLevel) {
                         continue;
@@ -70,7 +70,7 @@ function productsToShow(state: Readonly<RootState>, props: ReactProps) {
     PRODUCTS.forEach((product) => {
         if (!!populationStates) {
             for (let level in populationStates) {
-                if (populationStates[level].population > 0) {
+                if (populationStates[level].houses > 0) {
                     const populationLevel = getPopulationLevelByName(level);
                     if (!populationLevel) {
                         continue;
@@ -271,6 +271,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
             <div style={{textAlign: "center"}}>
                 <Typography component="div" variant="h5">Products</Typography>
+                {/*TODO: does this still make sense when filters from assets have been introduced?*/}
                 <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("products")} color={"primary"}>
                     {this.state.showAllProducts ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>

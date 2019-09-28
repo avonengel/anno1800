@@ -14,17 +14,13 @@ const initialProductState = {
     producers: {},
 };
 
-function getMaxPeoplePerHouse(level: PopulationAsset) {
-    return level.inputs.reduce((acc, input) => acc + (input.supplyWeight || 0), 0);
-}
-
 export function populationConsumptionReducer(state: RootState, action: RootAction): RootState {
     if (isActionOf([updateHouseCount, updatePopulation], action)) {
-        // FIXME how to notice that population changed due to updateFactoryCount with population recomputation?!
         const {islandId, level: levelName} = action;
         if (!!state.island) {
             const level = getPopulationLevelByName(levelName);
             const people = state.island.islandsById[islandId].population[levelName].population;
+            const houses = state.island.islandsById[islandId].population[levelName].houses;
             if (level) {
                 const products = {...state.products};
                 const islandProductStates = {...products[islandId]} || {};
@@ -36,7 +32,7 @@ export function populationConsumptionReducer(state: RootState, action: RootActio
                         islandProductStates[input.product] = productState;
                         productState.populationConsumers = {...productState.populationConsumers};
                         if (input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < people) {
-                            productState.populationConsumers[level.name] = input.amount * people * 60 / getMaxPeoplePerHouse(level);
+                            productState.populationConsumers[level.name] = input.amount * houses * 60;
                         } else {
                             productState.populationConsumers[level.name] = 0;
                         }
