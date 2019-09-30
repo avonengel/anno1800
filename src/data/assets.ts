@@ -162,7 +162,7 @@ export class PublicService {
 export const ALL_PUBLIC_SERVICES = PUBLIC_SERVICES.map(asset => new PublicService(asset));
 export const PUBLIC_SERVICES_BY_ID = new Map(ALL_PUBLIC_SERVICES.map(ps => [ps.guid, ps]));
 
-function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[], enabledPublicServices: number[]) {
+function mapToPublicServiceOutputs(enabledPublicServices: number[]) {
     const publicServiceOutputs = enabledPublicServices.map(guid => {
         const publicService = PUBLIC_SERVICES_BY_ID.get(guid);
         if (publicService) {
@@ -170,19 +170,43 @@ function getPopulationPerHouse(level: PopulationAsset, enabledProducts: number[]
         }
         return undefined;
     }).filter(v => v !== undefined);
+    return publicServiceOutputs;
+}
+
+function getPopulationPerHouse(level: PopulationAsset, population: number, enabledProducts: number[], enabledPublicServices: number[]) {
+    const publicServiceOutputs = mapToPublicServiceOutputs(enabledPublicServices);
     return level.inputs.filter(input => enabledProducts.includes(input.product) || publicServiceOutputs.includes(input.product))
         .filter(input => input.supplyWeight !== undefined)
+        .filter(input => input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < population)
         // @ts-ignore
         .reduce((current: number, input: PopulationInput) => current + input.supplyWeight, 0);
 }
 
 export function getPopulation(level: PopulationAsset, houses: number, enabledProducts: number[], enabledPublicServices: number[] = []): number {
-    return getPopulationPerHouse(level, enabledProducts, enabledPublicServices) * houses;
+    const publicServiceOutputs = mapToPublicServiceOutputs(enabledPublicServices);
+    const populationInputs = level.inputs.filter(input => enabledProducts.includes(input.product) || publicServiceOutputs.includes(input.product))
+        .sort((a, b) => {
+            if (a.noWeightPopulationCount === undefined && b.noWeightPopulationCount === undefined) {
+                return 0;
+            } else if (a.noWeightPopulationCount !== undefined && b.noWeightPopulationCount !== undefined) {
+                return a.noWeightPopulationCount - b.noWeightPopulationCount;
+            } else if (a.noWeightPopulationCount === undefined) {
+                return -1;
+            }
+            return 1;
+        });
+    return populationInputs
+        .reduce((current: number, input: PopulationInput) => {
+            if (input.supplyWeight && (input.noWeightPopulationCount === undefined || input.noWeightPopulationCount < current)) {
+                return current + input.supplyWeight * houses;
+            }
+            return current;
+        }, 0);
 }
 
 export function getHouses(level: PopulationAsset, population: number, enabledProducts: number[], enabledPublicServices: number[] = []): number {
     // assume at least 5 population per house (5 is supplyWeight of Marketplace)
-    const populationPerHouse = Math.max(5, getPopulationPerHouse(level, enabledProducts, enabledPublicServices));
+    const populationPerHouse = Math.max(5, getPopulationPerHouse(level, population, enabledProducts, enabledPublicServices));
     return Math.ceil(population / populationPerHouse);
 }
 
