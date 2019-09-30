@@ -8,8 +8,7 @@ export const PUBLIC_SERVICES: Readonly<PublicServiceAsset[]> = [
   {guid: 1010362, name: "University", associatedRegions: "Moderate", output: 1010353},
   {guid: 1010364, name: "Members Club", associatedRegions: "Moderate", output: 1010355},
   {guid: 1010372, name: "Marketplace", associatedRegions: "Moderate", output: 120020},
-    // FIXME power plant is now part of both public services and factories. how to resolve?
-  {guid: 100780, name: "Oil Power Plant", associatedRegions: "Moderate"},
+  {guid: 100780, name: "Oil Power Plant", associatedRegions: "Moderate", output: 1010354},
   {guid: 101257, baseGuid: 1010372, associatedRegions: "Colony01"},
   {guid: 101258, name: "Chapel", baseGuid: 1010359, associatedRegions: "Colony01", output: 120050},
   {guid: 101259, name: "Boxing Arena", baseGuid: 1010358, associatedRegions: "Colony01", output: 1010348},

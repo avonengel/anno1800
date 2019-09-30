@@ -4,8 +4,6 @@
 
     <xsl:variable name="coalPowerPlant" select="100779"/>
 
-    <!-- or (BaseAssetGUID != '' and Values/FactoryBase
-                                        and BaseAssetGUID != $zoo and BaseAssetGUID != $museum))-->
     <xsl:template match="/">
         <xsl:text>import {PublicServiceAsset} from "./assets";&#xa;</xsl:text>
         <xsl:text>export const PUBLIC_SERVICES: Readonly&lt;PublicServiceAsset[]&gt; = [</xsl:text>
@@ -31,12 +29,12 @@
         </xsl:if>
         <xsl:text>, associatedRegions: "</xsl:text><xsl:value-of select="Values/Building/AssociatedRegions"/><xsl:text>"</xsl:text>
         <xsl:apply-templates select="Values/PublicService" mode="publicService"/>
+        <xsl:if test="Template='PowerplantBuilding'">
+            <!-- "hack" Electricity output into PowerplantBuildings: tool needs to know for population calculations -->
+            <xsl:text>, output: 1010354</xsl:text>
+        </xsl:if>
         <xsl:text>}</xsl:text>
     </xsl:template>
-
-    <!--    <xsl:template match="PublicService" mode="publicService">-->
-    <!--        <xsl:apply-templates mode="publicService"/>-->
-    <!--    </xsl:template>-->
 
     <xsl:template match="Item" mode="publicService">
         <xsl:value-of select="Product"/>
