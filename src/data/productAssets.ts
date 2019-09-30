@@ -105,8 +105,8 @@ export const PRODUCTS: Readonly<ProductAsset[]> = [
     {guid: 1010240, name: "Cotton Fabric", civLevel: 1, productCategory: 11703, categoryName: "Processing Good"},
     {guid: 1010259, name: "Cigars", civLevel: 2, productCategory: 11704, categoryName: "Basic Need"},
     {guid: 1010566, name: "Oil", civLevel: 4, productCategory: 11797, categoryName: "Strategic Resource"},
-    {guid: 120022, name: "Electricity", isAbstract: true},
 ].sort((a, b) => {
+    // FIXME this sort will be overwritten by the XSL, needs to go somewhere else.
     let levelResult = 0;
     if (a.civLevel && b.civLevel) {
         levelResult = a.civLevel - b.civLevel;

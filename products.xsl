@@ -7,6 +7,7 @@
     <xsl:variable name="scrap2" select="112520"/>
     <xsl:variable name="scrap3" select="112523"/>
     <xsl:variable name="unknownStuff" select="193482"/>
+    <xsl:variable name="duplicateElectricity" select="120022"/>
 
     <xsl:template match="/">
         <xsl:text>import {ProductAsset} from "./assets";&#xa;</xsl:text>
@@ -17,7 +18,8 @@
                                         and Values/Standard/GUID != $scrap
                                         and Values/Standard/GUID != $scrap2
                                         and Values/Standard/GUID != $scrap3
-                                        and Values/Standard/GUID != $unknownStuff)]">
+                                        and Values/Standard/GUID != $unknownStuff
+                                        and Values/Standard/GUID != $duplicateElectricity)]">
             <xsl:apply-templates select="."/>
         </xsl:for-each>
         <xsl:text>];&#xa;</xsl:text>
