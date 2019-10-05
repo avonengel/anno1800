@@ -1,18 +1,58 @@
 import * as React from "react";
-import {Button, createStyles, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, Grid, IconButton, Input, Theme, Tooltip, Typography, withStyles, WithStyles, Zoom} from "@material-ui/core";
+import {
+    Button,
+    createStyles,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Fab,
+    FormControl,
+    Grid,
+    IconButton,
+    Input,
+    InputLabel,
+    MenuItem,
+    Select,
+    Theme,
+    Tooltip,
+    Typography,
+    withStyles,
+    WithStyles,
+    Zoom
+} from "@material-ui/core";
 import {getProductStateById, getTradeIdsForIslandId} from "../redux/selectors";
 import {Dispatch} from "redux";
 import {Add, ChevronLeft, ChevronRight, Delete, Edit, Visibility, VisibilityOff} from "@material-ui/icons";
-import {deleteIsland, renameIsland, selectNextIsland, selectPreviousIsland, updateHouseCount, updatePopulation} from "../redux/islands/actions";
+import {
+    deleteIsland,
+    renameIsland,
+    selectNextIsland,
+    selectPreviousIsland,
+    updateHouseCount,
+    updatePopulation
+} from "../redux/islands/actions";
 import TradeCard from "./TradeCard";
 import {addTrade} from "../redux/trade/actions";
-import {ALL_PUBLIC_SERVICES, getPopulationLevelByName, NEW_WORLD_POPULATION_LEVELS, OLD_WORLD_POPULATION_LEVELS, POPULATION_LEVELS, ProductAsset, PUBLIC_SERVICES_BY_ID, PublicService, Region} from "../data/assets";
+import {
+    ALL_PUBLIC_SERVICES,
+    getPopulationLevelByName,
+    NEW_WORLD_POPULATION_LEVELS,
+    OLD_WORLD_POPULATION_LEVELS,
+    POPULATION_LEVELS,
+    ProductAsset,
+    PUBLIC_SERVICES_BY_ID,
+    PublicService,
+    Region
+} from "../data/assets";
 import PopulationCard from "./PopulationCard";
 import {connect} from "react-redux";
 import PublicServiceCard from "./PublicServiceCard";
 import {PRODUCTS} from "../data/productAssets";
 import ProductCard from "./ProductCard";
 import {RootState} from "../redux/root-state";
+import {FILTERS} from "../data/filterAssets";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -34,14 +74,15 @@ interface ReactProps extends WithStyles<typeof styles> {
 function publicServicesToShow(state: Readonly<RootState>, props: ReactProps) {
     const populationStates = state.island.islandsById[state.selectedIsland].population;
     const servicesToShow: PublicService[] = [];
+    const islandId = state.selectedIsland;
     PUBLIC_SERVICES_BY_ID.forEach((publicService, publicServiceId) => {
-        // TODO introduce public service state
-        // if (state.factories && state.factories[props.islandId]
-        //     && state.factories[props.islandId][publicServiceId]
-        //     && state.factories[props.islandId][publicServiceId].buildingCount > 0) {
-        //     servicesToShow.push(publicService);
-        //     return;
-        // }
+        if (state.publicServices
+            && state.publicServices.byIslandId[islandId]
+            && state.publicServices.byIslandId[islandId].enabledPublicServices
+            && state.publicServices.byIslandId[islandId].enabledPublicServices.includes(publicServiceId)) {
+            servicesToShow.push(publicService);
+            return;
+        }
 
         if (!!populationStates) {
             for (let level in populationStates) {
