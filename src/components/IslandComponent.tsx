@@ -13,8 +13,10 @@ import {
     IconButton,
     Input,
     InputLabel,
-    MenuItem,
+    MenuItem, Paper,
     Select,
+    Tab,
+    Tabs,
     Theme,
     Tooltip,
     Typography,
@@ -53,6 +55,7 @@ import {PRODUCTS} from "../data/productAssets";
 import ProductCard from "./ProductCard";
 import {RootState} from "../redux/root-state";
 import {FILTERS} from "../data/filterAssets";
+import {updateFilter, updateFilterType} from "../redux/productFilter/actions";
 
 
 const styles = (theme: Theme) => createStyles({
@@ -65,6 +68,10 @@ const styles = (theme: Theme) => createStyles({
     },
     input: {
         margin: theme.spacing(1),
+    },
+    filterTabsPaper: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     }
 });
 
@@ -160,6 +167,8 @@ const mapStateToProps = (state: RootState, reactProps: ReactProps) => {
         productsToShow: productsToShow(state, reactProps),
         tradeIds: getTradeIdsForIslandId(state, state.selectedIsland),
         hasMultipleIslands: state.island.islandIds.length > 1,
+        filterType: state.productFilter.filterType,
+        filter: state.productFilter.filter,
     };
 };
 
@@ -171,7 +180,7 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
         onPopulationChange: (islandId: number, level: string, population: number) => {
             dispatch(updatePopulation(islandId, level, population));
         },
-        addTrade: (islandId: number, ) => {
+        addTrade: (islandId: number,) => {
             dispatch(addTrade(islandId));
         },
         renameIsland: (islandId: number, name: string) => {
@@ -186,6 +195,12 @@ const mapDispatchToProps = (dispatch: Dispatch, props: ReactProps) => {
         selectNextIsland: () => {
             dispatch(selectNextIsland());
         },
+        selectFilterType: (filterTypeId: number) => {
+            dispatch(updateFilterType(filterTypeId));
+        },
+        selectFilter: (filterValue: string) => {
+            dispatch(updateFilter(filterValue));
+        }
     };
 };
 type Props = ReactProps & ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -235,7 +250,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
     }
 
     render() {
-        const {island, tradeIds, classes, hasMultipleIslands} = this.props;
+        const {island, tradeIds, classes, hasMultipleIslands, filter, filterType} = this.props;
         const region = this.determineIslandRegion();
         let populationCards;
         switch (region) {
@@ -248,6 +263,12 @@ class IslandComponent extends React.Component<Props, OwnState> {
             default:
                 populationCards = POPULATION_LEVELS.map((level) => this.renderPopulationCard(level));
                 break;
+        }
+
+        const selectedFilterType = FILTERS.find(f => f.guid === filterType);
+        let productsInFilter: number[] = [];
+        if (selectedFilterType) {
+            productsInFilter = selectedFilterType.options[filter];
         }
 
         return <React.Fragment>
@@ -295,7 +316,8 @@ class IslandComponent extends React.Component<Props, OwnState> {
 
             <div style={{textAlign: "center"}}>
                 <Typography component="div" variant="h5">Public Services</Typography>
-                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("publicServices")} color={"primary"}>
+                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("publicServices")}
+                            color={"primary"}>
                     {this.state.showAllPublicServices ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>
             </div>
@@ -303,7 +325,8 @@ class IslandComponent extends React.Component<Props, OwnState> {
                 {ALL_PUBLIC_SERVICES.filter((ps) => region === undefined || ps.associatedRegions.indexOf(region) >= 0)
                     .filter((ps) => ps.output !== undefined)
                     .map((ps) =>
-                        <Zoom key={ps.guid} in={this.shouldShowPublicService(ps)} mountOnEnter={true} unmountOnExit={true}>
+                        <Zoom key={ps.guid} in={this.shouldShowPublicService(ps)} mountOnEnter={true}
+                              unmountOnExit={true}>
                             <Grid item xs={6} md={4} lg={3}>
                                 <PublicServiceCard publicService={ps} islandId={island.id}/>
                             </Grid>
@@ -313,18 +336,48 @@ class IslandComponent extends React.Component<Props, OwnState> {
             <div style={{textAlign: "center"}}>
                 <Typography component="div" variant="h5">Products</Typography>
                 {/*TODO: does this still make sense when filters from assets have been introduced?*/}
-                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("products")} color={"primary"}>
+                <IconButton aria-label="toggle visibility" onClick={() => this.toggleVisibility("products")}
+                            color={"primary"}>
                     {this.state.showAllProducts ? <VisibilityOff/> : <Visibility/>}
                 </IconButton>
+
+                <FormControl>
+                    <InputLabel htmlFor={"filterTypeSelect"}>Filter:</InputLabel>
+                    <Select
+                        value={this.props.filterType}
+                        // style={{}}
+                        onChange={(event) => this.props.selectFilterType(event.target.value as number)}
+                        autoWidth
+                        inputProps={{
+                            name: 'filterType',
+                            id: 'filterTypeSelect',
+                        }}>
+                        {
+                            FILTERS
+                                .map(p => (
+                                    <MenuItem value={p.guid} key={p.guid}>{p.name}</MenuItem>
+                                ))
+                        }
+                    </Select>
+                </FormControl>
             </div>
+
+            <Paper className={classes.filterTabsPaper}>
+                <Tabs centered value={this.props.filter} onChange={(e, newValue) => this.props.selectFilter(newValue)}>
+                    {
+                        this.filterTabs()
+                    }
+                </Tabs>
+            </Paper>
+
             <Grid container spacing={1} justify={"center"}>
-                {PRODUCTS.filter(p => !p.isAbstract && p.civLevel !== undefined)
+                {productsInFilter
+                    .map(guid => PRODUCTS.find(product => product.guid === guid))
                     .map((product) =>
-                        <Zoom key={product.guid} in={this.shouldShowProduct(product)} mountOnEnter={true} unmountOnExit={true}>
-                            <Grid item xs={6} md={3} lg={2}>
-                                <ProductCard product={product} islandId={island.id} region={region}/>
-                            </Grid>
-                        </Zoom>)}
+                        product && <Grid item key={product.guid} xs={6} md={3} lg={2}>
+                            <ProductCard product={product} islandId={island.id} region={region}/>
+                        </Grid>
+                    )}
             </Grid>
 
             <Typography component="div" align={"center"} variant="h5">Trade</Typography>
@@ -340,7 +393,7 @@ class IslandComponent extends React.Component<Props, OwnState> {
                     </Fab>
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </React.Fragment>;
     }
 
     private determineIslandRegion() {
@@ -442,6 +495,17 @@ class IslandComponent extends React.Component<Props, OwnState> {
         if (deleteIsland) {
             this.props.deleteIsland(this.props.islandId);
         }
+    }
+
+    private filterTabs() {
+        const selectedFilter = FILTERS.find(filter => filter.guid === this.props.filterType);
+        const tabs: React.ReactFragment[] = [];
+        if (selectedFilter) {
+            for (let filterName in selectedFilter.options) {
+                tabs.push(<Tab key={filterName} value={filterName} label={filterName}/>);
+            }
+        }
+        return tabs;
     }
 }
 

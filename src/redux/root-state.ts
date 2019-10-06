@@ -11,6 +11,10 @@ export interface RootState {
     readonly selectedIsland: number,
     readonly trades: TradeState,
     readonly publicServices: PublicServiceStateByIslandId,
+    readonly productFilter: {
+        filterType: number,
+        filter: string,
+    },
 }
 
 export const initialState: Readonly<RootState> = {
@@ -34,4 +38,8 @@ export const initialState: Readonly<RootState> = {
     publicServices: {
         byIslandId: {}
     },
+    productFilter: {
+        filterType: 500514,
+        filter: "All Goods",
+    }
 };

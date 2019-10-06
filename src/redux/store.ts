@@ -11,6 +11,7 @@ import {stateUploadReducer} from "./reducers";
 import {RootAction} from "./types";
 import {initialState, RootState} from "./root-state";
 import {publicServiceReducer} from "./publicservices/reducers";
+import {productFilterReducer} from "./productFilter/reducers";
 
 
 const composeEnhancers = composeWithDevTools({
@@ -34,6 +35,7 @@ function rootReducer(state: RootState = initialState, action: RootAction): RootS
         }
     }
     state = tradeReducer(state, action);
+    state = productFilterReducer(state, action);
     return state;
 }
 
